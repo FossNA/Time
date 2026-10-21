@@ -112,6 +112,11 @@ body[data-tab="integrations"] [data-page]:not([data-page~="integrations"]){displ
 @media(max-width:760px){.app-tabs{position:static}.app-tab{flex:1 1 auto}.record-editor-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:460px){.record-editor-grid{grid-template-columns:1fr}}
 
+
+/* Explicit tab pages: only the selected page is visible */
+.tab-page[hidden]{display:none!important}
+.tab-page{min-width:0}
+
 </style>
 </head>
 <body><main class="shell">
@@ -211,31 +216,55 @@ body[data-tab="integrations"] [data-page]:not([data-page~="integrations"]){displ
 <p class="notice">Security: this static site has no private server. Use only an endpoint you trust; never put passwords or API keys here. Browser CORS rules may block a request. Background sync and secure company sign-in need a server-side integration and are not enabled.</p>
 </section>
 </main>
-<script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js">
-/* myTIME page navigation */
+<script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
+<script>
+/* myTIME tab navigation — group content into real pages */
 (function setupAppTabs(){
- const assign=(selector,page)=>document.querySelectorAll(selector).forEach(el=>el.dataset.page=page);
- assign('.hero','dashboard');
- const metricGrid=document.querySelector('section.grid[aria-label="Today\'s totals"]');if(metricGrid)metricGrid.dataset.page='dashboard';
- const timeline=document.querySelector('#timeline')?.closest('article');if(timeline)timeline.dataset.page='dashboard';
- const settingsPanel=document.getElementById('workSettingsPanel');if(settingsPanel)settingsPanel.dataset.page='settings';
- const settingsSummary=document.getElementById('workSettingsSummary');if(settingsSummary)settingsSummary.dataset.page='settings';
- const quickTimesheet=document.getElementById('monthFilter')?.closest('article');if(quickTimesheet)quickTimesheet.dataset.page='timesheets';
- const monthSection=document.getElementById('monthRows')?.closest('section');if(monthSection)monthSection.dataset.page='timesheets';
- const recovery=document.getElementById('recoveryPanel')?.closest('section');if(recovery)recovery.dataset.page='dashboard';
- const week=document.getElementById('weekRows')?.closest('section');if(week)week.dataset.page='timesheets';
- const bank=document.getElementById('bankForm')?.closest('section');if(bank)bank.dataset.page='timesheets';
- const integrations=document.getElementById('integrationDirectory');if(integrations)integrations.dataset.page='integrations';
- const hub=document.getElementById('dataHub');if(hub)hub.dataset.page='import records';
- document.querySelectorAll('#dataHub > .grid, #dataHub > .notice, #dataHub > #importPreviewWrap, #dataHub > .section-head, #dataHub > .formrow, #dataHub > p, #dataHub > .settings-actions, #dataHub > div[style*="height:1px"]').forEach(el=>el.dataset.page='import');
- const manager=document.getElementById('recordManager');if(manager)manager.dataset.page='records';
- document.querySelectorAll('[data-tab]').forEach(btn=>btn.addEventListener('click',()=>{
-  const tab=btn.dataset.tab;document.body.dataset.tab=tab;
-  document.querySelectorAll('.app-tab').forEach(b=>{const active=b===btn;b.classList.toggle('active',active);b.setAttribute('aria-current',active?'page':'false')});
-  if(tab==='records')renderRecordManager();
-  if(tab==='timesheets')renderPlanning();
- }));
- document.body.dataset.tab='dashboard';
+ const main=document.querySelector('main.shell'),nav=document.getElementById('appTabs');
+ if(!main||!nav)return;
+ const labels={dashboard:'Dashboard',timesheets:'Weekly & monthly',records:'Manage records',import:'Import & export',settings:'Settings',integrations:'Integrations'};
+ const pages={};
+ Object.keys(labels).forEach(key=>{
+  let page=document.getElementById('page-'+key);
+  if(!page){page=document.createElement('div');page.id='page-'+key;page.className='tab-page';page.dataset.tabPage=key;nav.insertAdjacentElement('afterend',page);}
+  pages[key]=page;
+ });
+ const move=(el,key)=>{if(el)pages[key].appendChild(el)};
+ const oldLayout=document.querySelector('.layout');
+ if(oldLayout){
+  const timelineCard=oldLayout.querySelector('#timeline')?.closest('article');
+  const settingsPanel=document.getElementById('workSettingsPanel');
+  const settingsSummary=document.getElementById('workSettingsSummary');
+  const quickTimesheet=document.getElementById('monthFilter')?.closest('article');
+  move(timelineCard,'dashboard');
+  move(settingsPanel,'settings');move(settingsSummary,'settings');
+  move(quickTimesheet,'timesheets');
+  oldLayout.remove();
+ }
+ move(document.querySelector('.hero'),'dashboard');
+ move(document.querySelector('section.grid[aria-label="Today\'s totals"]'),'dashboard');
+ move(document.querySelector('#recoveryPanel')?.closest('section'),'dashboard');
+ move(document.querySelector('#monthRows')?.closest('section'),'timesheets');
+ move(document.querySelector('#weekRows')?.closest('section'),'timesheets');
+ move(document.querySelector('#bankForm')?.closest('section'),'timesheets');
+ move(document.getElementById('recordManager'),'records');
+ move(document.getElementById('dataHub'),'import');
+ move(document.getElementById('integrationDirectory'),'integrations');
+ move(document.getElementById('webhookUrl')?.closest('section'),'integrations');
+ [...main.children].filter(el=>el.tagName==='DIV'&&el.getAttribute('style')?.includes('height:1px')).forEach(el=>el.remove());
+ document.querySelectorAll('[data-page]').forEach(el=>el.removeAttribute('data-page'));
+ function showPage(key){
+  if(!pages[key])key='dashboard';
+  document.body.dataset.tab=key;
+  Object.entries(pages).forEach(([name,el])=>{el.hidden=name!==key;el.setAttribute('aria-hidden',name===key?'false':'true')});
+  nav.querySelectorAll('.app-tab').forEach(btn=>{
+   const active=btn.dataset.tab===key;btn.classList.toggle('active',active);btn.setAttribute('aria-current',active?'page':'false');
+  });
+  if(key==='records'&&typeof renderRecordManager==='function')renderRecordManager();
+  if(key==='timesheets'&&typeof renderPlanning==='function')renderPlanning();
+ }
+ nav.querySelectorAll('.app-tab').forEach(btn=>btn.addEventListener('click',()=>showPage(btn.dataset.tab)));
+ showPage('dashboard');window.myTimeShowPage=showPage;
 })();
 
 /* Direct editing and deletion for any saved date */
