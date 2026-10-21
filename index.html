@@ -113,6 +113,19 @@ body[data-tab="integrations"] [data-page]:not([data-page~="integrations"]){displ
 @media(max-width:460px){.record-editor-grid{grid-template-columns:1fr}}
 
 
+
+/* Consistent spacing and dashboard hierarchy */
+.tab-page{display:flex;flex-direction:column;gap:20px;padding:2px 0 24px}
+.tab-page > .card,.tab-page > .hero,.tab-page > .grid{margin:0!important;width:100%;box-sizing:border-box}
+.tab-page > .grid{gap:16px}
+.tab-page > .layout{gap:20px}
+#page-dashboard > .hero{order:1}
+#page-dashboard > section.grid[aria-label="Today's totals"]{order:2}
+#page-dashboard > article.card{order:3}
+#page-dashboard > section.card{order:4}
+#page-dashboard .timeline{margin-top:8px}
+#page-dashboard > .hero + .grid{margin-top:0!important}
+@media(max-width:760px){.tab-page{gap:14px}.app-tabs{gap:6px}.app-tab{padding:10px 11px}}
 /* Explicit tab pages: only the selected page is visible */
 .tab-page[hidden]{display:none!important}
 .tab-page{min-width:0}
@@ -244,6 +257,13 @@ body[data-tab="integrations"] [data-page]:not([data-page~="integrations"]){displ
  move(document.querySelector('.hero'),'dashboard');
  move(document.querySelector('section.grid[aria-label="Today\'s totals"]'),'dashboard');
  move(document.querySelector('#recoveryPanel')?.closest('section'),'dashboard');
+ // Keep the clock/punch hero first, summary metrics second, and today's punches below them.
+ const dashboardHero=pages.dashboard.querySelector('.hero');
+ const dashboardTotals=pages.dashboard.querySelector('section.grid[aria-label="Today\'s totals"]');
+ const dashboardPunches=pages.dashboard.querySelector('#timeline')?.closest('article');
+ const dashboardRecovery=pages.dashboard.querySelector('#recoveryPanel')?.closest('section');
+ [dashboardHero,dashboardTotals,dashboardPunches,dashboardRecovery].forEach(el=>{if(el)pages.dashboard.appendChild(el)});
+
  move(document.querySelector('#monthRows')?.closest('section'),'timesheets');
  move(document.querySelector('#weekRows')?.closest('section'),'timesheets');
  move(document.querySelector('#bankForm')?.closest('section'),'timesheets');
