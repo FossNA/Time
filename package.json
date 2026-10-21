@@ -1,0 +1,9 @@
+{
+  "name": "mytime-foss",
+  "version": "1.0.0",
+  "private": true,
+  "description": "FOSS-branded timecard and weekly schedule app",
+  "scripts": {
+    "test": "node tests/smoke.test.cjs"
+  }
+}
