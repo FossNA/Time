@@ -42,10 +42,39 @@ img{max-width:100%}
 @media(max-width:900px){.shell{padding:16px 16px 32px}.hero,.layout{grid-template-columns:minmax(0,1fr)}.grid{grid-template-columns:repeat(3,minmax(0,1fr))}.hero{padding:22px}.suggestion-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:620px){.top{align-items:flex-start;flex-direction:column}.local{text-align:left;max-width:none}.grid{grid-template-columns:minmax(0,1fr)}.suggestion-list{grid-template-columns:minmax(0,1fr)}.formrow{grid-template-columns:minmax(0,1fr)}.card{padding:16px}.clock{font-size:clamp(38px,11vw,58px)}.footer{flex-direction:column}.event{grid-template-columns:68px 12px minmax(0,1fr);gap:8px}}
 
+
+/* Personal profile and larger brand mark */
+.foss-logo{width:clamp(150px,14vw,220px);max-width:34vw}
+.brand{gap:16px}
+.brand strong{font-size:clamp(18px,1.4vw,23px)}
+.profile-card{display:grid;grid-template-columns:clamp(100px,12vw,150px) minmax(0,1fr);gap:clamp(16px,2vw,28px);align-items:start;margin:0 auto 20px}
+.profile-avatar-wrap{width:clamp(96px,11vw,140px);aspect-ratio:1;border-radius:50%;overflow:hidden;background:#e8edfa;border:3px solid #dce5f5;display:grid;place-items:center}
+.profile-avatar{width:100%;height:100%;object-fit:cover}
+.profile-initials{font-size:clamp(18px,2vw,28px);font-weight:800;color:var(--ink)}
+.profile-main{min-width:0}
+.profile-fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.profile-fields .field{min-width:0}
+.profile-fields input{min-width:0}
+.profile-actions{display:flex;gap:8px;flex-wrap:wrap}
+.profile-note{margin-top:12px;line-height:1.45}
+#profilePhoto{padding:7px;font-size:12px}
+@media(max-width:760px){.profile-card{grid-template-columns:84px minmax(0,1fr)}.profile-avatar-wrap{width:84px}.profile-fields{grid-template-columns:minmax(0,1fr)}.foss-logo{width:clamp(120px,30vw,170px)}}
+@media(max-width:460px){.brand{gap:10px}.foss-logo{max-width:30vw}.profile-card{padding:14px;grid-template-columns:1fr}.profile-avatar-wrap{width:88px}}
+
 </style>
 </head>
 <body><main class="shell">
 <header class="top"><div class="brand"><a href="https://fossna.com/" aria-label="FOSS North America website"><img class="foss-logo" src="https://www.fossanalytics.com/Design/static/foss-logo.png" alt="FOSS" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-block'"><span class="logo-fallback" aria-hidden="true">FOSS</span></a><div><strong>FOSS TIME</strong><small>FOSS North America · Personal time clock</small></div></div><div class="local" id="timezoneLabel">Local time · loading</div></header>
+
+<section class="card profile-card" aria-labelledby="profileHeading">
+ <div class="profile-avatar-wrap"><img id="profileAvatar" class="profile-avatar" alt="Your profile photo" hidden><div id="profileInitials" class="profile-initials">YOU</div></div>
+ <div class="profile-main"><div class="section-head"><h2 id="profileHeading">Your FOSS TIME profile</h2><span class="tag">PERSONAL PROFILE</span></div>
+  <div class="profile-fields"><div class="field"><label for="profileName">Display name</label><input id="profileName" type="text" maxlength="70" placeholder="Your name"></div><div class="field"><label for="profileEmail">FOSSNA work email</label><input id="profileEmail" type="email" maxlength="160" placeholder="you@fossna.com" autocomplete="email"></div>
+  <div class="field"><label for="profilePhoto">Profile image</label><input id="profilePhoto" type="file" accept="image/*"></div></div>
+  <div class="profile-actions"><button class="primary" id="saveProfile" type="button">Save profile</button><button class="quiet" id="clearProfilePhoto" type="button">Remove photo</button></div>
+  <p class="sub profile-note">Profile details and photo are saved only in this browser. Entering a FOSSNA email personalizes this local profile; it does not authenticate your work account or sync records between devices.</p>
+ </div>
+</section>
 <section class="hero" aria-label="Time clock"><div><div class="eyebrow">Your workday, at a glance</div><div class="clock" id="liveClock">--:--:--</div><div class="date" id="liveDate"></div><div class="status"><span class="dot"></span><span id="statusText">Not clocked in</span></div></div><div class="punchpanel"><h2 id="actionTitle">Ready when you are</h2><p id="actionHelp">Clock in to start tracking today's shift.</p><button class="primary" id="punchBtn">Clock in</button><button class="secondary" id="secondaryBtn" hidden>End lunch</button></div></section>
 <section class="grid" aria-label="Today's totals"><article class="card"><div class="metric-label">PAID TIME TODAY</div><div class="metric" id="paidMetric">0h 00m</div><div class="sub" id="paidSub">Goal: 8 hours</div><div class="progress"><span id="progressBar"></span></div><div class="sub" id="progressLabel">0% of daily goal</div></article><article class="card"><div class="metric-label">TIME REMAINING</div><div class="metric" id="remainingMetric">8h 00m</div><div class="sub">Until 8 paid hours are reached</div></article><article class="card"><div class="metric-label">PROJECTED FINISH</div><div class="metric" id="finishMetric">5:00 PM</div><div class="sub" id="finishSub">Based on 8:00 AM start and 1h lunch</div></article></section>
 <section class="layout"><article class="card"><div class="section-head"><h2>Today's punches</h2><span class="tag" id="dayTag">TODAY</span></div><div id="timeline" class="timeline"><div class="empty">No punches yet. Clock in to begin your day.</div></div><div class="notice">Times are recorded on this device using your local clock. If a punch is wrong, use the correction option and enter a reason.</div></article>
@@ -142,5 +171,38 @@ const oldRender=render;render=function(){oldRender();renderPlanning()};
 const oldExportJson=$('exportJson').onclick;
 $('exportJson').onclick=()=>download('foss-time-backup-'+todayKey()+'.json',JSON.stringify({version:2,settings,data,bankEntries},null,2),'application/json');
 $('restoreFile').onchange=async e=>{let f=e.target.files[0];if(!f)return;try{let j=JSON.parse(await f.text());if(!j.data||typeof j.data!=='object')throw Error('Missing data');if(!confirm('Replace local records, settings and time-bank entries with this backup? Export a backup first if needed.'))return;data=j.data;if(j.settings)settings=j.settings;bankEntries=Array.isArray(j.bankEntries)?j.bankEntries:[];save();saveSet();localStorage.setItem(BANKKEY,JSON.stringify(bankEntries));applySettings();render();alert('Backup restored on this device.')}catch{alert('That backup file could not be read.')}finally{e.target.value=''}};
+
+
+/* Local profile: deliberately not a substitute for company SSO authentication */
+const PROFILEKEY='foss-time-profile-v1';
+let profile=load(PROFILEKEY,{name:'',email:'',photo:''});
+function initialsFor(name,email){const source=(name||email||'YOU').trim();const bits=source.includes('@')?source.split('@')[0].split(/[._ -]+/):source.split(/\s+/);return bits.slice(0,2).map(x=>x[0]||'').join('').toUpperCase()||'YOU'}
+function renderProfile(){
+ $('profileName').value=profile.name||'';$('profileEmail').value=profile.email||'';
+ $('profileInitials').textContent=initialsFor(profile.name,profile.email);
+ const img=$('profileAvatar');if(profile.photo){img.src=profile.photo;img.hidden=false;$('profileInitials').hidden=true}else{img.removeAttribute('src');img.hidden=true;$('profileInitials').hidden=false}
+}
+$('saveProfile').onclick=()=>{
+ const email=$('profileEmail').value.trim();
+ if(email && !/^[^\s@]+@fossna\.com$/i.test(email)){alert('Please use your FOSS North America work email ending in @fossna.com.');return}
+ profile.name=$('profileName').value.trim();profile.email=email;
+ try{localStorage.setItem(PROFILEKEY,JSON.stringify(profile));renderProfile();alert('Your profile was saved in this browser. This does not sign you into your company account.')}
+ catch{alert('The profile could not be saved. Try using a smaller profile image.')}
+};
+$('profilePhoto').onchange=async e=>{
+ const file=e.target.files?.[0];if(!file)return;
+ if(!file.type.startsWith('image/')){alert('Choose an image file.');e.target.value='';return}
+ try{
+  const dataUrl=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=reject;reader.readAsDataURL(file)});
+  const img=await new Promise((resolve,reject)=>{const im=new Image();im.onload=()=>resolve(im);im.onerror=reject;im.src=dataUrl});
+  const canvas=document.createElement('canvas'),max=320,scale=Math.min(1,max/Math.max(img.width,img.height));canvas.width=Math.round(img.width*scale);canvas.height=Math.round(img.height*scale);
+  canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);profile.photo=canvas.toDataURL('image/jpeg',.82);renderProfile();
+ }catch{alert('Could not load that image. Try a different photo.')}finally{e.target.value=''}
+};
+$('clearProfilePhoto').onclick=()=>{profile.photo='';try{localStorage.setItem(PROFILEKEY,JSON.stringify(profile))}catch{}renderProfile()};
+renderProfile();
+/* Keep the weekly schedule designer visibly connected to clock settings. */
+const scheduleNote=document.querySelector('#weekHeading')?.parentElement;
+if(scheduleNote){const note=document.createElement('p');note.className='sub';note.textContent='Design each day’s planned start, lunch, finish and paid-hours goal below. Save weekly schedule to update the clock’s late-start recovery and daily target calculations.';scheduleNote.insertAdjacentElement('afterend',note)}
 
 </script></body></html>
