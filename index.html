@@ -104,9 +104,9 @@ img{max-width:100%}
 </section>
 <section class="card" style="margin-top:18px" aria-labelledby="weekHeading">
  <div class="section-head"><h2 id="weekHeading">Weekly schedule & punches</h2><span class="tag">MON–SUN</span></div>
- <div class="week-tools"><button class="quiet" id="prevWeek">← Previous week</button><label for="weekOf" class="sub">Week starting</label><input type="date" id="weekOf" style="padding:9px;border:1px solid var(--line);border-radius:9px"><button class="quiet" id="nextWeek">Next week →</button><button class="quiet" id="saveWeek">Save weekly schedule</button></div>
+ <div class="week-tools"><button class="quiet" id="prevWeek">← Previous week</button><label for="weekOf" class="sub">Week starting</label><input type="date" id="weekOf" style="padding:9px;border:1px solid var(--line);border-radius:9px"><button class="quiet" id="nextWeek">Next week →</button></div>
  <div class="tablewrap" style="margin-top:14px"><table class="week-table"><thead><tr><th>Day</th><th>Planned in</th><th>Lunch out</th><th>Lunch in</th><th>Planned out</th><th>Actual in</th><th>Actual out</th><th>Lunch</th><th>Paid</th><th>Day balance</th></tr></thead><tbody id="weekRows"></tbody><tfoot><tr><th colspan="8">Weekly totals</th><th id="weekPaid">0h 00m</th><th id="weekBalance">0h 00m</th></tr></tfoot></table></div>
- <div class="notice">Edit the planned times for any day, then select “Save weekly schedule.” Actual punches are read from your time clock. Day balance compares paid time with that day’s planned paid-hours goal.</div>
+ <div class="notice">This weekly view is read-only. Planned times come from your saved workday settings; actual punches come from your time clock. Day balance compares paid time with that day’s planned paid-hours goal.</div>
 </section>
 <section class="card" style="margin-top:18px" aria-labelledby="bankHeading">
  <div class="section-head"><h2 id="bankHeading">Add hours from another day</h2><span class="tag">TIME BANK</span></div>
@@ -187,7 +187,7 @@ function renderWeek(){
  const keys=weekKeys(),body=$('weekRows');if(!body)return;body.innerHTML='';let paidTotal=0;
  keys.forEach(k=>{const d=new Date(k+'T12:00:00'),s=scheduleForDate(k),rec=data[k],p=rec?.punches||[],first=getPunch(rec,'in'),out=getOut(rec),ls=getPunch(rec,'lunch-start'),le=getPunch(rec,'lunch-end'),paid=rec?.punches?.length?actualPaidMinutes(rec):0,goal=plannedMinutes(s),balance=rec?.punches?.length?paid-goal:0;paidTotal+=paid;
  const tr=document.createElement('tr');if(k===todayKey())tr.className='today-row';
- const timeCell=(field,val,label)=>'<td><input type="time" data-day="'+d.getDay()+'" data-field="'+field+'" aria-label="'+label+' '+weekdays[d.getDay()]+'" value="'+(val||'')+'" '+(goal===0?'disabled':'')+'></td>';
+ const timeCell=(field,val,label)=>'<td>'+((goal===0)?'—':(val||'—'))+'</td>';
  tr.innerHTML='<td>'+weekdays[d.getDay()]+'<small style="display:block;color:var(--muted)">'+k+'</small></td>'+timeCell('startTime',s.startTime,'Planned in')+timeCell('lunchStart',s.lunchStart,'Lunch out')+timeCell('lunchEnd',s.lunchEnd,'Lunch in')+timeCell('endTime',s.endTime,'Planned out')+'<td>'+(first?fmtTime(first.ts):'—')+'</td><td>'+(out?fmtTime(out.ts):'—')+'</td><td>'+(ls&&le?fmtMin((le.ts-ls.ts)/60000):ls?'Open':'—')+'</td><td>'+(rec?.punches?.length?fmtMin(paid):'—')+'</td><td class="'+(balance<0?'negative':'positive')+'">'+(rec?.punches?.length?(balance<0?'−':'+')+fmtMin(Math.abs(balance)):'—')+'</td>';
  body.appendChild(tr);
  });
@@ -200,7 +200,7 @@ $('weekOf').value=keyDate(weekMonday(new Date()));
 $('prevWeek').onclick=()=>{let d=new Date($('weekOf').value+'T12:00:00');d.setDate(d.getDate()-7);$('weekOf').value=keyDate(d);renderPlanning()};
 $('nextWeek').onclick=()=>{let d=new Date($('weekOf').value+'T12:00:00');d.setDate(d.getDate()+7);$('weekOf').value=keyDate(d);renderPlanning()};
 $('weekOf').onchange=renderPlanning;
-$('saveWeek').onclick=()=>{ensureWeeklySchedule();document.querySelectorAll('#weekRows input[data-day]').forEach(input=>{let d=input.dataset.day,field=input.dataset.field;if(!settings.weeklySchedule[d])settings.weeklySchedule[d]={...defaultDaySchedule};if(input.value)settings.weeklySchedule[d][field]=input.value});saveSet();renderPlanning();alert('Weekly schedule saved on this device.')};
+
 $('bankDate').value=todayKey();
 $('bankForm').onsubmit=e=>{e.preventDefault();let hours=Number($('bankHours').value),note=$('bankNote').value.trim(),date=$('bankDate').value;if(!date||!note||!Number.isFinite(hours)||hours===0){alert('Enter a date, a non-zero number of hours, and a note.');return}bankEntries.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,7),date,minutes:Math.round(hours*60),note,createdAt:Date.now()});localStorage.setItem(BANKKEY,JSON.stringify(bankEntries));$('bankNote').value='';$('bankHours').value='1';renderPlanning()};
 const oldRender=render;render=function(){oldRender();renderPlanning()};
