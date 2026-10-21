@@ -19,6 +19,29 @@
 @media(max-width:780px){.suggestion-list{grid-template-columns:1fr}.bank-form{grid-template-columns:1fr 1fr}.week-table{font-size:12px}.week-table input{min-width:76px}}
 @media(max-width:460px){.bank-form{grid-template-columns:1fr}.week-tools{align-items:stretch}.week-tools button{flex:1}}
 
+
+/* Full-viewport responsive layout: use available screen width instead of a narrow centered column */
+html{min-height:100%;background:var(--bg)}
+body{min-height:100vh;width:100%;overflow-x:hidden}
+.shell{width:100%;max-width:none;margin:0;padding:clamp(14px,2.2vw,34px) clamp(14px,3vw,52px) 42px}
+.top{width:100%;max-width:1800px;margin:0 auto clamp(18px,2vw,30px)}
+.hero,.grid,.layout,.recovery,.week-section{width:100%;max-width:1800px;margin-left:auto;margin-right:auto}
+.hero{grid-template-columns:minmax(0,1.15fr) minmax(280px,.85fr);padding:clamp(20px,2.5vw,40px);gap:clamp(18px,2.5vw,38px)}
+.grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(12px,1.2vw,20px);margin-top:clamp(14px,1.5vw,22px);margin-bottom:clamp(14px,1.5vw,22px)}
+.layout{grid-template-columns:minmax(0,1.15fr) minmax(320px,.85fr);gap:clamp(12px,1.4vw,22px)}
+.card{padding:clamp(16px,1.5vw,26px)}
+.clock{font-size:clamp(42px,5.2vw,86px);overflow-wrap:anywhere}
+.metric{font-size:clamp(24px,2.1vw,36px)}
+.suggestion-list{grid-template-columns:repeat(3,minmax(0,1fr))}
+.week-tools{max-width:100%}
+.tablewrap{max-width:100%;overflow-x:auto}
+table{min-width:760px}
+button,input,select{max-width:100%}
+img{max-width:100%}
+@media(min-width:1600px){.shell{padding-left:clamp(48px,4vw,90px);padding-right:clamp(48px,4vw,90px)}.hero{border-radius:28px}.card{border-radius:20px}}
+@media(max-width:900px){.shell{padding:16px 16px 32px}.hero,.layout{grid-template-columns:minmax(0,1fr)}.grid{grid-template-columns:repeat(3,minmax(0,1fr))}.hero{padding:22px}.suggestion-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:620px){.top{align-items:flex-start;flex-direction:column}.local{text-align:left;max-width:none}.grid{grid-template-columns:minmax(0,1fr)}.suggestion-list{grid-template-columns:minmax(0,1fr)}.formrow{grid-template-columns:minmax(0,1fr)}.card{padding:16px}.clock{font-size:clamp(38px,11vw,58px)}.footer{flex-direction:column}.event{grid-template-columns:68px 12px minmax(0,1fr);gap:8px}}
+
 </style>
 </head>
 <body><main class="shell">
