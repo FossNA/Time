@@ -455,23 +455,30 @@ function bankMinutesForWeek(keys){let set=new Set(keys);return bankEntries.filte
 function weekBalanceFor(keys){return keys.reduce((n,k)=>{let rec=data[k],s=scheduleForDate(k);if(!rec?.punches?.length)return n;return n+actualPaidMinutes(rec)-plannedMinutes(s)},0)+bankMinutesForWeek(keys)}
 function renderRecovery(){
  const panel=$('recoveryPanel');if(!panel)return;
- const now=new Date(),k=todayKey(),s=scheduleForDate(k),rec=day(),first=getPunch(rec,'in'),out=getOut(rec);
+ const k=todayKey(),s=scheduleForDate(k),rec=day(),first=getPunch(rec,'in'),out=getOut(rec);
  const goal=Number(s.goalHours||settings.goalHours||8),startM=parseTime(s.startTime||settings.startTime),actualStart=first?new Date(first.ts).getHours()*60+new Date(first.ts).getMinutes():null;
- const paid=actualPaidMinutes(rec),target=Math.round(goal*60),deficit=Math.max(0,target-paid);
- const week=weekKeys(),bank=bankMinutesForWeek(week),otherSurplus=week.reduce((sum,dk)=>{if(dk===k)return sum;let rr=data[dk];if(!rr?.punches?.length)return sum;return sum+Math.max(0,actualPaidMinutes(rr)-plannedMinutes(scheduleForDate(dk)))},0);
- if(!first){panel.innerHTML='<div class="recovery-number">Your normal start is '+s.startTime+'</div><p>Clock in when you arrive. If you start late, this planner will calculate the time to make up and suggest options.</p>';return}
- const late=Math.max(0,actualStart-startM),finish=projectedFinish(),finishText=finish?fmtTime(finish.getTime()):s.endTime;
- let options=[];
- if(deficit>0){
-   const endM=parseTime(s.endTime),lunchM=Math.max(0,parseTime(s.lunchEnd)-parseTime(s.lunchStart));
-   const laterFinish=new Date((first.ts)+(target*60000)+lunchM*60000);
-   options.push({title:'Stay a little later',detail:'Work until about '+fmtTime(laterFinish.getTime())+' to reach '+goal+' paid hours today.'});
-   if(lunchM>30)options.push({title:'Shorten lunch (if allowed)',detail:'A 30-minute lunch would recover '+fmtMin(Math.max(0,lunchM-30))+'; remaining time may need to be made up later.'});
-   options.push({title:'Make it up another day',detail:'Add '+fmtMin(deficit)+' to a future day’s plan, or log hours already worked in the Time Bank below.'});
-   if(otherSurplus>0)options.push({title:'Use extra time from this week',detail:'You have '+fmtMin(otherSurplus)+' above planned hours on other punched days this week. Confirm with your manager before treating it as an offset.'});
- }
- const headline=out?'Shift complete':deficit===0?'You’ve reached today’s paid-hours goal':late>0?'You started '+fmtMin(late)+' late':'Your recovery plan';
- panel.innerHTML='<div class="recovery-number">'+headline+'</div><p>'+(out?'Your shift is clocked out.':deficit===0?'No make-up time is currently needed.':'Estimated remaining paid time: <strong>'+fmtMin(deficit)+'</strong>. Projected finish: <strong>'+finishText+'</strong>.')+'</p>'+(late>0?'<p>Compared with your planned start ('+s.startTime+'), you clocked in at '+fmtTime(first.ts)+'.</p>':'')+(options.length?'<div class="suggestion-list">'+options.map(o=>'<div class="suggestion"><strong>'+o.title+'</strong><span>'+o.detail+'</span></div>').join('')+'</div>':'');
+ const paid=actualPaidMinutes(rec),deficit=Math.max(0,Math.round(goal*60)-paid),week=weekKeys(),bank=bankMinutesForWeek(week);
+ let projected=0,remaining=[];
+ week.forEach(dk=>{
+  const ds=scheduleForDate(dk),g=plannedMinutes(ds),rr=data[dk],has=!!rr?.punches?.length,done=!!(rr&&getOut(rr)),date=new Date(dk+'T12:00:00');
+  if(date.getDay()===0||date.getDay()===6||g<=0)return;
+  if(dk<k){if(has)projected+=actualPaidMinutes(rr);return}
+  if(dk===k){projected+=done?actualPaidMinutes(rr):Math.max(g,has?actualPaidMinutes(rr):0);if(!done)remaining.push(dk);return}
+  projected+=has?Math.max(g,actualPaidMinutes(rr)):g;if(!done)remaining.push(dk);
+ });
+ const gap=Math.max(0,2400-projected-bank),perDay=remaining.length?Math.ceil(gap/remaining.length):gap,opts=[];
+ if(gap&&remaining.length){
+  opts.push({title:'Spread make-up time across the remaining workdays',detail:'Plan about '+fmtMin(perDay)+' extra on each of '+remaining.length+' remaining workday(s) to reach 40 paid hours.'});
+  const lunches=remaining.map(d=>{const x=scheduleForDate(d);return Math.max(0,parseTime(x.lunchEnd)-parseTime(x.lunchStart))}).filter(m=>m>30);
+  if(lunches.length)opts.push({title:'Consider a shorter lunch, if permitted',detail:'A 30-minute lunch could recover up to '+fmtMin(Math.min(30,Math.max(...lunches)-30))+' per eligible day. Follow your workplace policy and applicable meal-break requirements.'});
+  opts.push({title:'Adjust your finish time',detail:'Another option is staying about '+fmtMin(perDay)+' later on remaining workdays. Confirm schedule changes with your manager.'});
+ }else if(gap)opts.push({title:'Discuss the remaining gap',detail:'The week is projected '+fmtMin(gap)+' short of 40 hours and no scheduled workdays remain.'});
+ if(deficit&&first)opts.unshift({title:'Today’s make-up estimate',detail:'About '+fmtMin(deficit)+' more paid time is needed for today’s '+goal+'-hour goal.'});
+ const status='<p>Weekly goal: <strong>40 paid hours</strong>. Projected total: <strong>'+fmtMin(Math.max(0,projected+bank))+'</strong> of 40 hours'+(gap?' · projected gap: <strong>'+fmtMin(gap)+'</strong>':' · <strong>on track</strong>')+'.</p>';
+ const list=opts.length?'<div class="suggestion-list">'+opts.map(o=>'<div class="suggestion"><strong>'+o.title+'</strong><span>'+o.detail+'</span></div>').join('')+'</div>':'<p>You are projected to reach the 40-hour weekly target if the remaining planned shifts are completed.</p>';
+ if(!first){panel.innerHTML='<div class="recovery-number">Weekly goal: 40 paid hours</div>'+status+list;return}
+ const late=Math.max(0,actualStart-startM);
+ panel.innerHTML='<div class="recovery-number">'+(out?'Shift complete':deficit===0?'You’ve reached today’s paid-hours goal':late>0?'You started '+fmtMin(late)+' late':'Your recovery plan')+'</div>'+status+(late>0?'<p>You clocked in at '+fmtTime(first.ts)+'; your planned start is '+s.startTime+'.</p>':'')+list;
 }
 function renderWeek(){
  const keys=weekKeys(),body=$('weekRows');if(!body)return;body.innerHTML='';let paidTotal=0;
