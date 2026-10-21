@@ -61,20 +61,34 @@ img{max-width:100%}
 @media(max-width:760px){.profile-card{grid-template-columns:84px minmax(0,1fr)}.profile-avatar-wrap{width:84px}.profile-fields{grid-template-columns:minmax(0,1fr)}.foss-logo{width:clamp(120px,30vw,170px)}}
 @media(max-width:460px){.brand{gap:10px}.foss-logo{max-width:30vw}.profile-card{padding:14px;grid-template-columns:1fr}.profile-avatar-wrap{width:88px}}
 
+
+/* Professional compact header and profile popover panel */
+.top{max-width:none;align-items:center}
+.brand{min-width:0}
+.brand strong{letter-spacing:.08em}
+.top-actions{display:flex;align-items:center;justify-content:flex-end;gap:18px}
+.profile-trigger{display:flex;align-items:center;gap:9px;background:#fff;color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:6px 12px 6px 6px;box-shadow:0 4px 14px #09266f0b;white-space:nowrap}
+.profile-trigger:hover{background:#f0f4ff;border-color:#c8d5f1}
+.mini-avatar{width:32px;height:32px;display:grid;place-items:center;overflow:hidden;border-radius:50%;background:#e8edfa;color:var(--ink);font-size:11px;font-weight:800}
+.mini-avatar img{width:100%;height:100%;object-fit:cover}
+.profile-card{position:relative;z-index:20;grid-template-columns:clamp(84px,9vw,120px) minmax(0,1fr);max-width:980px;margin:0 0 20px auto;box-shadow:0 18px 55px #09266f22}
+.profile-card[hidden],.profile-backdrop[hidden]{display:none}
+.profile-backdrop{position:fixed;inset:0;background:#091b3b35;z-index:15}
+.profile-card{z-index:20}
+.profile-avatar-wrap{width:clamp(84px,9vw,120px)}
+.profile-fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.profile-fields .field{min-width:0}
+.profile-actions{display:flex;gap:8px;flex-wrap:wrap}
+.profile-note{margin-top:12px;line-height:1.45}
+@media(max-width:760px){.top{align-items:flex-start}.top-actions{gap:8px;flex-direction:column;align-items:flex-end}.profile-card{grid-template-columns:1fr}.profile-avatar-wrap{width:88px}.profile-fields{grid-template-columns:1fr}.profile-card{margin-left:0}}
+@media(max-width:460px){.top{gap:8px}.top-actions .local{display:none}.profile-trigger{padding:5px 9px 5px 5px}.brand small{display:block;font-size:10px}.foss-logo{max-width:30vw}}
+
 </style>
 </head>
 <body><main class="shell">
-<header class="top"><div class="brand"><a href="https://fossna.com/" aria-label="FOSS North America website"><img class="foss-logo" src="https://www.fossanalytics.com/Design/static/foss-logo.png" alt="FOSS" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-block'"><span class="logo-fallback" aria-hidden="true">FOSS</span></a><div><strong>myTIME</strong><small>FOSS North America · Personal time clock</small></div></div><div class="local" id="timezoneLabel">Local time · loading</div></header>
+<header class="top"><div class="brand"><a href="https://fossna.com/" aria-label="FOSS North America website"><img class="foss-logo" src="https://www.fossanalytics.com/Design/static/foss-logo.png" alt="FOSS" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-block'"><span class="logo-fallback" aria-hidden="true">FOSS</span></a><div><strong>myTIME</strong><small>FOSS North America · Personal time clock</small></div></div><div class="top-actions"><div class="local" id="timezoneLabel">Local time · loading</div><button type="button" class="profile-trigger" id="profileTrigger"><span class="mini-avatar" id="miniAvatar">YOU</span><span id="profileButtonName">My profile</span><span aria-hidden="true">⌄</span></button></div></header><div class="profile-backdrop" id="profileBackdrop" hidden></div><section class="card profile-card" id="profilePanel" aria-labelledby="profileHeading" hidden><div class="profile-avatar-wrap"><img id="profileAvatar" class="profile-avatar" alt="Your profile photo" hidden><div id="profileInitials" class="profile-initials">YOU</div></div><div class="profile-main"><div class="section-head"><h2 id="profileHeading">Your myTIME profile</h2><button type="button" class="quiet" id="closeProfile">Close</button></div><div class="profile-fields"><div class="field"><label for="profileName">Display name</label><input id="profileName" type="text" maxlength="70" placeholder="Your name"></div><div class="field"><label for="profileEmail">FOSSNA work email</label><input id="profileEmail" type="email" maxlength="160" placeholder="you@fossna.com" autocomplete="email"></div><div class="field"><label for="profilePhoto">Profile image</label><input id="profilePhoto" type="file" accept="image/*"></div></div><div class="profile-actions"><button class="primary" id="saveProfile" type="button">Save profile</button><button class="quiet" id="clearProfilePhoto" type="button">Remove photo</button></div><p class="sub profile-note">Profile details and photo are saved only in this browser. Entering a FOSSNA email personalizes this local profile; it does not authenticate your work account or sync records between devices.</p></div></section>
 
-<section class="card profile-card" aria-labelledby="profileHeading">
- <div class="profile-avatar-wrap"><img id="profileAvatar" class="profile-avatar" alt="Your profile photo" hidden><div id="profileInitials" class="profile-initials">YOU</div></div>
- <div class="profile-main"><div class="section-head"><h2 id="profileHeading">Your myTIME profile</h2><span class="tag">PERSONAL PROFILE</span></div>
-  <div class="profile-fields"><div class="field"><label for="profileName">Display name</label><input id="profileName" type="text" maxlength="70" placeholder="Your name"></div><div class="field"><label for="profileEmail">FOSSNA work email</label><input id="profileEmail" type="email" maxlength="160" placeholder="you@fossna.com" autocomplete="email"></div>
-  <div class="field"><label for="profilePhoto">Profile image</label><input id="profilePhoto" type="file" accept="image/*"></div></div>
-  <div class="profile-actions"><button class="primary" id="saveProfile" type="button">Save profile</button><button class="quiet" id="clearProfilePhoto" type="button">Remove photo</button></div>
-  <p class="sub profile-note">Profile details and photo are saved only in this browser. Entering a FOSSNA email personalizes this local profile; it does not authenticate your work account or sync records between devices.</p>
- </div>
-</section>
+
 <section class="hero" aria-label="Time clock"><div><div class="eyebrow">Your workday, at a glance</div><div class="clock" id="liveClock">--:--:--</div><div class="date" id="liveDate"></div><div class="status"><span class="dot"></span><span id="statusText">Not clocked in</span></div></div><div class="punchpanel"><h2 id="actionTitle">Ready when you are</h2><p id="actionHelp">Clock in to start tracking today's shift.</p><button class="primary" id="punchBtn">Clock in</button><button class="secondary" id="secondaryBtn" hidden>End lunch</button></div></section>
 <section class="grid" aria-label="Today's totals"><article class="card"><div class="metric-label">PAID TIME TODAY</div><div class="metric" id="paidMetric">0h 00m</div><div class="sub" id="paidSub">Goal: 8 hours</div><div class="progress"><span id="progressBar"></span></div><div class="sub" id="progressLabel">0% of daily goal</div></article><article class="card"><div class="metric-label">TIME REMAINING</div><div class="metric" id="remainingMetric">8h 00m</div><div class="sub">Until 8 paid hours are reached</div></article><article class="card"><div class="metric-label">PROJECTED FINISH</div><div class="metric" id="finishMetric">5:00 PM</div><div class="sub" id="finishSub">Based on 8:00 AM start and 1h lunch</div></article></section>
 <section class="layout"><article class="card"><div class="section-head"><h2>Today's punches</h2><span class="tag" id="dayTag">TODAY</span></div><div id="timeline" class="timeline"><div class="empty">No punches yet. Clock in to begin your day.</div></div><div class="notice">Times are recorded on this device using your local clock. If a punch is wrong, use the correction option and enter a reason.</div></article>
@@ -204,5 +218,26 @@ renderProfile();
 /* Keep the weekly schedule designer visibly connected to clock settings. */
 const scheduleNote=document.querySelector('#weekHeading')?.parentElement;
 if(scheduleNote){const note=document.createElement('p');note.className='sub';note.textContent='Design each day’s planned start, lunch, finish and paid-hours goal below. Save weekly schedule to update the clock’s late-start recovery and daily target calculations.';scheduleNote.insertAdjacentElement('afterend',note)}
+
+
+/* Profile is an optional corner-button panel, not a permanent dashboard card. */
+function updateProfileButton(){
+ const label=profile.name||'My profile';$('profileButtonName').textContent=label;
+ const initials=initialsFor(profile.name,profile.email),mini=$('miniAvatar');
+ if(profile.photo){mini.innerHTML='<img alt="" src="'+profile.photo+'">'}else{mini.textContent=initials}
+}
+function setProfileOpen(open){
+ $('profilePanel').hidden=!open;$('profileBackdrop').hidden=!open;
+ $('profileTrigger').setAttribute('aria-expanded',String(open));
+ if(open)$('profileName').focus();
+}
+$('profileTrigger').setAttribute('aria-controls','profilePanel');$('profileTrigger').setAttribute('aria-expanded','false');
+$('profileTrigger').onclick=()=>setProfileOpen($('profilePanel').hidden);
+$('closeProfile').onclick=()=>setProfileOpen(false);
+$('profileBackdrop').onclick=()=>setProfileOpen(false);
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('profilePanel').hidden)setProfileOpen(false)});
+const priorRenderProfile=renderProfile;
+renderProfile=function(){priorRenderProfile();updateProfileButton()};
+updateProfileButton();
 
 </script></body></html>
