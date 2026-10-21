@@ -19,3 +19,6 @@ This is a prototype, not an official payroll system. Records are stored only in 
 
 ## Hosting
 The site is a static HTML page and can be deployed on Cloudflare Pages. The GitHub repository is separate from the People Lookup project.
+
+
+Cloudflare Pages project: `foss-time.pages.dev` (deployment status should be checked in Cloudflare).
