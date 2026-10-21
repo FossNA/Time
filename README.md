@@ -1,24 +1,20 @@
-# FOSS TIME
+# myTIME by FOSS — rebuild workspace
 
-A lightweight, responsive time-clock prototype for FOSS North America.
+This isolated branch starts from the supplied reference commit:
+[Fix print clipping and format timesheets for landscape letter paper](https://github.com/FossNA/Time/commit/ac1286f6f9e163659c544e18aa39b74538718665).
+
+## Brand system
+- FOSS navy: `#09266f`
+- FOSS blue: `#2458c6`
+- Font stack: Purista, Segoe UI, Arial, sans-serif
+- Official FOSS logo: `https://www.fossanalytics.com/Design/static/foss-logo.png`
+- Official favicon: `https://www.fossanalytics.com/favicon.ico`
 
 ## Run locally
-Open `index.html` in a modern browser. No build step is required.
+The app is a static single-page web app. Open `index.html` in a browser or serve it with any static web server. There are no build dependencies.
 
-## Current features
-- Live clock and today's punch timeline
-- Clock in, start/end lunch, and clock out with sequence validation
-- Paid time, remaining goal, and projected finish estimates
-- Configurable schedule and daily paid-hours target
-- Monthly timesheet, CSV export, JSON backup/restore, print view
-- Punch correction flow requiring a reason and recording an audit entry
-- Browser-local persistence
+## Quality checks
+Run `npm test` to check core branding and print layout. GitHub Actions runs the smoke check on pushes and pull requests.
 
-## Important limitations
-This is a prototype, not an official payroll system. Records are stored only in the current browser's local storage. They do not sync across devices or employees and are not protected by user accounts or server-side access controls. Browser data can be cleared or changed by the user. Do not use it as an authoritative employee timekeeping or payroll record. Back up data regularly. No Microsoft integration or external data service is configured.
-
-## Hosting
-The site is a static HTML page and can be deployed on Cloudflare Pages. The GitHub repository is separate from the People Lookup project.
-
-
-Cloudflare Pages project: `foss-time.pages.dev` (deployment status should be checked in Cloudflare).
+## Deployment status
+This branch is a safe workspace and does not change `main`. It is not yet connected to a new Cloudflare Pages project. The available GitHub connection can create branches and commit files, but does not expose a create-repository action. To create a separate repository, GitHub must grant repository-creation access or an empty repository must first be created in the GitHub UI.
