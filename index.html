@@ -226,7 +226,7 @@ body[data-tab="integrations"] [data-page]:not([data-page~="integrations"]){displ
  const week=document.getElementById('weekRows')?.closest('section');if(week)week.dataset.page='timesheets';
  const bank=document.getElementById('bankForm')?.closest('section');if(bank)bank.dataset.page='timesheets';
  const integrations=document.getElementById('integrationDirectory');if(integrations)integrations.dataset.page='integrations';
- const hub=document.getElementById('dataHub');if(hub)hub.dataset.page='import';
+ const hub=document.getElementById('dataHub');if(hub)hub.dataset.page='import records';
  document.querySelectorAll('#dataHub > .grid, #dataHub > .notice, #dataHub > #importPreviewWrap, #dataHub > .section-head, #dataHub > .formrow, #dataHub > p, #dataHub > .settings-actions, #dataHub > div[style*="height:1px"]').forEach(el=>el.dataset.page='import');
  const manager=document.getElementById('recordManager');if(manager)manager.dataset.page='records';
  document.querySelectorAll('[data-tab]').forEach(btn=>btn.addEventListener('click',()=>{
