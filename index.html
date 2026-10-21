@@ -87,10 +87,43 @@ img{max-width:100%}
 @media(max-width:760px){.top{align-items:flex-start}.top-actions{gap:8px;flex-direction:column;align-items:flex-end}.profile-card{grid-template-columns:1fr}.profile-avatar-wrap{width:88px}.profile-fields{grid-template-columns:1fr}.profile-card{margin-left:0}}
 @media(max-width:460px){.top{gap:8px}.top-actions .local{display:none}.profile-trigger{padding:5px 9px 5px 5px}.brand small{display:block;font-size:10px}.foss-logo{max-width:30vw}}
 
+
+/* Page tabs and safer record management */
+.app-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 22px;padding:8px;background:#eaf0fc;border:1px solid var(--line);border-radius:16px;position:sticky;top:8px;z-index:10;box-shadow:0 6px 20px #09266f0a}
+.app-tab{background:transparent;color:var(--ink);padding:10px 14px;border:1px solid transparent;border-radius:10px;font-size:13px}
+.app-tab:hover{background:#fff;border-color:#d5e0f5}
+.app-tab.active{background:var(--ink);color:#fff;box-shadow:0 4px 12px #09266f20}
+body[data-tab="dashboard"] [data-page]:not([data-page~="dashboard"]),
+body[data-tab="timesheets"] [data-page]:not([data-page~="timesheets"]),
+body[data-tab="records"] [data-page]:not([data-page~="records"]),
+body[data-tab="import"] [data-page]:not([data-page~="import"]),
+body[data-tab="settings"] [data-page]:not([data-page~="settings"]),
+body[data-tab="integrations"] [data-page]:not([data-page~="integrations"]){display:none!important}
+.record-tools{display:flex;gap:10px;align-items:end;flex-wrap:wrap;margin:12px 0}
+.record-tools .field{min-width:190px;flex:1}
+.record-editor{padding:16px;background:#f7f9ff;border:1px solid var(--line);border-radius:14px;margin:14px 0}
+.record-editor-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.record-editor-grid .field{min-width:0}
+.record-editor-grid input{width:100%;min-width:0}
+.record-row-actions{display:flex;gap:6px;flex-wrap:wrap}
+.record-row-actions button{padding:7px 10px;font-size:12px}
+.danger{background:#fff0ef;color:#a83d38;border:1px solid #f1c6c3}
+.safe-hint{padding:12px 14px;background:#eef4ff;border-radius:12px;color:#294578;font-size:13px;margin:12px 0}
+@media(max-width:760px){.app-tabs{position:static}.app-tab{flex:1 1 auto}.record-editor-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:460px){.record-editor-grid{grid-template-columns:1fr}}
+
 </style>
 </head>
 <body><main class="shell">
-<header class="top"><div class="brand"><a href="https://fossna.com/" aria-label="FOSS North America website"><img class="foss-logo" src="https://www.fossanalytics.com/Design/static/foss-logo.png" alt="FOSS" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-block'"><span class="logo-fallback" aria-hidden="true">FOSS</span></a><div><strong>myTIME</strong><small>FOSS North America · Personal time clock</small></div></div><div class="top-actions"><div class="local" id="timezoneLabel">Local time · loading</div><button type="button" class="profile-trigger" id="profileTrigger"><span class="mini-avatar" id="miniAvatar">YOU</span><span id="profileButtonName">My profile</span><span aria-hidden="true">⌄</span></button></div></header><div class="profile-backdrop" id="profileBackdrop" hidden></div><section class="card profile-card" id="profilePanel" aria-labelledby="profileHeading" hidden><div class="profile-avatar-wrap"><img id="profileAvatar" class="profile-avatar" alt="Your profile photo" hidden><div id="profileInitials" class="profile-initials">YOU</div></div><div class="profile-main"><div class="section-head"><h2 id="profileHeading">Your myTIME profile</h2><button type="button" class="quiet" id="closeProfile">Close</button></div><div class="profile-fields"><div class="field"><label for="profileName">Display name</label><input id="profileName" type="text" maxlength="70" placeholder="Your name"></div><div class="field"><label for="profileEmail">FOSSNA work email</label><input id="profileEmail" type="email" maxlength="160" placeholder="you@fossna.com" autocomplete="email"></div><div class="field"><label for="profilePhoto">Profile image</label><input id="profilePhoto" type="file" accept="image/*"></div></div><div class="profile-actions"><button class="primary" id="saveProfile" type="button">Save profile</button><button class="quiet" id="clearProfilePhoto" type="button">Remove photo</button></div><p class="sub profile-note">Profile details and photo are saved only in this browser. Entering a FOSSNA email personalizes this local profile; it does not authenticate your work account or sync records between devices.</p></div></section>
+<header class="top"><div class="brand"><a href="https://fossna.com/" aria-label="FOSS North America website"><img class="foss-logo" src="https://www.fossanalytics.com/Design/static/foss-logo.png" alt="FOSS" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-block'"><span class="logo-fallback" aria-hidden="true">FOSS</span></a><div><strong>myTIME</strong><small>FOSS North America · Personal time clock</small></div></div><div class="top-actions"><div class="local" id="timezoneLabel">Local time · loading</div><button type="button" class="profile-trigger" id="profileTrigger"><span class="mini-avatar" id="miniAvatar">YOU</span><span id="profileButtonName">My profile</span><span aria-hidden="true">⌄</span></button></div></header>
+<nav class="app-tabs" aria-label="myTIME pages" id="appTabs">
+  <button type="button" class="app-tab active" data-tab="dashboard">Dashboard</button>
+  <button type="button" class="app-tab" data-tab="timesheets">Weekly &amp; monthly</button>
+  <button type="button" class="app-tab" data-tab="records">Manage records</button>
+  <button type="button" class="app-tab" data-tab="import">Import &amp; export</button>
+  <button type="button" class="app-tab" data-tab="settings">Settings</button>
+  <button type="button" class="app-tab" data-tab="integrations">Integrations</button>
+</nav><div class="profile-backdrop" id="profileBackdrop" hidden></div><section class="card profile-card" id="profilePanel" aria-labelledby="profileHeading" hidden><div class="profile-avatar-wrap"><img id="profileAvatar" class="profile-avatar" alt="Your profile photo" hidden><div id="profileInitials" class="profile-initials">YOU</div></div><div class="profile-main"><div class="section-head"><h2 id="profileHeading">Your myTIME profile</h2><button type="button" class="quiet" id="closeProfile">Close</button></div><div class="profile-fields"><div class="field"><label for="profileName">Display name</label><input id="profileName" type="text" maxlength="70" placeholder="Your name"></div><div class="field"><label for="profileEmail">FOSSNA work email</label><input id="profileEmail" type="email" maxlength="160" placeholder="you@fossna.com" autocomplete="email"></div><div class="field"><label for="profilePhoto">Profile image</label><input id="profilePhoto" type="file" accept="image/*"></div></div><div class="profile-actions"><button class="primary" id="saveProfile" type="button">Save profile</button><button class="quiet" id="clearProfilePhoto" type="button">Remove photo</button></div><p class="sub profile-note">Profile details and photo are saved only in this browser. Entering a FOSSNA email personalizes this local profile; it does not authenticate your work account or sync records between devices.</p></div></section>
 
 
 <section class="hero" aria-label="Time clock"><div><div class="eyebrow">Your workday, at a glance</div><div class="clock" id="liveClock">--:--:--</div><div class="date" id="liveDate"></div><div class="status"><span class="dot"></span><span id="statusText">Not clocked in</span></div></div><div class="punchpanel"><h2 id="actionTitle">Ready when you are</h2><p id="actionHelp">Clock in to start tracking today's shift.</p><button class="primary" id="punchBtn">Clock in</button><button class="secondary" id="secondaryBtn" hidden>End lunch</button></div></section>
@@ -153,6 +186,24 @@ img{max-width:100%}
 </div>
 <div class="notice" id="importStatus" role="status" aria-live="polite">Choose an Excel (.xlsx), CSV, or myTIME JSON file. Use one row per work date and times like 08:00 or 17:00. Nothing is changed until you confirm.</div>
 <div id="importPreviewWrap" hidden style="margin-top:14px"><div class="section-head"><h3 style="margin:0;font-size:15px">Import preview</h3><div class="settings-actions"><button class="primary" id="commitPunchImport" disabled>Import valid rows</button><button class="quiet" id="cancelPunchImport">Cancel</button></div></div><div class="tablewrap"><table><thead><tr><th>Date</th><th>Clock in</th><th>Lunch out</th><th>Lunch in</th><th>Clock out</th><th>Validation</th></tr></thead><tbody id="importPreviewRows"></tbody></table></div></div>
+<section class="card" id="recordManager" data-page="records" style="margin-top:18px" aria-labelledby="recordManagerHeading">
+ <div class="section-head"><div><h2 id="recordManagerHeading">Manage saved punches</h2><p class="sub">Review, correct, add or remove a day’s records. Changes save in this browser only.</p></div><span class="tag">EDITABLE RECORDS</span></div>
+ <div class="safe-hint"><strong>Before correcting a bad import:</strong> download a JSON backup first. You can also export CSV or Excel, edit it in a spreadsheet, then import and review the preview before confirming.</div>
+ <div class="record-tools"><div class="field"><label for="recordSearch">Find a date</label><input id="recordSearch" type="search" placeholder="YYYY-MM-DD"></div><div class="field"><label for="recordDate">Edit or create date</label><input id="recordDate" type="date"></div><button class="quiet" type="button" id="newRecordBtn">New date</button><button class="quiet" type="button" id="downloadRecordsCsv">Download records CSV</button></div>
+ <div class="record-editor" id="recordEditor" hidden>
+  <div class="section-head"><div><h3 style="margin:0;font-size:16px" id="recordEditorTitle">Edit day</h3><p class="sub">Use local time. Leave a punch blank if it did not happen.</p></div></div>
+  <div class="record-editor-grid">
+   <div class="field"><label for="editClockIn">Clock in</label><input id="editClockIn" type="time"></div>
+   <div class="field"><label for="editLunchOut">Lunch out</label><input id="editLunchOut" type="time"></div>
+   <div class="field"><label for="editLunchIn">Lunch in</label><input id="editLunchIn" type="time"></div>
+   <div class="field"><label for="editClockOut">Clock out</label><input id="editClockOut" type="time"></div>
+   <div class="field"><label for="editReason">Reason / note</label><input id="editReason" type="text" maxlength="180" placeholder="e.g. Corrected after import"></div>
+  </div>
+  <div class="settings-actions" style="margin-top:12px"><button class="primary" type="button" id="saveRecordEdit">Save changes</button><button class="quiet" type="button" id="cancelRecordEdit">Cancel</button><button class="danger" type="button" id="deleteRecordDay">Delete this date</button></div>
+ </div>
+ <div class="tablewrap"><table><thead><tr><th>Date</th><th>Clock in</th><th>Lunch out</th><th>Lunch in</th><th>Clock out</th><th>Paid time</th><th>Actions</th></tr></thead><tbody id="recordManagerRows"><tr><td colspan="7">No saved records yet.</td></tr></tbody></table></div>
+ <p class="notice">Delete removes the entire selected date’s punch record from this browser. This does not delete a downloaded backup or change a company payroll system.</p>
+</section>
 <div style="height:1px;background:var(--line);margin:22px 0"></div>
 <div class="section-head"><div><h3 style="margin:0;font-size:16px">Optional webhook</h3><p class="sub">Send data on demand to a trusted HTTPS webhook, such as your own Power Automate flow.</p></div><span class="tag">OPT-IN</span></div>
 <div class="formrow"><div class="field"><label for="webhookUrl">Webhook URL</label><input id="webhookUrl" type="url" placeholder="https://your-secure-endpoint.example/webhook"></div><div class="field"><label for="webhookMode">Branded notification</label><select id="webhookMode"><option value="weekly-report">Weekly timecard email report</option><option value="punches">Punch records only</option><option value="backup">Full backup</option></select></div></div><div class="formrow"><div class="field"><label for="reportEmail">Email recipient (for email workflows)</label><input id="reportEmail" type="email" placeholder="you@company.com" autocomplete="email"></div><div class="field"><label for="reportName">Report display name</label><input id="reportName" type="text" placeholder="My weekly timecard"></div></div><p class="sub">Weekly report payload includes a FOSS-branded HTML email body, subject, date range, daily punch details and total hours. Configure your webhook receiver to send the email. Automatic weekly delivery requires a scheduled flow.</p>
@@ -160,7 +211,79 @@ img{max-width:100%}
 <p class="notice">Security: this static site has no private server. Use only an endpoint you trust; never put passwords or API keys here. Browser CORS rules may block a request. Background sync and secure company sign-in need a server-side integration and are not enabled.</p>
 </section>
 </main>
-<script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js">
+/* myTIME page navigation */
+(function setupAppTabs(){
+ const assign=(selector,page)=>document.querySelectorAll(selector).forEach(el=>el.dataset.page=page);
+ assign('.hero','dashboard');
+ const metricGrid=document.querySelector('section.grid[aria-label="Today\'s totals"]');if(metricGrid)metricGrid.dataset.page='dashboard';
+ const timeline=document.querySelector('#timeline')?.closest('article');if(timeline)timeline.dataset.page='dashboard';
+ const settingsPanel=document.getElementById('workSettingsPanel');if(settingsPanel)settingsPanel.dataset.page='settings';
+ const settingsSummary=document.getElementById('workSettingsSummary');if(settingsSummary)settingsSummary.dataset.page='settings';
+ const quickTimesheet=document.getElementById('monthFilter')?.closest('article');if(quickTimesheet)quickTimesheet.dataset.page='timesheets';
+ const monthSection=document.getElementById('monthRows')?.closest('section');if(monthSection)monthSection.dataset.page='timesheets';
+ const recovery=document.getElementById('recoveryPanel')?.closest('section');if(recovery)recovery.dataset.page='dashboard';
+ const week=document.getElementById('weekRows')?.closest('section');if(week)week.dataset.page='timesheets';
+ const bank=document.getElementById('bankForm')?.closest('section');if(bank)bank.dataset.page='timesheets';
+ const integrations=document.getElementById('integrationDirectory');if(integrations)integrations.dataset.page='integrations';
+ const hub=document.getElementById('dataHub');if(hub)hub.dataset.page='import';
+ document.querySelectorAll('#dataHub > .grid, #dataHub > .notice, #dataHub > #importPreviewWrap, #dataHub > .section-head, #dataHub > .formrow, #dataHub > p, #dataHub > .settings-actions, #dataHub > div[style*="height:1px"]').forEach(el=>el.dataset.page='import');
+ const manager=document.getElementById('recordManager');if(manager)manager.dataset.page='records';
+ document.querySelectorAll('[data-tab]').forEach(btn=>btn.addEventListener('click',()=>{
+  const tab=btn.dataset.tab;document.body.dataset.tab=tab;
+  document.querySelectorAll('.app-tab').forEach(b=>{const active=b===btn;b.classList.toggle('active',active);b.setAttribute('aria-current',active?'page':'false')});
+  if(tab==='records')renderRecordManager();
+  if(tab==='timesheets')renderPlanning();
+ }));
+ document.body.dataset.tab='dashboard';
+})();
+
+/* Direct editing and deletion for any saved date */
+function recordHH(ts){if(!ts)return '';const d=new Date(ts);return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}
+function managerRecordTimes(k){const p=data[k]?.punches||[],first=t=>p.find(x=>x.type===t);return {cin:first('in')?.ts,lo:first('lunch-start')?.ts,li:first('lunch-end')?.ts,cout:[...p].reverse().find(x=>x.type==='out')?.ts}}
+function renderRecordManager(){
+ const body=document.getElementById('recordManagerRows');if(!body)return;
+ const filter=(document.getElementById('recordSearch')?.value||'').trim(),keys=Object.keys(data).filter(k=>!filter||k.includes(filter)).sort().reverse();body.innerHTML='';
+ if(!keys.length){body.innerHTML='<tr><td colspan="7">No matching saved records.</td></tr>';return}
+ keys.forEach(k=>{const p=managerRecordTimes(k),rec=data[k],paid=paidMs(rec,[...(rec.punches||[])].reverse().find(x=>x.type==='out')?.ts||Date.now());const tr=document.createElement('tr');
+  [k, p.cin?fmtTime(p.cin):'—',p.lo?fmtTime(p.lo):'—',p.li?fmtTime(p.li):'—',p.cout?fmtTime(p.cout):'—',fmtMin(paid/60000)].forEach(v=>{const td=document.createElement('td');td.textContent=v;tr.appendChild(td)});
+  const td=document.createElement('td'),actions=document.createElement('div');actions.className='record-row-actions';const edit=document.createElement('button');edit.type='button';edit.className='quiet';edit.textContent='Edit';edit.onclick=()=>openRecordEditor(k);const del=document.createElement('button');del.type='button';del.className='danger';del.textContent='Delete';del.onclick=()=>deleteRecordDate(k);actions.append(edit,del);td.appendChild(actions);tr.appendChild(td);body.appendChild(tr);
+ });
+}
+function openRecordEditor(k){
+ const input=document.getElementById('recordDate');input.value=k;const exists=!!data[k];const p=managerRecordTimes(k);
+ document.getElementById('editClockIn').value=recordHH(p.cin);document.getElementById('editLunchOut').value=recordHH(p.lo);document.getElementById('editLunchIn').value=recordHH(p.li);document.getElementById('editClockOut').value=recordHH(p.cout);
+ document.getElementById('editReason').value='';document.getElementById('recordEditorTitle').textContent=(exists?'Edit punches for ':'Add punches for ')+k;document.getElementById('deleteRecordDay').hidden=!exists;document.getElementById('recordEditor').hidden=false;
+}
+function deleteRecordDate(k){
+ if(!data[k])return;if(!confirm('Permanently delete all punch records for '+k+' from this browser? Download a backup first if you may need them.'))return;
+ delete data[k];save();render();renderRecordManager();document.getElementById('recordEditor').hidden=true;
+}
+document.getElementById('recordSearch')?.addEventListener('input',renderRecordManager);
+document.getElementById('recordDate')?.addEventListener('change',e=>{if(e.target.value)openRecordEditor(e.target.value)});
+document.getElementById('newRecordBtn')?.addEventListener('click',()=>{const d=document.getElementById('recordDate');if(!d.value)d.value=todayKey();openRecordEditor(d.value)});
+document.getElementById('cancelRecordEdit')?.addEventListener('click',()=>document.getElementById('recordEditor').hidden=true);
+document.getElementById('deleteRecordDay')?.addEventListener('click',()=>deleteRecordDate(document.getElementById('recordDate').value));
+document.getElementById('saveRecordEdit')?.addEventListener('click',()=>{
+ const k=document.getElementById('recordDate').value;if(!/^\d{4}-\d{2}-\d{2}$/.test(k)){alert('Choose a valid work date first.');return}
+ const values=[['in',document.getElementById('editClockIn').value],['lunch-start',document.getElementById('editLunchOut').value],['lunch-end',document.getElementById('editLunchIn').value],['out',document.getElementById('editClockOut').value]],seq=values.filter(x=>x[1]).map(x=>x[1]);
+ if(!seq.length){alert('Enter at least one punch time, or use Delete to remove the date.');return}
+ for(let i=1;i<seq.length;i++)if(seq[i]<seq[i-1]){alert('Punch times must be chronological: clock in, lunch out, lunch in, clock out.');return}
+ if(values[1][1]&&!values[0][1]||values[2][1]&&!values[1][1]||values[3][1]&&!values[0][1]){alert('Add the preceding punch first (clock in before lunch, lunch out before lunch in, and clock in before clock out).');return}
+ const punches=values.filter(x=>x[1]).map(([type,t])=>({type,ts:new Date(k+'T'+t+':00').getTime()}));
+ const reason=document.getElementById('editReason').value.trim()||'Manually edited in Manage records';
+ const audit=[...(data[k]?.audit||[]),{at:Date.now(),reason}];data[k]={...(data[k]||{}),punches,audit};save();render();renderRecordManager();document.getElementById('recordEditor').hidden=true;
+ const status=document.getElementById('importStatus');if(status)status.textContent='Saved corrections for '+k+'.';
+});
+document.getElementById('downloadRecordsCsv')?.addEventListener('click',()=>{
+ const escapeCsv=v=>'"'+String(v??'').replace(/"/g,'""')+'"',lines=[['Date','Clock In','Lunch Out','Lunch In','Clock Out','Paid Minutes','Notes']];
+ Object.keys(data).sort().forEach(k=>{const p=managerRecordTimes(k),rec=data[k],out=[...(rec.punches||[])].reverse().find(x=>x.type==='out'),mins=Math.round(paidMs(rec,out?.ts||Date.now())/60000);lines.push([k,recordHH(p.cin),recordHH(p.lo),recordHH(p.li),recordHH(p.cout),mins,(rec.audit||[]).map(a=>a.reason).filter(Boolean).join(' | ')])});
+ const blob=new Blob([lines.map(r=>r.map(escapeCsv).join(',')).join('\r\n')],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='myTIME-editable-records-'+todayKey()+'.csv';a.click();URL.revokeObjectURL(url);
+});
+const beforeManagerRender=render;render=function(){beforeManagerRender();renderRecordManager()};
+renderRecordManager();
+
+</script>
 <script>
 const $=id=>document.getElementById(id);const KEY='foss-time-v1';const SETKEY='foss-time-settings-v1';const todayKey=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};let data=load(KEY,{}),settings=load(SETKEY,{startTime:'08:00',endTime:'17:00',lunchStart:'11:30',lunchEnd:'12:30',goalHours:8,timezone:'local'});function load(k,f){try{return JSON.parse(localStorage.getItem(k))||f}catch{return f}}function save(){localStorage.setItem(KEY,JSON.stringify(data))}function saveSet(){localStorage.setItem(SETKEY,JSON.stringify(settings))}
 function humanTime(value){if(!value)return '—';const [h,m]=value.split(':').map(Number);return new Date(2000,0,1,h,m).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})}
