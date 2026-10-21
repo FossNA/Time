@@ -117,6 +117,7 @@ body[data-tab="integrations"] [data-page]:not([data-page~="integrations"]){displ
 
 /* Print-ready FOSS report layout: US Letter, not a screenshot of the app */
 @page{size:letter portrait;margin:.55in .55in .6in}
+@page wide{size:letter landscape;margin:.38in .42in .45in}
 .print-report-head,.print-report-foot{display:none}
 @media print{
   html,body{width:100%!important;min-width:0!important;margin:0!important;padding:0!important;background:#fff!important;color:#15264c!important;font:10pt/1.38 "Segoe UI",Arial,sans-serif!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
@@ -125,6 +126,26 @@ body[data-tab="integrations"] [data-page]:not([data-page~="integrations"]){displ
   .top,.app-tabs,.profile-backdrop,#profilePanel,.top-actions,.settings-actions,button,.no-print,.notice,.subtle-actions{display:none!important}
   .tab-page[hidden]{display:none!important}
   .tab-page:not([hidden]){display:flex!important;gap:12pt!important;padding:0!important;margin:0!important;width:100%!important}
+
+  .tablewrap{overflow:visible!important;max-width:100%!important;width:100%!important}
+  .tablewrap table{width:100%!important;max-width:100%!important;table-layout:fixed!important}
+  .tablewrap th,.tablewrap td{white-space:normal!important;word-break:normal!important;overflow-wrap:anywhere!important;hyphens:auto;padding:4pt 4pt!important;font-size:8pt!important;line-height:1.22!important;vertical-align:top!important}
+  .tablewrap .week-table th,.tablewrap .week-table td{font-size:7pt!important;padding:3pt 3pt!important;letter-spacing:-.1pt}
+  .tablewrap .week-table th:first-child,.tablewrap .week-table td:first-child{width:13%!important}
+  #page-timesheets{page:wide!important}
+  #page-timesheets .tab-page{page:wide!important}
+  #page-timesheets .tablewrap{overflow:visible!important}
+  #page-timesheets .week-tools{display:none!important}
+  #page-timesheets #bankForm{display:none!important}
+  #page-timesheets #bankHeading{break-after:avoid}
+  #page-timesheets #monthRows td,#page-timesheets #weekRows td{white-space:normal!important;overflow-wrap:anywhere!important}
+  #page-timesheets .tablewrap table{font-size:7pt!important}
+  #page-timesheets .card{break-inside:auto!important}
+  #page-timesheets table thead{display:table-header-group}
+  #page-timesheets table tfoot{display:table-footer-group}
+  #page-timesheets tr{break-inside:avoid!important;page-break-inside:avoid!important}
+  #page-timesheets .print-tools{display:none!important}
+
   .print-report-head{display:flex!important;align-items:center;justify-content:space-between;gap:18pt;border-bottom:2.5pt solid #09266f;padding:0 0 10pt;margin:0 0 14pt;break-inside:avoid}
   .print-brand{display:flex;align-items:center;gap:9pt;min-width:0}
   .print-mark{width:42pt;height:42pt;object-fit:contain}
@@ -390,6 +411,9 @@ const printTitles={dashboard:'Daily Time Report',timesheets:'Weekly & Monthly Ti
 function preparePrintReport(){
  const active=document.querySelector('.tab-page:not([hidden])')||document.querySelector('#page-dashboard');
  if(!active)return;
+ document.body.classList.toggle('print-wide',active.id==='page-timesheets');
+ const toolsCard=document.getElementById('exportCsv')?.closest('article');
+ if(toolsCard)toolsCard.classList.add('print-tools');
  document.querySelectorAll('.print-report-head,.print-report-foot').forEach(n=>n.remove());
  const now=new Date();
  const dateLabel=now.toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'});
@@ -408,7 +432,7 @@ function preparePrintReport(){
  foot.append(left,right);active.append(foot);
  document.body.classList.add('printing-report');
 }
-function cleanPrintReport(){document.querySelectorAll('.print-report-head,.print-report-foot').forEach(n=>n.remove());document.body.classList.remove('printing-report')}
+function cleanPrintReport(){document.querySelectorAll('.print-report-head,.print-report-foot').forEach(n=>n.remove());document.querySelectorAll('.print-tools').forEach(n=>n.classList.remove('print-tools'));document.body.classList.remove('printing-report','print-wide')}
 window.addEventListener('beforeprint',preparePrintReport);window.addEventListener('afterprint',cleanPrintReport);
 $('printBtn').onclick=()=>{preparePrintReport();window.print();};
 $('monthFilter').value=todayKey().slice(0,7);$('monthFilter').onchange=renderMonth;$('correctBtn').onclick=()=>{let r=day(),p=r.punches;if(!p.length){alert('There are no punches to correct today.');return}let choice=prompt('Enter the punch number to correct (1–'+p.length+'):\n'+p.map((x,i)=>(i+1)+'. '+typeName(x.type)+' — '+fmtTime(x.ts)).join('\n'));if(choice===null)return;let i=Number(choice)-1;if(!Number.isInteger(i)||i<0||i>=p.length){alert('Invalid punch number.');return}let reason=prompt('Required reason for correction:');if(!reason?.trim()){alert('A reason is required. No change made.');return}let old={...p[i]},newType=prompt('New punch type: in, lunch-start, lunch-end, or out',old.type);if(!['in','lunch-start','lunch-end','out'].includes(newType)){alert('Invalid type. No change made.');return}let tsInput=prompt('New date/time (YYYY-MM-DD HH:MM) or leave blank to keep time:',new Date(old.ts).getFullYear()+'-'+String(new Date(old.ts).getMonth()+1).padStart(2,'0')+'-'+String(new Date(old.ts).getDate()).padStart(2,'0')+' '+String(new Date(old.ts).getHours()).padStart(2,'0')+':'+String(new Date(old.ts).getMinutes()).padStart(2,'0'));let ts=old.ts;if(tsInput?.trim()){let parsed=new Date(tsInput.replace(' ','T'));if(Number.isNaN(parsed.getTime())){alert('Invalid date/time. No change made.');return}ts=parsed.getTime()}r.audit=r.audit||[];r.audit.push({at:Date.now(),before:old,after:{type:newType,ts},reason:reason.trim()});p[i]={type:newType,ts};p.sort((a,b)=>a.ts-b.ts);save();render();alert('Punch corrected and correction reason saved in the local audit history. Export a JSON backup to preserve the audit.');};applySettings();render();setInterval(render,1000);
