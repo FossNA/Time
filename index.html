@@ -357,6 +357,40 @@ body[data-tab]:not([data-tab="dashboard"]) #webhookPanel{display:none!important;
   #page-dashboard #webhookPanel{display:none!important;visibility:hidden!important;height:0!important;max-height:0!important;overflow:hidden!important;margin:0!important;padding:0!important;border:0!important;break-before:avoid!important;break-after:avoid!important;page-break-before:avoid!important;page-break-after:avoid!important}
 }
 
+
+/* Integrations redesign — clear states, visible webhook controls, responsive FOSS styling */
+.integration-page{margin-top:18px;color:var(--ink)}
+.integration-hero{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:clamp(22px,4vw,38px);border-radius:22px;background:linear-gradient(125deg,#09266f 0%,#153c92 66%,#2458c6 100%);color:#fff;box-shadow:var(--shadow)}
+.integration-eyebrow{font-size:11px;font-weight:800;letter-spacing:.17em;color:#dce7ff;text-transform:uppercase}
+.integration-hero h2{font-size:clamp(28px,4vw,38px);letter-spacing:-.04em;line-height:1.1;margin:10px 0}
+.integration-hero p{max-width:660px;color:#e4ebff;margin:0;font-size:14px}
+.integration-hero-mark{flex:0 0 100px;width:100px;height:100px;border:1px solid #ffffff45;border-radius:24px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:#ffffff0c}
+.integration-hero-mark span{font-size:36px;line-height:1}.integration-hero-mark small{font-size:9px;font-weight:800;letter-spacing:.12em;text-align:center;color:#dce7ff}
+.integration-statusbar{display:flex;align-items:flex-start;gap:12px;padding:16px 18px;margin:14px 0 28px;background:#fff;border:1px solid var(--line);border-radius:15px}
+.integration-statusbar>div{flex:1;min-width:0}.integration-statusbar strong{font-size:13px}.integration-statusbar p{margin:3px 0 0;color:var(--muted);font-size:12px}
+.integration-status-dot{width:10px;height:10px;flex:0 0 10px;margin-top:5px;border-radius:50%;background:#9aa7bc;box-shadow:0 0 0 4px #eef1f7}
+.integration-section-title{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin:0 2px 13px}
+.integration-section-title h3{font-size:20px;letter-spacing:-.025em;margin:4px 0 0}.integration-section-title p{margin:5px 0 0;color:var(--muted);font-size:12px;max-width:660px}
+.integration-provider-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.integration-provider{min-width:0;padding:22px;background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow)}
+.provider-top{display:flex;align-items:center;justify-content:space-between;gap:10px}.provider-icon{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;background:#f3f6fc;font-size:25px;font-weight:800}
+.google-icon{color:#4285f4}.microsoft-icon{grid-template-columns:repeat(2,9px);grid-template-rows:repeat(2,9px);gap:2px}.microsoft-icon span:nth-child(1){background:#f25022}.microsoft-icon span:nth-child(2){background:#7fba00}.microsoft-icon span:nth-child(3){background:#00a4ef}.microsoft-icon span:nth-child(4){background:#ffb900}
+.integration-provider h3{margin:17px 0 5px;font-size:18px}.integration-provider>p{min-height:54px;color:var(--muted);font-size:13px;margin:0 0 15px}.integration-provider button{width:100%;text-align:center}.integration-provider button:disabled{opacity:.65}
+.provider-requirement{display:grid;gap:3px;margin-top:16px;padding-top:14px;border-top:1px solid var(--line);font-size:11px}.provider-requirement strong{font-size:11px;color:var(--ink)}.provider-requirement span{color:var(--muted);line-height:1.55}
+.integration-manual-title{margin-top:34px}.webhook-card{display:block!important;visibility:visible!important;position:relative;margin-top:0;background:#fff;border:1px solid #d4def1;border-radius:20px;overflow:hidden;box-shadow:0 16px 42px #09266f10}
+.webhook-card-head{display:flex;align-items:center;gap:13px;padding:22px 24px;border-bottom:1px solid var(--line);background:linear-gradient(90deg,#f4f7ff,#fff)}
+.webhook-icon{width:44px;height:44px;display:grid;place-items:center;border-radius:13px;background:#e7eeff;color:#153c92;font-size:27px;font-weight:700;flex-shrink:0}
+.webhook-card-head>div:nth-child(2){flex:1;min-width:0}.webhook-card-head h3{font-size:17px;margin:0}.webhook-card-head p{font-size:12px;color:var(--muted);margin:4px 0 0}.webhook-step{font-size:10px;letter-spacing:.1em;font-weight:800;color:#52658b;white-space:nowrap}
+.webhook-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 18px;padding:22px 24px 8px}.webhook-form .field{min-width:0}.webhook-url-field{grid-column:1/-1}.webhook-form .field label{color:var(--ink);font-size:12px}.webhook-form input,.webhook-form select{min-height:44px;border-color:#ccd6e8;border-radius:10px}.webhook-form .field small{font-size:11px;color:var(--muted);line-height:1.5}
+.webhook-payload-note{display:flex;gap:11px;margin:0 24px 20px;padding:13px 15px;border-radius:12px;background:#f3f6fc;border:1px solid #e5ebf6}.payload-note-icon{width:22px;height:22px;display:grid;place-items:center;border-radius:50%;background:#dce7ff;color:#153c92;font-size:12px;font-weight:800;flex-shrink:0}.webhook-payload-note p{margin:0;font-size:12px;color:var(--muted);line-height:1.6}.webhook-payload-note strong{color:var(--ink)}
+.webhook-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:0 24px 20px}.webhook-actions .primary,.webhook-actions .quiet{min-height:42px}.text-button{background:transparent;color:#68748b;padding:10px 4px;font-size:12px}.text-button:hover{color:var(--red);background:transparent}
+.webhook-status{display:flex;align-items:flex-start;gap:10px;margin:0 24px 18px;padding:12px 14px;border:1px solid #dce5f4;border-radius:11px;background:#f8faff;color:#52617b;font-size:12px;line-height:1.55}.status-light{width:8px;height:8px;border-radius:50%;background:#9aa7bc;margin-top:5px;flex-shrink:0}
+.webhook-security{margin:0 24px 18px;padding-top:15px;border-top:1px solid var(--line)}.webhook-security strong{font-size:12px}.webhook-security p{font-size:11px;line-height:1.65;color:var(--muted);margin:4px 0 0}
+.integration-help{margin:0 24px 22px;border:1px solid var(--line);border-radius:11px;padding:12px 14px}.integration-help summary{cursor:pointer;font-size:12px;font-weight:700;color:var(--ink)}.integration-help p{font-size:12px;color:var(--muted);margin:10px 0 0}.integration-links a{color:var(--brand-blue);font-weight:700}
+.integration-safety{display:flex;align-items:flex-start;gap:12px;margin-top:14px;padding:15px 17px;background:#eef3ff;border:1px solid #dce6fb;border-radius:14px}.integration-safety>span{display:grid;place-items:center;width:25px;height:25px;flex-shrink:0;border-radius:50%;background:#dce7ff;color:#153c92;font-weight:900}.integration-safety p{margin:0;font-size:12px;line-height:1.6;color:#52617b}.integration-safety strong{color:var(--ink)}
+@media(max-width:640px){.integration-hero{padding:22px;gap:10px}.integration-hero-mark{width:68px;height:68px;flex-basis:68px;border-radius:18px}.integration-hero-mark span{font-size:27px}.integration-hero-mark small{font-size:7px}.integration-statusbar{flex-wrap:wrap}.integration-statusbar>div{flex-basis:calc(100% - 28px)}.integration-statusbar>.tag{margin-left:22px}.integration-section-title{align-items:flex-start;flex-direction:column;gap:5px}.integration-provider-grid{grid-template-columns:1fr}.integration-provider>p{min-height:0}.webhook-card-head{padding:18px;align-items:flex-start}.webhook-step{display:none}.webhook-form{grid-template-columns:1fr;padding:18px 18px 6px}.webhook-url-field{grid-column:auto}.webhook-payload-note{margin:0 18px 18px}.webhook-actions{padding:0 18px 18px}.webhook-actions button{flex:1}.webhook-actions .text-button{flex-basis:100%;text-align:left}.webhook-status{margin:0 18px 16px}.webhook-security{margin:0 18px 16px}.integration-help{margin:0 18px 18px}}
+@media print{.integration-page,.webhook-card{display:none!important}}
+
 </style>
 </head>
 <body><main class="shell">
@@ -408,31 +442,47 @@ body[data-tab]:not([data-tab="dashboard"]) #webhookPanel{display:none!important;
  <div class="notice">Use a positive number to add time or a negative number to remove time. These are personal planning records, not payroll changes. Entries can be removed if entered by mistake.</div>
 </section>
 
-<section class="card integration-hub" id="integrationDirectory" style="margin-top:18px" aria-labelledby="integrationHeading">
- <div class="section-head"><div><div class="metric-label">INTEGRATIONS</div><h2 id="integrationHeading">Connect once. Use everywhere.</h2><p class="sub">The goal: sign in with Google or Microsoft once, approve the tools you want, and get back to your timecard.</p></div><span class="tag">SETUP STATUS</span></div>
- <div class="integration-status"><span class="tag">SIGN-IN SETUP REQUIRED</span><span class="sub">Secure Google/Microsoft sign-in is not enabled yet. Your existing punches remain in this browser and are not deleted or uploaded by this screen.</span></div>
- <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin-top:16px">
-  <article class="card" style="margin:0"><div class="metric-label">OPTION 1</div><h3 style="margin:8px 0">Google</h3><p class="sub">Gmail reports, Google Sheets records, and calendar reminders after you authorize access.</p><button class="quiet" type="button" disabled aria-disabled="true" style="width:100%;opacity:.72">Google sign-in · setup required</button><p class="sub" style="margin-top:9px">Not connected. Requires a Google OAuth app and server-side credentials.</p></article>
-  <article class="card" style="margin:0"><div class="metric-label">OPTION 2</div><h3 style="margin:8px 0">Microsoft</h3><p class="sub">Outlook email, Excel/OneDrive, and calendar reminders where your organization allows them.</p><button class="quiet" type="button" disabled aria-disabled="true" style="width:100%;opacity:.72">Microsoft sign-in · setup required</button><p class="sub" style="margin-top:9px">Not connected. Requires a Microsoft Entra app and admin-approved permissions if your FOSS account needs them.</p></article>
- </div>
- <h3 class="integration-subhead">After sign-in, choose what to connect</h3>
- <div class="integration-chips"><span>Email reports</span><span>Spreadsheet records</span><span>Calendar reminders</span><span>Secure backup</span></div>
- <div class="integration-callout"><strong>What’s needed to turn sign-in on</strong><p>The site currently runs as a static app. Real OAuth sign-in requires server-side callback routes, protected token storage, and provider app credentials configured as Cloudflare secrets. These are not present in the current app, so the sign-in buttons stay disabled instead of pretending to connect. No password, client secret, or access token should ever be entered into this page.</p></div>
- <details class="integration-alternatives"><summary>Manual setup (optional, until sign-in is enabled)</summary>
-  <div style="padding-top:12px"><p class="sub">You can continue using the existing optional webhook below. It is a manual integration route and is separate from account sign-in.</p>
-   <ol><li>Create a trusted webhook receiver in Make.com or another approved service.</li><li>Save its HTTPS URL in the Optional webhook section.</li><li>Click Send now and confirm the receiving workflow actually processed the event.</li></ol>
-   <p class="integration-links"><a href="https://www.make.com/en/register" target="_blank" rel="noopener noreferrer">Open Make.com ↗</a> · <a href="https://apps.make.com/gateway" target="_blank" rel="noopener noreferrer">Webhook guide ↗</a></p>
+<section class="integration-page" id="integrationDirectory" aria-labelledby="integrationHeading">
+ <div class="integration-hero">
+  <div>
+   <div class="integration-eyebrow">FOSS myTIME · CONNECTIONS</div>
+   <h2 id="integrationHeading">Integrations</h2>
+   <p>Choose how myTIME can share your timecard. Your records stay in this browser unless you explicitly export them or send them to a service.</p>
   </div>
- </details>
-<section class="card" id="webhookPanel" style="margin-top:18px;display:block!important" aria-labelledby="webhookPanelHeading"><div class="section-head"><div><div class="metric-label">MANUAL INTEGRATION</div><h3 id="webhookPanelHeading" style="margin:4px 0">Optional webhook</h3><p class="sub">Connect a trusted HTTPS webhook, such as a Make.com Custom Webhook.</p></div><span class="tag">OPTIONAL</span></div>
-<div style="height:1px;background:var(--line);margin:0 0 18px"></div>
-<div class="section-head"><div><h3 id="webhookPanelHeading" style="margin:0;font-size:16px">Optional webhook</h3><p class="sub">Send data on demand to a trusted HTTPS webhook, such as a Make.com Custom Webhook. Saving a URL does not connect an account; use “Send now” to test the receiver.</p></div><span class="tag">OPT-IN</span></div>
-<div class="formrow"><div class="field"><label for="webhookUrl">Webhook URL</label><input id="webhookUrl" type="url" placeholder="https://your-secure-endpoint.example/webhook"></div><div class="field"><label for="webhookMode">Branded notification</label><select id="webhookMode"><option value="weekly-report">Weekly timecard email report</option><option value="punches">Punch records only</option><option value="backup">Full backup</option></select></div></div><div class="formrow"><div class="field"><label for="reportEmail">Email recipient (for email workflows)</label><input id="reportEmail" type="email" placeholder="you@company.com" autocomplete="email"></div><div class="field"><label for="reportName">Report display name</label><input id="reportName" type="text" placeholder="My weekly timecard"></div></div><p class="sub">Weekly report payload includes a FOSS-branded HTML email body, subject, date range, daily punch details and total hours. Configure your webhook receiver to send the email. Automatic weekly delivery requires a scheduled flow.</p>
-<div class="settings-actions"><button class="quiet" id="saveWebhook">Save webhook on this device</button><button class="primary" id="sendWebhook">Send now</button><button class="quiet" id="clearWebhook">Forget webhook</button></div>
-<div class="notice" id="webhookStatus" role="status" aria-live="polite">Not connected yet. Save a trusted HTTPS webhook, start its receiving scenario, then use Send now to test.</div>
-<p class="notice">Security: this static site has no private server. Use only an endpoint you trust; never put passwords or API keys here. Browser CORS rules may block a request. Background sync and secure company sign-in need a server-side integration and are not enabled.</p>
-</section>
- <div class="notice"><strong>FOSS data safety:</strong> Only connect company records to services approved by FOSS IT. Punches stay in this browser unless you explicitly export or send them.</div>
+  <div class="integration-hero-mark" aria-hidden="true"><span>↗</span><small>CONNECT<br>WITH CARE</small></div>
+ </div>
+ <div class="integration-statusbar"><span class="integration-status-dot"></span><div><strong>Local-only mode</strong><p>Google and Microsoft sign-in are not configured. Webhook sending is available when you provide your own trusted HTTPS endpoint.</p></div><span class="tag">NOT CONNECTED</span></div>
+ <div class="integration-section-title"><div><span class="metric-label">ACCOUNT CONNECTIONS</span><h3>Connect your work tools</h3></div><span class="sub">Requires administrator-approved setup</span></div>
+ <div class="integration-provider-grid">
+  <article class="integration-provider">
+   <div class="provider-top"><div class="provider-icon google-icon" aria-hidden="true">G</div><span class="tag">NOT CONFIGURED</span></div>
+   <h3>Google Workspace</h3><p>For Gmail reports, Google Sheets exports, and Calendar reminders after authorization.</p>
+   <button class="quiet" type="button" disabled aria-disabled="true">Google sign-in unavailable</button>
+   <div class="provider-requirement"><strong>What’s needed</strong><span>Google OAuth app, secure callback route, and server-side credential storage.</span></div>
+  </article>
+  <article class="integration-provider">
+   <div class="provider-top"><div class="provider-icon microsoft-icon" aria-hidden="true"><span></span><span></span><span></span><span></span></div><span class="tag">NOT CONFIGURED</span></div>
+   <h3>Microsoft 365</h3><p>For Outlook reports, Excel/OneDrive records, and Calendar reminders where your organization permits access.</p>
+   <button class="quiet" type="button" disabled aria-disabled="true">Microsoft sign-in unavailable</button>
+   <div class="provider-requirement"><strong>What’s needed</strong><span>Microsoft Entra app, approved permissions, secure callback route, and protected token storage.</span></div>
+  </article>
+ </div>
+ <div class="integration-section-title integration-manual-title"><div><span class="metric-label">MANUAL CONNECTION</span><h3>Webhook delivery</h3><p>Send a report or selected time records to a webhook you control. This is separate from Google or Microsoft sign-in.</p></div><span class="tag">USER CONTROLLED</span></div>
+ <section class="webhook-card" id="webhookPanel" aria-labelledby="webhookPanelHeading">
+  <div class="webhook-card-head"><div class="webhook-icon" aria-hidden="true">↗</div><div><h3 id="webhookPanelHeading">Configure your webhook</h3><p>Use a Make.com Custom Webhook or another trusted HTTPS receiver.</p></div><span class="webhook-step">01 / SET UP</span></div>
+  <div class="webhook-form">
+   <div class="field webhook-url-field"><label for="webhookUrl">Webhook HTTPS URL</label><input id="webhookUrl" type="url" placeholder="https://hook.example.com/your-endpoint" autocomplete="url"><small>Use only an endpoint you trust. Avoid URLs containing credentials or secrets.</small></div>
+   <div class="field"><label for="webhookMode">What should be sent?</label><select id="webhookMode"><option value="weekly-report">Weekly timecard email report</option><option value="punches">Punch records only</option><option value="backup">Full backup</option></select></div>
+   <div class="field"><label for="reportEmail">Report recipient email</label><input id="reportEmail" type="email" placeholder="you@company.com" autocomplete="email"><small>Used by your receiving workflow for weekly reports.</small></div>
+   <div class="field"><label for="reportName">Report display name</label><input id="reportName" type="text" placeholder="My weekly timecard" maxlength="120"></div>
+  </div>
+  <div class="webhook-payload-note"><span class="payload-note-icon" aria-hidden="true">i</span><p><strong>What gets sent?</strong><br>Weekly report sends the recent seven-day summary, punch details, totals, and a FOSS-branded HTML email body for your workflow to deliver. Punch records sends the recorded dates. Full backup sends your saved timekeeping data and settings.</p></div>
+  <div class="webhook-actions"><button class="primary" id="saveWebhook" type="button">Save settings</button><button class="quiet" id="sendWebhook" type="button">Send test / report</button><button class="text-button" id="clearWebhook" type="button">Forget saved webhook</button></div>
+  <div class="webhook-status" id="webhookStatus" role="status" aria-live="polite"><span class="status-light"></span><span>Not connected yet. Save a trusted HTTPS webhook, start its receiving scenario, then send a test.</span></div>
+  <div class="webhook-security"><strong>Security &amp; delivery</strong><p>This static site does not store credentials on a private server. The URL and report options are saved in this browser only. Sending requires your explicit click and confirmation. Browser CORS or receiver settings may block a request; verify the receiving service processed it. Automatic weekly sending and secure company sign-in are not enabled.</p></div>
+  <details class="integration-help"><summary>Need a webhook receiver?</summary><p>Create a Custom Webhook in a trusted automation service, copy its HTTPS URL into the field above, and turn the receiving scenario on before testing.</p><p class="integration-links"><a href="https://www.make.com/en/register" target="_blank" rel="noopener noreferrer">Open Make.com ↗</a> · <a href="https://apps.make.com/gateway" target="_blank" rel="noopener noreferrer">Webhook guide ↗</a></p></details>
+ </section>
+ <div class="integration-safety"><span aria-hidden="true">✓</span><p><strong>FOSS data safety</strong><br>Only connect company records to services approved by FOSS IT. Punches remain in this browser unless you explicitly export or send them.</p></div>
 </section>
 <footer class="footer"><span>myTIME · Prototype</span><span><a href="https://fossna.com/" target="_blank" rel="noreferrer">FOSS North America</a> · Not an official payroll system</span></footer>
 <section class="card" id="dataHub" style="margin-top:18px" aria-labelledby="dataHubHeading">
