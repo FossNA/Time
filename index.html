@@ -511,11 +511,13 @@ function renderMyTimeCalendar(){
     <div class="mytime-break-grid" id="calendarBreakControls"></div>
     <p class="notice" style="margin-top:12px">If you're running late, keep required lunch and rest breaks. The planner can help estimate an approved later finish or another approved schedule adjustment instead.</p>
    </section>
-   <section class="card" style="margin-top:18px"><div class="section-head"><div><h3 style="margin:0">Daily punches for this month</h3><p class="sub">A full month-by-month ledger of clock-in/out, lunch, paid time and 15-minute breaks.</p></div></div><div class="tablewrap"><table class="calendar-ledger"><thead><tr><th>Date</th><th>Clock in</th><th>Lunch out</th><th>Lunch in</th><th>Clock out</th><th>Morning 15 min</th><th>Afternoon 15 min</th><th>Paid time</th></tr></thead><tbody id="calendarMonthRows"></tbody></table></div></section>
+   <section class="card" style="margin-top:18px"><div class="section-head"><div><h3 style="margin:0">Recent punches · last 14 days</h3><p class="sub">A quick view of yesterday and last week, independent of the month currently selected above.</p></div><div class="settings-actions"><button type="button" class="quiet" id="calendarYesterday">Yesterday</button><button type="button" class="quiet" id="calendarLastWeek">Last week</button></div></div><div class="tablewrap"><table class="calendar-ledger"><thead><tr><th>Date</th><th>Clock in</th><th>Lunch out</th><th>Lunch in</th><th>Clock out</th><th>Recorded punches</th><th></th></tr></thead><tbody id="calendarRecentRows"></tbody></table></div></section><section class="card" style="margin-top:18px"><div class="section-head"><div><h3 style="margin:0">Daily punches for this month</h3><p class="sub">A full month-by-month ledger of clock-in/out, lunch, paid time and 15-minute breaks.</p></div></div><div class="tablewrap"><table class="calendar-ledger"><thead><tr><th>Date</th><th>Clock in</th><th>Lunch out</th><th>Lunch in</th><th>Clock out</th><th>Morning 15 min</th><th>Afternoon 15 min</th><th>Paid time</th></tr></thead><tbody id="calendarMonthRows"></tbody></table></div></section>
   </section>`;
   document.getElementById('calendarPrev').onclick=()=>{myTimeCalendarMonth=new Date(myTimeCalendarMonth.getFullYear(),myTimeCalendarMonth.getMonth()-1,1);myTimeSelectedDate=myTimeCalendarMonth.getFullYear()+'-'+String(myTimeCalendarMonth.getMonth()+1).padStart(2,'0')+'-01';renderMyTimeCalendar()};
   document.getElementById('calendarNext').onclick=()=>{myTimeCalendarMonth=new Date(myTimeCalendarMonth.getFullYear(),myTimeCalendarMonth.getMonth()+1,1);myTimeSelectedDate=myTimeCalendarMonth.getFullYear()+'-'+String(myTimeCalendarMonth.getMonth()+1).padStart(2,'0')+'-01';renderMyTimeCalendar()};
   document.getElementById('calendarToday').onclick=()=>{myTimeSelectedDate=todayKey();myTimeCalendarMonth=new Date(new Date().getFullYear(),new Date().getMonth(),1);renderMyTimeCalendar()};
+  document.getElementById('calendarYesterday').onclick=()=>{const d=new Date();d.setDate(d.getDate()-1);myTimeSelectedDate=keyDate(d);myTimeCalendarMonth=new Date(d.getFullYear(),d.getMonth(),1);renderMyTimeCalendar()};
+  document.getElementById('calendarLastWeek').onclick=()=>{const d=new Date();const monday=(d.getDay()+6)%7;d.setDate(d.getDate()-monday-7);myTimeSelectedDate=keyDate(d);myTimeCalendarMonth=new Date(d.getFullYear(),d.getMonth(),1);renderMyTimeCalendar()};
  }
  const title=document.getElementById('calendarMonthTitle'),grid=document.getElementById('myTimeCalendarGrid');
  title.textContent=myTimeCalendarMonth.toLocaleDateString(undefined,{month:'long',year:'numeric'});
@@ -547,6 +549,16 @@ function renderMyTimeCalendar(){
  }
  for(let i=offset+days;i<42;i++){const blank=document.createElement('div');blank.className='mytime-calendar-empty';grid.appendChild(blank)}
  const monthBody=document.getElementById('calendarMonthRows');monthBody.innerHTML='';dayRows.forEach(row=>monthBody.appendChild(row));
+ const recentBody=document.getElementById('calendarRecentRows');recentBody.innerHTML='';
+ const today=new Date();today.setHours(12,0,0,0);
+ for(let ago=0;ago<14;ago++){
+  const d=new Date(today);d.setDate(today.getDate()-ago);const rk=keyDate(d),rr=data[rk],rp=rr?.punches||[],getRecent=t=>rp.find(x=>x.type===t),outRecent=[...rp].reverse().find(x=>x.type==='out');
+  const tr=document.createElement('tr');if(rk===myTimeSelectedDate)tr.className='calendar-ledger-selected';
+  const values=[new Date(rk+'T12:00:00').toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric',year:'numeric'}),showTs(getRecent('in')?.ts),showTs(getRecent('lunch-start')?.ts),showTs(getRecent('lunch-end')?.ts),showTs(outRecent?.ts),String(rp.length)];
+  values.forEach(v=>{const td=document.createElement('td');td.textContent=v;tr.appendChild(td)});
+  const actionCell=document.createElement('td'),selectDay=document.createElement('button');selectDay.type='button';selectDay.className='quiet';selectDay.textContent='View day';selectDay.onclick=()=>{myTimeSelectedDate=rk;myTimeCalendarMonth=new Date(d.getFullYear(),d.getMonth(),1);renderMyTimeCalendar()};actionCell.appendChild(selectDay);tr.appendChild(actionCell);recentBody.appendChild(tr);
+ }
+ document.getElementById('calendarYesterday').textContent='Yesterday · '+keyDate(new Date(Date.now()-86400000));
  const k=myTimeSelectedDate;document.getElementById('calendarSelectedTitle').textContent=new Date(k+'T12:00:00').toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric',year:'numeric'});
  const rec=data[k],p=rec?.punches||[],get=t=>p.find(x=>x.type===t),last=[...p].reverse().find(x=>x.type==='out');
  const details=[['Clock in',get('in')?.ts],['Lunch out',get('lunch-start')?.ts],['Lunch in',get('lunch-end')?.ts],['Clock out',last?.ts]];
