@@ -96,7 +96,10 @@ img{max-width:100%}
 .app-tabs{align-items:center;gap:clamp(4px,.55vw,9px);padding:8px clamp(8px,1vw,14px)}
 .app-tab{flex:0 0 auto;padding:10px clamp(8px,.9vw,14px);white-space:nowrap}
 .app-tabs-spacer{flex:1 1 auto;min-width:12px}
-.app-tabs-brand{flex:0 0 auto;margin-left:auto;display:flex;align-items:center;justify-content:flex-end;min-width:90px;padding:4px 3px 4px 14px}
+.app-tabs-brand{display:none;flex:0 0 auto;margin-left:auto;align-items:center;justify-content:flex-end;min-width:90px;padding:4px 3px 4px 14px}
+body.nav-compact .app-tabs-brand{display:flex}
+body.nav-compact .top .brand{visibility:hidden}
+body.nav-compact .top{margin-bottom:25px}
 .app-tabs-brand img{display:block;width:clamp(100px,10vw,150px);max-height:36px;height:auto;object-fit:contain;object-position:right center}
 .break-punch-btn{background:#fff;color:#09266f;border:1px solid #cbd8f0}
 .break-punch-hint{font-size:11px;line-height:1.35;color:#c1ceca}
@@ -421,11 +424,13 @@ body[data-tab="integrations"] [data-page]:not([data-page~="integrations"]){displ
   if(key==='timesheets'&&typeof renderPlanning==='function')renderPlanning();
  }
  nav.querySelectorAll('.app-tab').forEach(btn=>btn.addEventListener('click',()=>showPage(btn.dataset.tab)));
+ const updateNavBrand=()=>document.body.classList.toggle('nav-compact',window.scrollY>120);
+ window.addEventListener('scroll',updateNavBrand,{passive:true});updateNavBrand();
  showPage('dashboard');window.myTimeShowPage=showPage;
 })();
 
 
-/* Monthly calendar and explicit break-status records. Break status is descriptive only and never grants make-up time. */
+/* Monthly calendar and explicit break-status records. Skipped paid 15-minute breaks can offset recovery estimates. */
 let myTimeCalendarMonth = new Date(new Date().getFullYear(),new Date().getMonth(),1);
 let myTimeSelectedDate = todayKey();
 function ensureBreakFields(k){
@@ -499,7 +504,7 @@ function renderMyTimeCalendar(){
   const box=document.createElement('div');box.className='mytime-break-item';const h=document.createElement('strong');h.textContent=label;box.appendChild(h);
   const select=document.createElement('select');select.setAttribute('aria-label',label+' status');
   [['not-recorded','Not recorded'],['taken','Taken'],['skipped','Skipped']].forEach(([v,t])=>{const o=document.createElement('option');o.value=v;o.textContent=t;select.appendChild(o)});
-  select.value=root.breakStatus[key];select.onchange=()=>{const rr=ensureBreakFields(k);rr.breakStatus[key]=select.value;save();renderMyTimeCalendar()};box.appendChild(select);
+  select.value=root.breakStatus[key];select.onchange=()=>{const rr=ensureBreakFields(k);rr.breakStatus[key]=select.value;save();renderMyTimeCalendar();if(typeof renderPlanning==='function')renderPlanning()};box.appendChild(select);
   if(key!=='lunch'){
    const timeRow=document.createElement('div');timeRow.className='mytime-break-times';
    ['start','end'].forEach(part=>{const labelEl=document.createElement('label');labelEl.textContent=part==='start'?'Start time':'End time';const input=document.createElement('input');input.type='time';input.value=root.breakTimes[key][part]||'';input.setAttribute('aria-label',label+' '+part);input.onchange=()=>{const rr=ensureBreakFields(k);rr.breakTimes[key][part]=input.value;save();renderMyTimeCalendar()};labelEl.appendChild(input);timeRow.appendChild(labelEl)});box.appendChild(timeRow);
@@ -510,7 +515,7 @@ function renderMyTimeCalendar(){
  if(k===todayKey()){
   const now=Date.now(),scheduledStart=parseTime(settings.startTime||'08:00'),nowM=new Date().getHours()*60+new Date().getMinutes(),firstIn=get('in'),lateBy=firstIn?Math.max(0,Math.floor((new Date(firstIn.ts).getHours()*60+new Date(firstIn.ts).getMinutes())-scheduledStart)):Math.max(0,nowM-scheduledStart);
   if(lateBy>0&&nowM>=scheduledStart){
-   latePanel.hidden=false;latePanel.innerHTML='<strong>You are '+lateBy+' minute(s) past your scheduled start.</strong><p>Are you planning to take your scheduled lunch and both 15-minute breaks? Keep required breaks; skipped or shortened breaks will not be counted as make-up time.</p><div class="settings-actions"><button type="button" class="quiet" id="calendarKeepBreaks">Yes — keep my scheduled breaks</button><button type="button" class="primary" id="calendarRecoveryOptions">Show make-up options</button></div><p class="sub" id="calendarRecoveryAdvice" hidden>Options: ask your manager about an approved later finish, an approved earlier start on another day, or another authorized schedule adjustment. This estimate does not assume missed breaks.</p>';
+   latePanel.hidden=false;latePanel.innerHTML='<strong>You are '+lateBy+' minute(s) past your scheduled start.</strong><p>Your two 15-minute breaks are paid. If you skip one, mark it “Skipped” in the calendar to apply a 15-minute credit to your recovery estimate. Lunch is tracked separately. Follow workplace policy for required breaks.</p><div class="settings-actions"><button type="button" class="quiet" id="calendarKeepBreaks">Yes — keep my scheduled breaks</button><button type="button" class="primary" id="calendarRecoveryOptions">Show make-up options</button></div><p class="sub" id="calendarRecoveryAdvice" hidden>Your recovery estimate can include 15 minutes for each paid 15-minute break you mark “Skipped” (up to 30 minutes per day). These credits adjust the planner only; they do not change recorded punch time or payroll. Other options include an approved later finish, earlier start, or authorized schedule adjustment.</p>';
    document.getElementById('calendarKeepBreaks').onclick=()=>{latePanel.innerHTML='<strong>Break plan noted for today.</strong><p>Your calendar will continue to show the actual break status you record below.</p>'};
    document.getElementById('calendarRecoveryOptions').onclick=()=>{document.getElementById('calendarRecoveryAdvice').hidden=false};
   }
@@ -620,18 +625,21 @@ function renderRecovery(){
  const panel=$('recoveryPanel');if(!panel)return;
  const k=todayKey(),s=scheduleForDate(k),rec=data[k],first=rec?getPunch(rec,'in'):null,out=rec?getOut(rec):null;
  const goal=Number(s.goalHours||settings.goalHours||8),startM=parseTime(s.startTime||settings.startTime),actualStart=first?new Date(first.ts).getHours()*60+new Date(first.ts).getMinutes():null;
- const paidToday=rec?.punches?.length?actualPaidMinutes(rec):0,deficit=Math.max(0,Math.round(goal*60)-paidToday),week=weekKeys();
- let projected=0,actualWeek=0,remaining=[];
+ const paidToday=rec?.punches?.length?actualPaidMinutes(rec):0,week=weekKeys();
+ const paidBreakCreditFor=key=>{const bs=data[key]?.breakStatus||{};return ['morning','afternoon'].reduce((sum,name)=>sum+(bs[name]==='skipped'?15:0),0)};
+ const todayBreakCredit=paidBreakCreditFor(k),deficit=Math.max(0,Math.round(goal*60)-paidToday-todayBreakCredit);
+ let projected=0,actualWeek=0,remaining=[],weekBreakCredit=0;
  week.forEach(dk=>{
   const ds=scheduleForDate(dk),g=plannedMinutes(ds),rr=data[dk],has=!!rr?.punches?.length,done=!!(rr&&getOut(rr)),date=new Date(dk+'T12:00:00');
   if(date.getDay()===0||date.getDay()===6||g<=0)return;
+  weekBreakCredit+=paidBreakCreditFor(dk);
   if(has)actualWeek+=actualPaidMinutes(rr);
   if(dk<k){if(has)projected+=actualPaidMinutes(rr);return}
   if(dk===k){projected+=done?actualPaidMinutes(rr):Math.max(g,has?actualPaidMinutes(rr):0);if(!done)remaining.push(dk);return}
   projected+=done?actualPaidMinutes(rr):(has?Math.max(g,actualPaidMinutes(rr)):g);
   if(!done)remaining.push(dk);
  });
- const gap=Math.max(0,2400-projected),perDay=remaining.length?Math.ceil(gap/remaining.length):gap,opts=[];
+ const rawGap=Math.max(0,2400-projected),gap=Math.max(0,rawGap-weekBreakCredit),perDay=remaining.length?Math.ceil(gap/remaining.length):gap,opts=[];
  if(gap&&remaining.length){
   opts.push({title:'Spread the gap across remaining workdays',detail:'To project 40 paid hours, plan about '+fmtMin(perDay)+' additional paid time on each of '+remaining.length+' remaining workday(s), on top of the planned shift.'});
   const half=Math.ceil(gap/remaining.length/15)*15;
@@ -642,9 +650,9 @@ function renderRecovery(){
  const actualLabel=(actualWeek/60).toFixed(2);
  const forecastLabel=(Math.max(0,projected)/60).toFixed(2);
  const bank=bankMinutesForWeek(week);
- const status='<div class="recovery-progress"><div class="recovery-progress-head"><span>Weekly paid-hours target</span><strong>40.00 h</strong></div><div class="recovery-progress-track"><span style="width:'+Math.min(100,Math.max(0,projected/2400*100))+'%"></span></div><div class="recovery-stats"><div><small>Actual recorded</small><strong>'+actualLabel+' h</strong></div><div><small>Projected by week end</small><strong>'+forecastLabel+' h</strong></div><div><small>Projected gap</small><strong>'+(gap?(gap/60).toFixed(2)+' h':'On track')+'</strong></div></div><p class="sub">Only recorded paid work counts toward the 40-hour target. '+(bank?'Time-bank entries ('+fmtMin(bank)+') are shown separately and are not counted as paid hours here. ':'')+'Future shifts are estimates, not completed time.</p></div>';
+ const status='<div class="recovery-progress"><div class="recovery-progress-head"><span>Weekly paid-hours target</span><strong>40.00 h</strong></div><div class="recovery-progress-track"><span style="width:'+Math.min(100,Math.max(0,projected/2400*100))+'%"></span></div><div class="recovery-stats"><div><small>Actual recorded</small><strong>'+actualLabel+' h</strong></div><div><small>Projected by week end</small><strong>'+forecastLabel+' h</strong></div><div><small>Projected gap</small><strong>'+(gap?(gap/60).toFixed(2)+' h':'On track')+'</strong></div></div><p class="sub">Actual paid hours stay based on recorded punches. Skipped paid-break credits ('+fmtMin(weekBreakCredit)+') reduce the recovery gap estimate only; they do not change punch totals or payroll. '+(bank?'Time-bank entries ('+fmtMin(bank)+') are shown separately and are not counted as paid hours here. ':'')+'Future shifts are estimates, not completed time.</p></div>';
  const list=opts.length?'<div class="suggestion-list">'+opts.map(o=>'<div class="suggestion"><strong>'+o.title+'</strong><span>'+o.detail+'</span></div>').join('')+'</div>':'<p>You are projected to reach the 40 paid-hour target if the remaining planned shifts are completed.</p>';
- const breakNotice='<p class="notice recovery-break-note"><strong>Breaks are protected time, not a make-up-time shortcut.</strong> This planner never adds time for a skipped lunch or 15-minute break. Do not skip or shorten required breaks to close a gap. If a different meal period or schedule is permitted by your workplace policy and applicable law, confirm that with your manager first.</p>';
+ const breakNotice='<p class="notice recovery-break-note"><strong>Paid 15-minute break credits.</strong> Mark a morning or afternoon 15-minute break as “Skipped” in the Calendar to apply a 15-minute recovery credit for each one (up to 30 minutes per workday). This changes the planning estimate only, not recorded hours or payroll. Lunch is separate; follow workplace policy and applicable law for required breaks.</p>';
  if(!first){panel.innerHTML='<div class="recovery-number">Weekly goal: 40 paid hours</div>'+status+list+breakNotice;return}
  const late=Math.max(0,actualStart-startM);
  panel.innerHTML='<div class="recovery-number">'+(out?'Shift complete':deficit===0?'You’ve reached today’s paid-hours goal':late>0?'You started '+fmtMin(late)+' late':'Your recovery plan')+'</div>'+status+(late>0?'<p>You clocked in at '+fmtTime(first.ts)+'; your planned start is '+s.startTime+'.</p>':'')+list+breakNotice;
