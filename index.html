@@ -225,13 +225,41 @@ body[data-tab="integrations"] [data-page]:not([data-page~="integrations"]){displ
 .recovery-stats strong{font-size:17px}
 .recovery-break-note{margin-top:14px}
 @media(max-width:600px){.recovery-stats{grid-template-columns:1fr 1fr}.recovery-stats strong{font-size:15px}}
-.mytime-calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:7px}
-.mytime-calendar-weekday{text-align:center;color:var(--muted);font-size:12px;font-weight:700;padding:6px 0}
-.mytime-calendar-empty{min-height:76px}
-.mytime-calendar-day{min-width:0;min-height:76px;text-align:left;display:flex;flex-direction:column;gap:5px;align-items:flex-start;border:1px solid var(--line);background:var(--card);border-radius:10px;padding:8px;color:var(--ink)}
-.mytime-calendar-day small{font-size:10px;color:var(--muted);overflow-wrap:anywhere}
-.mytime-calendar-day.selected{outline:2px solid var(--brand-blue);background:var(--lime)}
-.mytime-calendar-day.today{border-color:var(--brand-blue)}
+.calendar-month-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:8px 0 12px}
+.mytime-calendar-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--card)}
+.mytime-calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(105px,1fr));gap:0;min-width:735px;background:var(--line);border-top:1px solid var(--line);border-left:1px solid var(--line)}
+.mytime-calendar-weekday{text-align:center;color:#fff;background:#09266f;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:10px 6px;border-right:1px solid #ffffff25;border-bottom:1px solid var(--line)}
+.mytime-calendar-empty{min-height:124px;background:#f7f9fd;border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+.mytime-calendar-day{min-width:0;min-height:124px;height:100%;text-align:left;display:flex;flex-direction:column;gap:5px;align-items:stretch;border:0;border-radius:0;border-right:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--card);padding:8px;color:var(--ink);font-weight:400;white-space:normal}
+.mytime-calendar-day>strong{display:flex;align-items:center;justify-content:center;width:27px;height:27px;border-radius:50%;font-size:13px;flex:0 0 auto}
+.mytime-calendar-day small{display:block;font-size:10px;color:var(--muted);line-height:1.35;overflow-wrap:anywhere;font-weight:500}
+.mytime-calendar-day .calendar-day-punches{color:#2458c6;font-weight:700}
+.mytime-calendar-day .calendar-day-lunch,.mytime-calendar-day .calendar-day-breaks{padding:3px 5px;border-radius:4px;background:#f2f5fb}
+.mytime-calendar-day.selected{outline:2px solid var(--brand-blue);outline-offset:-3px;background:#eaf0ff;position:relative;z-index:1}
+.mytime-calendar-day.today>strong{background:#09266f;color:#fff}
+.mytime-calendar-day.today{box-shadow:inset 0 0 0 2px #2458c6}
+.mytime-calendar-day:hover{background:#f2f6ff}
+.integration-hub .integration-recommend{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin:12px 0 20px;padding:22px;border:1px solid #cbd8f0;border-radius:16px;background:linear-gradient(135deg,#f4f7ff,#fff)}
+.integration-recommend-copy{min-width:0}
+.integration-recommend h3{margin:4px 0 8px;font-size:22px}
+.integration-recommend p{margin:8px 0;color:var(--muted)}
+.integration-recommend-mark{display:flex;align-items:center;justify-content:center;flex:0 0 48px;width:48px;height:48px;border-radius:14px;background:#09266f;color:#fff;font-size:25px}
+.integration-chips{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0}
+.integration-chips span{border:1px solid #dce4f3;border-radius:999px;padding:4px 9px;font-size:11px;color:#34486d;background:#fff}
+.integration-links{display:flex;gap:8px;flex-wrap:wrap;font-weight:700}
+.integration-links a,.integration-alternative-list a{color:#2458c6}
+.integration-subhead{margin:0 0 10px}
+.integration-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:12px 0 16px}
+.integration-step{border:1px solid var(--line);border-radius:12px;padding:14px;min-width:0;background:#fff}
+.integration-step strong{display:block;margin-bottom:6px;color:var(--brand-blue)}
+.integration-callout{padding:14px 16px;background:#f4f7ff;border:1px solid #dce4f3;border-radius:12px;margin:14px 0}
+.integration-callout p{margin:5px 0 0;color:var(--muted)}
+.integration-alternatives{margin:16px 0;border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.integration-alternatives summary{cursor:pointer;font-weight:700;color:var(--ink)}
+.integration-alternative-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:12px}
+.integration-alternative-list article{padding:14px;border:1px solid var(--line);border-radius:10px;min-width:0}
+.integration-alternative-list p{margin:6px 0;color:var(--muted);font-size:13px}
+@media(max-width:650px){.calendar-month-bar{align-items:flex-start;flex-direction:column}.mytime-calendar-day{min-height:112px;padding:6px}.mytime-calendar-day small{font-size:9px}.mytime-detail-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.mytime-break-grid{grid-template-columns:1fr}.integration-steps,.integration-alternative-list{grid-template-columns:1fr}.integration-hub .integration-recommend{padding:16px}.integration-recommend-mark{flex-basis:38px;width:38px;height:38px}}
 .mytime-detail-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
 .mytime-detail-item,.mytime-break-item{border:1px solid var(--line);border-radius:10px;padding:12px;min-width:0}
 .mytime-detail-item{display:flex;flex-direction:column;gap:8px}
@@ -318,25 +346,30 @@ body[data-tab="integrations"] [data-page]:not([data-page~="integrations"]){displ
  <div class="notice">Use a positive number to add time or a negative number to remove time. These are personal planning records, not payroll changes. Entries can be removed if entered by mistake.</div>
 </section>
 
-<section class="card" id="integrationDirectory" style="margin-top:18px" aria-labelledby="integrationHeading">
-<div class="section-head"><div><h2 id="integrationHeading">Connect myTIME · Integration directory</h2><p class="sub">If your FOSS work account blocks Microsoft sign-in, use a provider that accepts a personal account or a webhook. These are setup links, not connections already authorized.</p></div><span class="tag">CHOOSE A ROUTE</span></div>
-<div class="integration-status"><span class="tag">DIRECT APP CONNECTION: NOT AUTHORIZED</span><span class="sub">Local exports work without sign-in. External services need their own webhook or server-side authorization.</span></div>
-<div class="integration-steps"><div class="integration-step"><strong>1 · Create a receiver</strong><span class="sub">In Make.com, create a scenario with Webhooks → Custom webhook and copy its HTTPS URL.</span></div><div class="integration-step"><strong>2 · Configure the route</strong><span class="sub">Paste the URL below, choose a report payload, and enter a recipient if your flow sends email.</span></div><div class="integration-step"><strong>3 · Test with sample data</strong><span class="sub">Start the receiving scenario, then select “Send now.” Check the run history before sending real work records.</span></div></div>
-<div class="notice"><strong>Best alternative:</strong> Make.com + its Custom Webhook + Gmail or its Email module. Create a scenario, copy its webhook URL into the Webhook URL field above, choose “Weekly timecard email report,” enter the recipient, then use “Send now” to test. To send every Friday, schedule the scenario—but note the site’s records are currently stored in this browser, so a weekly scheduled run cannot read them unless you send/sync the data to the service first. See <a href="https://www.make.com/en/integrations/gateway/google-email" target="_blank" rel="noopener noreferrer">Make + Gmail workflow</a> and <a href="https://apps.make.com/gateway" target="_blank" rel="noopener noreferrer">Make webhook setup</a>.</div>
-<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(230px,1fr));margin:14px 0">
-<article class="card"><div class="metric-label">EASIEST NO-CODE</div><strong>Make.com</strong><p class="sub">Webhook → email, Gmail, Google Sheets, notifications, scheduled scenarios. Can use non-Microsoft accounts.</p><p><a href="https://www.make.com/en/register" target="_blank" rel="noopener noreferrer">Create account</a> · <a href="https://www.make.com/en/integrations/gateway/google-email" target="_blank" rel="noopener noreferrer">Webhook + Gmail</a></p></article>
-<article class="card"><div class="metric-label">CHATGPT + CONNECT SDK</div><strong>Pipedream Connect</strong><p class="sub">Use your production Pipedream project <code>proj_PNs3DGe</code> to let myTIME connect user-authorized apps. Connect needs a server-side endpoint to create authenticated Connect tokens; never put a Pipedream API key or client secret in this static page.</p><p><a href="https://pipedream.com/docs/connect/quickstart" target="_blank" rel="noopener noreferrer">Connect quickstart</a> · <a href="https://pipedream.com/" target="_blank" rel="noopener noreferrer">Pipedream dashboard</a></p><p class="sub">Status: project ID noted in app setup; account authorization and production API configuration have not been verified. Configure the server-side token endpoint and approved app scopes before enabling connection buttons.</p></article>
-<article class="card"><div class="metric-label">ALTERNATIVE AUTOMATION</div><strong>Zapier</strong><p class="sub">Catch a webhook and route it to email, Sheets, Slack, or other supported apps.</p><p><a href="https://zapier.com/sign-up" target="_blank" rel="noopener noreferrer">Create account</a> · <a href="https://zapier.com/apps/webhook/integrations" target="_blank" rel="noopener noreferrer">Webhook integrations</a></p></article>
-<article class="card"><div class="metric-label">CHATGPT AUTOMATION</div><strong>Make for ChatGPT</strong><p class="sub">Open the scenario directly in a normal browser tab rather than an embedded frame. If Make shows “Insufficient rights,” your team role needs “View all scenarios” permission from the team owner/admin.</p><p><a href="https://us2.make.com/6724977/scenarios" target="_blank" rel="noopener noreferrer">Open myTIME scenario in browser ↗</a> · <a href="https://us2.make.com/" target="_blank" rel="noopener noreferrer">Open Make dashboard ↗</a></p><p class="sub">The app cannot grant Make permissions itself.</p></article>
-<article class="card"><div class="metric-label">PIPEDREAM CONNECT · PRODUCTION</div><strong>Connect your Pipedream project</strong><p class="sub">Project reference: <code>proj_PNs3DGe</code>. Connect can securely authorize apps for a user and pass scoped connection details to your backend. A production integration still needs Pipedream Connect credentials and a server-side endpoint; never put project secrets in this static page.</p><p><a href="https://pipedream.com/docs/connect/quickstart" target="_blank" rel="noopener noreferrer">Connect quickstart</a> · <a href="https://pipedream.com/" target="_blank" rel="noopener noreferrer">Open Pipedream</a></p><p class="sub">Status: documentation linked; production authorization and backend are not configured by this page.</p></article>
-<article class="card"><div class="metric-label">DEVELOPER-FRIENDLY</div><strong>Pipedream</strong><p class="sub">Receive HTTP events and build workflows; useful when you want more control over data handling.</p><p><a href="https://pipedream.com/auth/signup" target="_blank" rel="noopener noreferrer">Create account</a> · <a href="https://pipedream.com/docs/connect/components/triggers/" target="_blank" rel="noopener noreferrer">Webhook triggers</a></p></article>
-<article class="card"><div class="metric-label">GOOGLE ROUTE</div><strong>Google Apps Script</strong><p class="sub">A script can receive POST requests and send email or append rows to a Google Sheet. Requires publishing and securing a web app.</p><p><a href="https://script.google.com/" target="_blank" rel="noopener noreferrer">Open Apps Script</a> · <a href="https://developers.google.com/apps-script/guides/web" target="_blank" rel="noopener noreferrer">Web apps guide</a></p></article>
-<article class="card"><div class="metric-label">HOST IT YOURSELF</div><strong>Cloudflare Workers</strong><p class="sub">Best if you want a branded backend, secure server-side secrets, storage, and scheduled jobs without Microsoft sign-in. Requires backend setup.</p><p><a href="https://dash.cloudflare.com/" target="_blank" rel="noopener noreferrer">Cloudflare dashboard</a> · <a href="https://developers.cloudflare.com/pages/functions/get-started/" target="_blank" rel="noopener noreferrer">Pages Functions</a> · <a href="https://developers.cloudflare.com/workers/configuration/cron-triggers/" target="_blank" rel="noopener noreferrer">Scheduled jobs</a></p></article>
-<article class="card"><div class="metric-label">SELF-HOSTED OPTION</div><strong>n8n</strong><p class="sub">Flexible visual automation for webhooks, email and data destinations; cloud or self-hosted setup.</p><p><a href="https://n8n.io/" target="_blank" rel="noopener noreferrer">Explore n8n</a> · <a href="https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.webhook/" target="_blank" rel="noopener noreferrer">Webhook node</a></p></article>
-<article class="card"><div class="metric-label">EMAIL SERVICE</div><strong>EmailJS</strong><p class="sub">Can send a simple email from a front-end form, but avoid sending sensitive time records directly from the browser; use server-side authorization for work data.</p><p><a href="https://www.emailjs.com/" target="_blank" rel="noopener noreferrer">EmailJS</a> · <a href="https://www.emailjs.com/docs/" target="_blank" rel="noopener noreferrer">Documentation</a></p></article>
-<article class="card"><div class="metric-label">SPREADSHEETS & REPORTS</div><strong>Google Sheets</strong><p class="sub">Keep a shared report log or weekly totals after explicitly choosing a secure sync destination.</p><p><a href="https://sheets.google.com/" target="_blank" rel="noopener noreferrer">Open Sheets</a> · <a href="https://www.make.com/en/integrations/gateway/google-email" target="_blank" rel="noopener noreferrer">Webhook-to-Sheets/email example</a></p></article>
-</div>
-<div class="notice"><strong>Important:</strong> These links do not bypass FOSS IT policies. If the work email is blocked by Microsoft OAuth, do not use a personal account to move company time records unless company policy permits it. For a quick test, use fake/sample punches first. The app does not currently have cloud sync, background scheduling, or secure sign-in.</div>
+<section class="card integration-hub" id="integrationDirectory" style="margin-top:18px" aria-labelledby="integrationHeading">
+ <div class="section-head"><div><div class="metric-label">INTEGRATION SETUP</div><h2 id="integrationHeading">Connect myTIME to your tools</h2><p class="sub">One guided setup for email reports, spreadsheets, and notifications. No Microsoft sign-in required for the recommended route.</p></div><span class="tag">GUIDED SETUP</span></div>
+ <div class="integration-status"><span class="tag">NOT CONNECTED YET</span><span class="sub">Your punches stay in this browser until you choose to send them. No data is sent until you select “Send now.”</span></div>
+ <article class="integration-recommend">
+  <div class="integration-recommend-copy"><div class="metric-label">RECOMMENDED · NO-CODE</div><h3>Make.com</h3><p>Make hosts the webhook receiver and connects it to Gmail, Google Sheets, calendar tools, or notifications. Set it up once, then reuse the same webhook.</p><div class="integration-chips"><span>Email reports</span><span>Google Sheets</span><span>Notifications</span><span>Scheduled workflows</span></div><p class="integration-links"><a href="https://www.make.com/en/register" target="_blank" rel="noopener noreferrer">1. Open Make.com ↗</a> <span>·</span> <a href="https://apps.make.com/gateway" target="_blank" rel="noopener noreferrer">Webhook guide ↗</a></p></div>
+  <div class="integration-recommend-mark" aria-hidden="true">↗</div>
+ </article>
+ <h3 class="integration-subhead">Simple setup checklist</h3>
+ <div class="integration-steps">
+  <div class="integration-step"><strong>1 · Create your webhook</strong><span class="sub">In Make, create a scenario and add <b>Webhooks → Custom webhook</b>. Copy the HTTPS URL it gives you.</span></div>
+  <div class="integration-step"><strong>2 · Paste it below</strong><span class="sub">Scroll to Optional webhook, paste the URL, choose the report type, and add a recipient if you want email.</span></div>
+  <div class="integration-step"><strong>3 · Test safely</strong><span class="sub">Start the scenario in Make, then click “Send now” in myTIME. Use sample punches first and confirm the run appears in Make.</span></div>
+ </div>
+ <div class="integration-callout"><strong>One important limitation</strong><p>myTIME currently saves punch data in this browser. A scheduled Friday report cannot read this browser automatically while it is closed. To automate reports, send the data to Make or a secure backend first and configure the schedule there.</p></div>
+ <details class="integration-alternatives"><summary>Other integration hosts (optional)</summary>
+  <div class="integration-alternative-list">
+   <article><strong>Cloudflare Workers</strong><p>Best for a branded, secure backend with server-side secrets, storage, and scheduled jobs. More technical setup.</p><a href="https://developers.cloudflare.com/pages/functions/get-started/" target="_blank" rel="noopener noreferrer">Pages Functions guide ↗</a> · <a href="https://developers.cloudflare.com/workers/configuration/cron-triggers/" target="_blank" rel="noopener noreferrer">Scheduled jobs ↗</a></article>
+   <article><strong>Pipedream</strong><p>Good for webhook workflows and connecting APIs. User-authorized app connections need a server-side token endpoint.</p><a href="https://pipedream.com/docs/connect/quickstart" target="_blank" rel="noopener noreferrer">Connect guide ↗</a></article>
+   <article><strong>Zapier</strong><p>Visual workflows that route webhook data to supported email, spreadsheet, and notification apps.</p><a href="https://zapier.com/apps/webhook/integrations" target="_blank" rel="noopener noreferrer">Webhook integrations ↗</a></article>
+   <article><strong>n8n</strong><p>Flexible hosted or self-hosted workflows with a webhook trigger.</p><a href="https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.webhook/" target="_blank" rel="noopener noreferrer">Webhook node guide ↗</a></article>
+   <article><strong>Google Apps Script</strong><p>Can receive a POST and send email or write to Sheets; requires publishing and securing a web app.</p><a href="https://developers.google.com/apps-script/guides/web" target="_blank" rel="noopener noreferrer">Web apps guide ↗</a></article>
+  </div>
+ </details>
+ <div class="notice"><strong>Company data safety:</strong> These tools do not bypass FOSS IT policies. Only send work time records to services approved by your company. Never paste passwords or API keys into myTIME.</div>
 </section>
 <footer class="footer"><span>myTIME · Prototype</span><span><a href="https://fossna.com/" target="_blank" rel="noreferrer">FOSS North America</a> · Not an official payroll system</span></footer>
 <section class="card" id="dataHub" style="margin-top:18px" aria-labelledby="dataHubHeading">
@@ -455,7 +488,7 @@ function renderMyTimeCalendar(){
   page.innerHTML=`<section class="card" id="myTimeCalendarRoot">
    <div class="section-head"><div><div class="metric-label">MYTIME CALENDAR</div><h2 style="margin:4px 0">Monthly time calendar</h2><p class="sub">Every day shows your punches, lunch, and both 15-minute breaks. Select any day to review or update its break record.</p></div>
    <div class="settings-actions"><button type="button" class="quiet" id="calendarPrev" aria-label="Previous month">‹ Previous</button><button type="button" class="quiet" id="calendarToday">Today</button><button type="button" class="quiet" id="calendarNext" aria-label="Next month">Next ›</button></div></div>
-   <h3 id="calendarMonthTitle" style="margin:8px 0 14px"></h3><div class="mytime-calendar-grid" id="myTimeCalendarGrid"></div>
+   <div class="calendar-month-bar"><h3 id="calendarMonthTitle" style="margin:8px 0 14px"></h3><span class="sub">Select a day to see details</span></div><div class="mytime-calendar-wrap"><div class="mytime-calendar-grid" id="myTimeCalendarGrid"></div></div>
    <div class="notice" id="calendarLatePrompt" role="status" aria-live="polite" hidden></div>
    <section class="card" style="margin-top:18px;background:var(--bg)" id="calendarDayDetail">
     <div class="section-head"><div><div class="metric-label">SELECTED DAY</div><h3 id="calendarSelectedTitle" style="margin:4px 0"></h3></div><span class="tag" id="calendarSavedBadge">Local record</span></div>
@@ -486,9 +519,9 @@ function renderMyTimeCalendar(){
   btn.type='button';btn.className='mytime-calendar-day'+(k===myTimeSelectedDate?' selected':'')+(k===todayKey()?' today':'');btn.setAttribute('aria-pressed',k===myTimeSelectedDate?'true':'false');
   const num=document.createElement('strong');num.textContent=String(dayNo);btn.appendChild(num);
   const p=r?.punches||[],ci=p.find(x=>x.type==='in'),lo=p.find(x=>x.type==='lunch-start'),li=p.find(x=>x.type==='lunch-end'),co=[...p].reverse().find(x=>x.type==='out');
-  const times=document.createElement('small');times.textContent=ci?'In '+showTs(ci.ts)+(co?' · Out '+showTs(co.ts):' · In progress'):'No punches';btn.appendChild(times);
-  const br=document.createElement('small');br.textContent='Lunch '+statusLabel(r,'lunch');btn.appendChild(br);
-  const br2=document.createElement('small');br2.textContent='15m breaks '+statusLabel(r,'morning')+'/'+statusLabel(r,'afternoon');btn.appendChild(br2);
+  const times=document.createElement('small');times.className='calendar-day-punches';times.textContent=ci?'In '+showTs(ci.ts)+(co?' · Out '+showTs(co.ts):' · In progress'):'No punches';btn.appendChild(times);
+  const br=document.createElement('small');br.className='calendar-day-lunch';br.textContent='Lunch · '+statusLabel(r,'lunch');btn.appendChild(br);
+  const br2=document.createElement('small');br2.className='calendar-day-breaks';br2.textContent='Breaks · '+statusLabel(r,'morning')+'/'+statusLabel(r,'afternoon');btn.appendChild(br2);
   btn.title=[k,ci?'In '+showTs(ci.ts):'No clock-in',lo?'Lunch out '+showTs(lo.ts):'No lunch out',li?'Lunch in '+showTs(li.ts):'No lunch in',co?'Out '+showTs(co.ts):'No clock-out',breakLabel(r,'morning'),breakLabel(r,'afternoon')].join(' · ');
   btn.onclick=()=>{myTimeSelectedDate=k;renderMyTimeCalendar()};grid.appendChild(btn);
   const tr=document.createElement('tr');if(k===myTimeSelectedDate)tr.className='calendar-ledger-selected';
