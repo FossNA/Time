@@ -429,7 +429,7 @@ body.dark-mode .analytics-warning{background:#3a301c;color:#ffe4a1;border-color:
 </style>
 </head>
 <body><main class="shell">
-<header class="top"><div class="brand"><img class="foss-logo" src="https://www.fossanalytics.com/Design/static/foss-logo.png" alt="FOSS" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-block'"><span class="logo-fallback" aria-hidden="true">FOSS</span><div><strong>myTIME</strong><small>FOSS North America · Personal time clock</small></div></div><div class="top-actions"><button type="button" class="enhance-btn" id="themeToggle" aria-pressed="false" title="Switch light and dark theme">☾ Dark mode</button><button type="button" class="enhance-btn" id="installAppBtn" hidden>＋ Install app</button><div class="local" id="timezoneLabel">Local time · loading</div><button type="button" class="profile-trigger" id="profileTrigger"><span class="mini-avatar" id="miniAvatar">YOU</span><span id="profileButtonName">My profile</span><span aria-hidden="true">⌄</span></button></div></header>
+<header class="top"><div class="brand"><img class="foss-logo" src="https://www.fossanalytics.com/Design/static/foss-logo.png" alt="FOSS" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-block'"><span class="logo-fallback" aria-hidden="true">FOSS</span><div><strong>myTIME</strong><small>FOSS North America · Personal time clock</small></div></div><div class="top-actions"><button type="button" class="enhance-btn" id="themeToggle" aria-pressed="false" title="Switch light and dark theme">☾ Dark mode</button><button type="button" class="enhance-btn" id="installAppBtn">＋ Install app</button><div class="local" id="timezoneLabel">Local time · loading</div><button type="button" class="profile-trigger" id="profileTrigger"><span class="mini-avatar" id="miniAvatar">YOU</span><span id="profileButtonName">My profile</span><span aria-hidden="true">⌄</span></button></div></header>
 <nav class="app-tabs" aria-label="myTIME pages" id="appTabs">
   <button type="button" class="app-tab active" data-tab="dashboard">Dashboard</button>
   <button type="button" class="app-tab" data-tab="calendar">Calendar</button>
@@ -502,6 +502,15 @@ body.dark-mode .analytics-warning{background:#3a301c;color:#ffe4a1;border-color:
    <div class="provider-requirement"><strong>What’s needed</strong><span>Microsoft Entra app, approved permissions, secure callback route, and protected token storage.</span></div>
   </article>
  </div>
+ <section class="card" style="margin:14px 0" aria-labelledby="automationGuideHeading">
+  <div class="section-head"><div><span class="metric-label">AUTOMATION STARTER</span><h3 id="automationGuideHeading" style="margin:4px 0">Use your existing Google or Microsoft tools</h3></div><span class="tag">NO SIGN-IN CLAIMS</span></div>
+  <p class="sub">The browser app can send a timecard payload to an HTTPS webhook you configure. A Google Apps Script web app or a Microsoft Power Automate flow can receive it, then handle email or spreadsheet steps under your organization's permissions.</p>
+  <div class="settings-actions">
+   <a class="quiet" style="display:inline-block;text-decoration:none;border-radius:10px;padding:10px 13px;font-weight:700" href="https://developers.google.com/apps-script/guides/web" target="_blank" rel="noopener noreferrer">Google Apps Script guide ↗</a>
+   <a class="quiet" style="display:inline-block;text-decoration:none;border-radius:10px;padding:10px 13px;font-weight:700" href="https://learn.microsoft.com/en-us/power-automate/" target="_blank" rel="noopener noreferrer">Power Automate guide ↗</a>
+  </div>
+  <p class="notice">Account sign-in, direct Gmail/Outlook sending, and cloud sync are not active until an authorized endpoint or secure OAuth backend is configured. Do not paste passwords or API secrets into this page.</p>
+ </section>
  <div class="integration-section-title integration-manual-title"><div><span class="metric-label">MANUAL CONNECTION</span><h3>Webhook delivery</h3><p>Send a report or selected time records to a webhook you control. This is separate from Google or Microsoft sign-in.</p></div><span class="tag">USER CONTROLLED</span></div>
  <section class="webhook-card" id="webhookPanel" aria-labelledby="webhookPanelHeading">
   <div class="webhook-card-head"><div class="webhook-icon" aria-hidden="true">↗</div><div><h3 id="webhookPanelHeading">Configure your webhook</h3><p>Use a Make.com Custom Webhook or another trusted HTTPS receiver.</p></div><span class="webhook-step">01 / SET UP</span></div>
