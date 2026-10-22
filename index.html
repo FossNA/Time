@@ -513,10 +513,10 @@ body.dark-mode .analytics-warning{background:#3a301c;color:#ffe4a1;border-color:
  </section>
  <div class="integration-section-title integration-manual-title"><div><span class="metric-label">MANUAL CONNECTION</span><h3>Webhook delivery</h3><p>Send a report or selected time records to a webhook you control. This is separate from Google or Microsoft sign-in.</p></div><span class="tag">USER CONTROLLED</span></div>
  <section class="webhook-card" id="webhookPanel" aria-labelledby="webhookPanelHeading">
-  <div class="webhook-card-head"><div class="webhook-icon" aria-hidden="true">↗</div><div><h3 id="webhookPanelHeading">Configure your webhook</h3><p>Use a Make.com Custom Webhook or another trusted HTTPS receiver.</p></div><span class="webhook-step">01 / SET UP</span></div>
+  <div class="webhook-card-head"><div class="webhook-icon" aria-hidden="true">↗</div><div><h3 id="webhookPanelHeading">Configure your webhook</h3><p>Use a Power Automate “When an HTTP request is received” trigger URL or another trusted HTTPS receiver.</p></div><span class="webhook-step">01 / SET UP</span></div>
   <div class="webhook-form">
    <div class="field webhook-url-field"><label for="webhookUrl">Webhook HTTPS URL</label><input id="webhookUrl" type="url" placeholder="https://hook.example.com/your-endpoint" autocomplete="url"><small>Use only an endpoint you trust. Avoid URLs containing credentials or secrets.</small></div>
-   <div class="field"><label for="webhookMode">What should be sent?</label><select id="webhookMode"><option value="weekly-report">Weekly timecard email report</option><option value="punches">Punch records only</option><option value="backup">Full backup</option></select></div>
+   <div class="field"><label for="webhookProvider">Automation receiver</label><select id="webhookProvider"><option value="power-automate">Microsoft Power Automate</option><option value="generic">Other HTTPS webhook</option></select></div>\n   <div class="field"><label for="webhookMode">What should be sent?</label><select id="webhookMode"><option value="weekly-report">Weekly timecard email report</option><option value="punches">Punch records only</option><option value="backup">Full backup</option></select></div>
    <div class="field"><label for="reportEmail">Report recipient email</label><input id="reportEmail" type="email" placeholder="you@company.com" autocomplete="email"><small>Used by your receiving workflow for weekly reports.</small></div>
    <div class="field"><label for="reportName">Report display name</label><input id="reportName" type="text" placeholder="My weekly timecard" maxlength="120"></div>
   </div>
@@ -524,7 +524,24 @@ body.dark-mode .analytics-warning{background:#3a301c;color:#ffe4a1;border-color:
   <div class="webhook-actions"><button class="primary" id="saveWebhook" type="button">Save settings</button><button class="quiet" id="sendWebhook" type="button">Send test / report</button><button class="text-button" id="clearWebhook" type="button">Forget saved webhook</button></div>
   <div class="webhook-status" id="webhookStatus" role="status" aria-live="polite"><span class="status-light"></span><span>Not connected yet. Save a trusted HTTPS webhook, start its receiving scenario, then send a test.</span></div>
   <div class="webhook-security"><strong>Security &amp; delivery</strong><p>This static site does not store credentials on a private server. The URL and report options are saved in this browser only. Sending requires your explicit click and confirmation. Browser CORS or receiver settings may block a request; verify the receiving service processed it. Automatic weekly sending and secure company sign-in are not enabled.</p></div>
-  <details class="integration-help"><summary>Need a webhook receiver?</summary><p>Create a Custom Webhook in a trusted automation service, copy its HTTPS URL into the field above, and turn the receiving scenario on before testing.</p><p class="integration-links"><a href="https://www.make.com/en/register" target="_blank" rel="noopener noreferrer">Open Make.com ↗</a> · <a href="https://apps.make.com/gateway" target="_blank" rel="noopener noreferrer">Webhook guide ↗</a></p></details>
+  <details class="integration-help"><summary>Need a webhook receiver?</summary><p><strong>Power Automate setup</strong>: create an Automated cloud flow with the trigger “When an HTTP request is received”. Use the JSON schema below, save the flow to generate its HTTP POST URL, then paste that URL above. Add “Send an email (V2)” for weekly reports and map <code>to</code> to To, <code>subject</code> to Subject, and <code>htmlBody</code> to the email body; enable HTML if your action exposes that option. For other event types, add a condition on <code>event</code> before processing.</p><p class="integration-links"><a href="https://make.powerautomate.com/" target="_blank" rel="noopener noreferrer">Open Power Automate ↗</a> · <a href="https://learn.microsoft.com/en-us/power-automate/" target="_blank" rel="noopener noreferrer">Power Automate documentation ↗</a></p><details><summary>HTTP trigger JSON schema</summary><pre style="white-space:pre-wrap;overflow-wrap:anywhere;font-size:11px;background:var(--bg);padding:12px;border-radius:8px">{
+  "type": "object",
+  "properties": {
+    "source": {"type":"string"},
+    "event": {"type":"string"},
+    "sentAt": {"type":"string"},
+    "to": {"type":"string"},
+    "subject": {"type":"string"},
+    "reportName": {"type":"string"},
+    "periodDays": {"type":"integer"},
+    "totalPaidMinutes": {"type":"integer"},
+    "totalPaidHours": {"type":"number"},
+    "records": {"type":"array","items":{"type":"object","properties":{"date":{"type":"string"},"clockIn":{"type":["string","null"]},"lunchOut":{"type":["string","null"]},"lunchIn":{"type":["string","null"]},"clockOut":{"type":["string","null"]},"paidMinutes":{"type":["string","number","null"]}}}},
+    "htmlBody": {"type":"string"},
+    "branding": {"type":"object"},
+    "backup": {"type":"object"}
+  }
+}</pre><button type="button" class="quiet" id="copyPowerSchema">Copy JSON schema</button></details></details>
  </section>
  <div class="integration-safety"><span aria-hidden="true">✓</span><p><strong>FOSS data safety</strong><br>Only connect company records to services approved by FOSS IT. Punches remain in this browser unless you explicitly export or send them.</p></div>
 </section>
@@ -1042,6 +1059,8 @@ el('hubExportXlsx').onclick=()=>exportXlsx(false);
 el('downloadImportTemplate').onclick=()=>exportXlsx(true);
 el('downloadCsvTemplate').onclick=()=>csv('myTIME-import-template.csv',[['Date','Clock In','Lunch Out','Lunch In','Clock Out','Notes'],[todayKey(),'8:00 AM','11:30 AM','12:30 PM','5:00 PM','Example row — replace with actual times']]);
 try{el('webhookUrl').value=localStorage.getItem(webhookKey)||'';const cfg=JSON.parse(localStorage.getItem(webhookKey+'-options')||'{}');el('webhookMode').value=cfg.mode||'weekly-report';el('reportEmail').value=cfg.email||'';el('reportName').value=cfg.name||'';if(el('webhookUrl').value)el('webhookStatus').textContent='Webhook URL saved on this device. No request has been sent yet.'}catch{}
+const powerSchemaEl=document.getElementById('copyPowerSchema');if(powerSchemaEl)powerSchemaEl.onclick=async()=>{const schema=document.querySelector('#webhookPanel details pre')?.textContent||'';try{await navigator.clipboard.writeText(schema);say('Power Automate JSON schema copied. Paste it into the HTTP trigger schema field.')}catch{say('Select and copy the JSON schema shown above.')}};
+const providerEl=el('webhookProvider');if(providerEl){providerEl.addEventListener('change',()=>{const title=el('webhookPanelHeading');if(title)title.textContent=providerEl.value==='power-automate'?'Configure Power Automate':'Configure your webhook'});try{providerEl.value=localStorage.getItem(webhookKey+'-provider')||'power-automate'}catch{}providerEl.addEventListener('change',()=>{try{localStorage.setItem(webhookKey+'-provider',providerEl.value)}catch{}})}
 el('saveWebhook').onclick=()=>{const u=el('webhookUrl').value.trim();if(u&&!/^https:\/\//i.test(u)){alert('Use an HTTPS webhook URL.');return}try{u?localStorage.setItem(webhookKey,u):localStorage.removeItem(webhookKey);localStorage.setItem(webhookKey+'-options',JSON.stringify({mode:el('webhookMode').value,email:el('reportEmail').value.trim(),name:el('reportName').value.trim()}));say(u?'Webhook and report options saved on this device. No data sent yet.':'Webhook URL cleared; report preferences saved locally.')}catch{say('Could not save webhook settings in this browser.')}};
 el('clearWebhook').onclick=()=>{try{localStorage.removeItem(webhookKey);localStorage.removeItem(webhookKey+'-options')}catch{}el('webhookUrl').value='';el('reportEmail').value='';el('reportName').value='';el('webhookMode').value='weekly-report';say('Saved webhook URL and report preferences removed from this browser.')};
 el('sendWebhook').onclick=async()=>{const u=el('webhookUrl').value.trim();if(!/^https:\/\//i.test(u)){alert('Enter an HTTPS webhook URL.');return}if(el('webhookMode').value==='weekly-report'&&!el('reportEmail').value.trim()){alert('Enter the recipient email address your webhook flow should send to.');el('reportEmail').focus();return}if(!confirm('Send time records to this endpoint? Continue only if you trust the URL.'))return;const allRows=rows().slice(1);
