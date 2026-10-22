@@ -391,6 +391,11 @@ body[data-tab]:not([data-tab="dashboard"]) #webhookPanel{display:none!important;
 @media(max-width:640px){.integration-hero{padding:22px;gap:10px}.integration-hero-mark{width:68px;height:68px;flex-basis:68px;border-radius:18px}.integration-hero-mark span{font-size:27px}.integration-hero-mark small{font-size:7px}.integration-statusbar{flex-wrap:wrap}.integration-statusbar>div{flex-basis:calc(100% - 28px)}.integration-statusbar>.tag{margin-left:22px}.integration-section-title{align-items:flex-start;flex-direction:column;gap:5px}.integration-provider-grid{grid-template-columns:1fr}.integration-provider>p{min-height:0}.webhook-card-head{padding:18px;align-items:flex-start}.webhook-step{display:none}.webhook-form{grid-template-columns:1fr;padding:18px 18px 6px}.webhook-url-field{grid-column:auto}.webhook-payload-note{margin:0 18px 18px}.webhook-actions{padding:0 18px 18px}.webhook-actions button{flex:1}.webhook-actions .text-button{flex-basis:100%;text-align:left}.webhook-status{margin:0 18px 16px}.webhook-security{margin:0 18px 16px}.integration-help{margin:0 18px 18px}}
 @media print{.integration-page,.webhook-card{display:none!important}}
 
+
+.provider-brand{display:flex;align-items:center;gap:10px;min-width:0;font-size:19px;font-weight:650;letter-spacing:-.025em;color:var(--ink)}
+.provider-brand svg{display:block;width:42px;height:42px;flex:0 0 42px}
+.google-brand svg{padding:2px}.microsoft-brand svg{padding:3px}
+
 </style>
 </head>
 <body><main class="shell">
@@ -455,13 +460,13 @@ body[data-tab]:not([data-tab="dashboard"]) #webhookPanel{display:none!important;
  <div class="integration-section-title"><div><span class="metric-label">ACCOUNT CONNECTIONS</span><h3>Connect your work tools</h3></div><span class="sub">Requires administrator-approved setup</span></div>
  <div class="integration-provider-grid">
   <article class="integration-provider">
-   <div class="provider-top"><div class="provider-icon google-icon" aria-hidden="true">G</div><span class="tag">NOT CONFIGURED</span></div>
+   <div class="provider-top"><div class="provider-brand google-brand" aria-label="Google logo"><svg viewBox="0 0 48 48" role="img" aria-hidden="true"><path fill="#4285F4" d="M43.6 24.5c0-1.4-.1-2.8-.4-4.1H24v7.8h11a9.4 9.4 0 0 1-4.1 6.2v5.1h6.6c3.9-3.6 6.1-8.8 6.1-15Z"/><path fill="#34A853" d="M24 44c5.5 0 10.1-1.8 13.5-4.9l-6.6-5.1c-1.8 1.2-4.1 2-6.9 2-5.3 0-9.8-3.6-11.4-8.4H5.8v5.3A20 20 0 0 0 24 44Z"/><path fill="#FBBC05" d="M12.6 27.6a12 12 0 0 1 0-7.2v-5.3H5.8a20 20 0 0 0 0 17.8l6.8-5.3Z"/><path fill="#EA4335" d="M24 12c3 0 5.7 1 7.8 3.1l5.8-5.8C34.1 6.1 29.5 4 24 4A20 20 0 0 0 5.8 15.1l6.8 5.3C14.2 15.6 18.7 12 24 12Z"/></svg><span>Google</span></div><span class="tag">NOT CONFIGURED</span></div>
    <h3>Google Workspace</h3><p>For Gmail reports, Google Sheets exports, and Calendar reminders after authorization.</p>
    <button class="quiet" type="button" disabled aria-disabled="true">Google sign-in unavailable</button>
    <div class="provider-requirement"><strong>What’s needed</strong><span>Google OAuth app, secure callback route, and server-side credential storage.</span></div>
   </article>
   <article class="integration-provider">
-   <div class="provider-top"><div class="provider-icon microsoft-icon" aria-hidden="true"><span></span><span></span><span></span><span></span></div><span class="tag">NOT CONFIGURED</span></div>
+   <div class="provider-top"><div class="provider-brand microsoft-brand" aria-label="Microsoft logo"><svg viewBox="0 0 24 24" role="img" aria-hidden="true"><path fill="#F25022" d="M1 1h10.5v10.5H1z"/><path fill="#7FBA00" d="M12.5 1H23v10.5H12.5z"/><path fill="#00A4EF" d="M1 12.5h10.5V23H1z"/><path fill="#FFB900" d="M12.5 12.5H23V23H12.5z"/></svg><span>Microsoft</span></div><span class="tag">NOT CONFIGURED</span></div>
    <h3>Microsoft 365</h3><p>For Outlook reports, Excel/OneDrive records, and Calendar reminders where your organization permits access.</p>
    <button class="quiet" type="button" disabled aria-disabled="true">Microsoft sign-in unavailable</button>
    <div class="provider-requirement"><strong>What’s needed</strong><span>Microsoft Entra app, approved permissions, secure callback route, and protected token storage.</span></div>
