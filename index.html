@@ -499,7 +499,7 @@ function ensureBreakFields(k){
 function calendarKeyDate(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 function calendarRecord(k){const r=data[k];return r&&Array.isArray(r.punches)?r:{punches:[]}}
 function calendarPunchTime(rec,type){const p=rec?.punches||[],x=type==='out'?[...p].reverse().find(v=>v.type==='out'):p.find(v=>v.type===type);return x?.ts?fmtTime(x.ts):'—'}
-function calendarPaid(k){const r=calendarRecord(k);if(!r.punches.length)return '—';const out=[...r.punches].reverse().find(x=>x.type==='out');return fmtMin(paidMs(r,out?.ts||Date.now())/60000)}
+function calendarPaid(k){const r=calendarRecord(k);if(!r.punches.length)return '—';const out=[...r.punches].reverse().find(x=>x.type==='out'),last=r.punches[r.punches.length-1];const end=out?.ts||(k===todayKey()?Date.now():last?.ts||Date.now());return fmtMin(paidMs(r,end)/60000)}
 function renderMyTimeCalendar(){
  const page=document.getElementById('page-calendar');if(!page)return;
  if(!document.getElementById('myTimeCalendarRoot')){
@@ -535,7 +535,7 @@ function renderMyTimeCalendar(){
  let days=0,totalMs=0,punchTotal=0;
  keys.forEach(k=>{
   const rec=calendarRecord(k),p=rec.punches||[],has=p.length>0;
-  if(has){days++;punchTotal+=p.length;const out=[...p].reverse().find(x=>x.type==='out');totalMs+=paidMs(rec,out?.ts||Date.now())}
+  if(has){days++;punchTotal+=p.length;const out=[...p].reverse().find(x=>x.type==='out'),last=p[p.length-1];const end=out?.ts||(k===todayKey()?Date.now():last?.ts||Date.now());totalMs+=paidMs(rec,end)}
   const status=rec.breakStatus||{},statusText=['morning','afternoon'].map(n=>({taken:'Taken',skipped:'Skipped','not-recorded':'Not recorded'}[status[n]||'not-recorded'])).join(' / ');
   const tr=document.createElement('tr');if(k===myTimeSelectedDate)tr.className='calendar-ledger-selected';
   const dateCell=new Date(k+'T12:00:00').toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'});
