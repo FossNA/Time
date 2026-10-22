@@ -121,6 +121,9 @@ body[data-tab="records"] [data-page]:not([data-page~="records"]),
 body[data-tab="import"] [data-page]:not([data-page~="import"]),
 body[data-tab="settings"] [data-page]:not([data-page~="settings"]),
 body[data-tab="integrations"] [data-page]:not([data-page~="integrations"]){display:none!important}
+/* Break/lunch schedule and optional webhook belong on Dashboard only. */
+body[data-tab]:not([data-tab="dashboard"]) .schedule-reminders,
+body[data-tab]:not([data-tab="dashboard"]) #webhookPanel{display:none!important;}
 .record-tools{display:flex;gap:10px;align-items:end;flex-wrap:wrap;margin:12px 0}
 .record-tools .field{min-width:190px;flex:1}
 .record-editor{padding:16px;background:#f7f9ff;border:1px solid var(--line);border-radius:14px;margin:14px 0}
@@ -176,7 +179,7 @@ body[data-tab="integrations"] [data-page]:not([data-page~="integrations"]){displ
   .shell{width:100%!important;max-width:none!important;margin:0!important;padding:0!important}
   .top,.app-tabs,.profile-backdrop,#profilePanel,.top-actions,.settings-actions,button,.no-print,.notice,.subtle-actions{display:none!important}
   /* Keep today’s break and lunch schedule on screen, never in print or Save as PDF. */
-  .schedule-reminders{display:none!important}
+  .schedule-reminders,#webhookPanel{display:none!important;visibility:hidden!important;height:0!important;margin:0!important;padding:0!important;border:0!important;}
   .tab-page[hidden]{display:none!important}
   .tab-page:not([hidden]){display:flex!important;gap:12pt!important;padding:0!important;margin:0!important;width:100%!important}
 
@@ -488,7 +491,8 @@ body[data-tab="integrations"] [data-page]:not([data-page~="integrations"]){displ
  move(document.getElementById('recordManager'),'records');
  move(document.getElementById('dataHub'),'import');
  move(document.getElementById('integrationDirectory'),'integrations');
- move(document.getElementById('webhookUrl')?.closest('section'),'integrations');
+ move(document.querySelector('.schedule-reminders'),'dashboard');
+ move(document.getElementById('webhookUrl')?.closest('section'),'dashboard');
  [...main.children].filter(el=>el.tagName==='DIV'&&el.getAttribute('style')?.includes('height:1px')).forEach(el=>el.remove());
  document.querySelectorAll('[data-page]').forEach(el=>el.removeAttribute('data-page'));
  function showPage(key){
