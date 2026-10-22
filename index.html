@@ -123,7 +123,7 @@ body[data-tab="settings"] [data-page]:not([data-page~="settings"]),
 body[data-tab="integrations"] [data-page]:not([data-page~="integrations"]){display:none!important}
 /* Break/lunch schedule belongs on Dashboard; manual webhook setup belongs on Integrations. */
 body[data-tab]:not([data-tab="dashboard"]) .schedule-reminders,
-body[data-tab]:not([data-tab="integrations"]) #webhookPanel{display:none!important;}
+
 @media print{#webhookPanel,.schedule-reminders{display:none!important;margin:0!important;padding:0!important;break-before:auto!important;break-after:auto!important;page-break-before:auto!important;page-break-after:auto!important}}
 .record-tools{display:flex;gap:10px;align-items:end;flex-wrap:wrap;margin:12px 0}
 .record-tools .field{min-width:190px;flex:1}
@@ -424,6 +424,14 @@ body[data-tab]:not([data-tab="dashboard"]) #webhookPanel{display:none!important;
    <p class="integration-links"><a href="https://www.make.com/en/register" target="_blank" rel="noopener noreferrer">Open Make.com ↗</a> · <a href="https://apps.make.com/gateway" target="_blank" rel="noopener noreferrer">Webhook guide ↗</a></p>
   </div>
  </details>
+<section class="card" id="webhookPanel" style="margin-top:18px;display:block!important" aria-labelledby="webhookPanelHeading"><div class="section-head"><div><div class="metric-label">MANUAL INTEGRATION</div><h3 id="webhookPanelHeading" style="margin:4px 0">Optional webhook</h3><p class="sub">Connect a trusted HTTPS webhook, such as a Make.com Custom Webhook.</p></div><span class="tag">OPTIONAL</span></div>
+<div style="height:1px;background:var(--line);margin:0 0 18px"></div>
+<div class="section-head"><div><h3 id="webhookPanelHeading" style="margin:0;font-size:16px">Optional webhook</h3><p class="sub">Send data on demand to a trusted HTTPS webhook, such as a Make.com Custom Webhook. Saving a URL does not connect an account; use “Send now” to test the receiver.</p></div><span class="tag">OPT-IN</span></div>
+<div class="formrow"><div class="field"><label for="webhookUrl">Webhook URL</label><input id="webhookUrl" type="url" placeholder="https://your-secure-endpoint.example/webhook"></div><div class="field"><label for="webhookMode">Branded notification</label><select id="webhookMode"><option value="weekly-report">Weekly timecard email report</option><option value="punches">Punch records only</option><option value="backup">Full backup</option></select></div></div><div class="formrow"><div class="field"><label for="reportEmail">Email recipient (for email workflows)</label><input id="reportEmail" type="email" placeholder="you@company.com" autocomplete="email"></div><div class="field"><label for="reportName">Report display name</label><input id="reportName" type="text" placeholder="My weekly timecard"></div></div><p class="sub">Weekly report payload includes a FOSS-branded HTML email body, subject, date range, daily punch details and total hours. Configure your webhook receiver to send the email. Automatic weekly delivery requires a scheduled flow.</p>
+<div class="settings-actions"><button class="quiet" id="saveWebhook">Save webhook on this device</button><button class="primary" id="sendWebhook">Send now</button><button class="quiet" id="clearWebhook">Forget webhook</button></div>
+<div class="notice" id="webhookStatus" role="status" aria-live="polite">Not connected yet. Save a trusted HTTPS webhook, start its receiving scenario, then use Send now to test.</div>
+<p class="notice">Security: this static site has no private server. Use only an endpoint you trust; never put passwords or API keys here. Browser CORS rules may block a request. Background sync and secure company sign-in need a server-side integration and are not enabled.</p>
+</section>
  <div class="notice"><strong>FOSS data safety:</strong> Only connect company records to services approved by FOSS IT. Punches stay in this browser unless you explicitly export or send them.</div>
 </section>
 <footer class="footer"><span>myTIME · Prototype</span><span><a href="https://fossna.com/" target="_blank" rel="noreferrer">FOSS North America</a> · Not an official payroll system</span></footer>
@@ -455,14 +463,7 @@ body[data-tab]:not([data-tab="dashboard"]) #webhookPanel{display:none!important;
  <div class="tablewrap"><table><thead><tr><th>Date</th><th>Clock in</th><th>Lunch out</th><th>Lunch in</th><th>Clock out</th><th>Paid time</th><th>Actions</th></tr></thead><tbody id="recordManagerRows"><tr><td colspan="7">No saved records yet.</td></tr></tbody></table></div>
  <p class="notice">Delete removes the entire selected date’s punch record from this browser. This does not delete a downloaded backup or change a company payroll system.</p>
 </section>
-<details class="card" id="webhookPanel" style="margin-top:18px" aria-labelledby="webhookPanelHeading"><summary style="cursor:pointer;font-weight:750;color:var(--ink);padding:4px 0 14px">Optional webhook · advanced manual setup</summary>
-<div style="height:1px;background:var(--line);margin:0 0 18px"></div>
-<div class="section-head"><div><h3 id="webhookPanelHeading" style="margin:0;font-size:16px">Optional webhook</h3><p class="sub">Send data on demand to a trusted HTTPS webhook, such as a Make.com Custom Webhook. Saving a URL does not connect an account; use “Send now” to test the receiver.</p></div><span class="tag">OPT-IN</span></div>
-<div class="formrow"><div class="field"><label for="webhookUrl">Webhook URL</label><input id="webhookUrl" type="url" placeholder="https://your-secure-endpoint.example/webhook"></div><div class="field"><label for="webhookMode">Branded notification</label><select id="webhookMode"><option value="weekly-report">Weekly timecard email report</option><option value="punches">Punch records only</option><option value="backup">Full backup</option></select></div></div><div class="formrow"><div class="field"><label for="reportEmail">Email recipient (for email workflows)</label><input id="reportEmail" type="email" placeholder="you@company.com" autocomplete="email"></div><div class="field"><label for="reportName">Report display name</label><input id="reportName" type="text" placeholder="My weekly timecard"></div></div><p class="sub">Weekly report payload includes a FOSS-branded HTML email body, subject, date range, daily punch details and total hours. Configure your webhook receiver to send the email. Automatic weekly delivery requires a scheduled flow.</p>
-<div class="settings-actions"><button class="quiet" id="saveWebhook">Save webhook on this device</button><button class="primary" id="sendWebhook">Send now</button><button class="quiet" id="clearWebhook">Forget webhook</button></div>
-<div class="notice" id="webhookStatus" role="status" aria-live="polite">Not connected yet. Save a trusted HTTPS webhook, start its receiving scenario, then use Send now to test.</div>
-<p class="notice">Security: this static site has no private server. Use only an endpoint you trust; never put passwords or API keys here. Browser CORS rules may block a request. Background sync and secure company sign-in need a server-side integration and are not enabled.</p>
-</details>
+
 </main>
 <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
 <script>
@@ -506,16 +507,7 @@ body[data-tab]:not([data-tab="dashboard"]) #webhookPanel{display:none!important;
  move(document.getElementById('dataHub'),'import');
  move(document.getElementById('integrationDirectory'),'integrations');
  move(document.querySelector('.schedule-reminders'),'dashboard');
- const webhookPanel=document.getElementById('webhookPanel');
- const integrationDirectory=document.getElementById('integrationDirectory');
- // Keep the actual controls inside the Integrations card, next to the instructions.
- // This avoids the panel being stranded in a hidden tab-page during DOM regrouping.
- if(webhookPanel&&integrationDirectory){
-  integrationDirectory.appendChild(webhookPanel);
-  webhookPanel.hidden=false;
-  webhookPanel.open=true;
-  webhookPanel.style.display='block';
- }
+ // Webhook controls are already nested in #integrationDirectory in the source markup.
  [...main.children].filter(el=>el.tagName==='DIV'&&el.getAttribute('style')?.includes('height:1px')).forEach(el=>el.remove());
  document.querySelectorAll('[data-page]').forEach(el=>el.removeAttribute('data-page'));
  function showPage(key){
