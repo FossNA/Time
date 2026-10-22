@@ -506,7 +506,16 @@ body[data-tab]:not([data-tab="dashboard"]) #webhookPanel{display:none!important;
  move(document.getElementById('dataHub'),'import');
  move(document.getElementById('integrationDirectory'),'integrations');
  move(document.querySelector('.schedule-reminders'),'dashboard');
- move(document.getElementById('webhookPanel'),'integrations');
+ const webhookPanel=document.getElementById('webhookPanel');
+ const integrationDirectory=document.getElementById('integrationDirectory');
+ // Keep the actual controls inside the Integrations card, next to the instructions.
+ // This avoids the panel being stranded in a hidden tab-page during DOM regrouping.
+ if(webhookPanel&&integrationDirectory){
+  integrationDirectory.appendChild(webhookPanel);
+  webhookPanel.hidden=false;
+  webhookPanel.open=true;
+  webhookPanel.style.display='block';
+ }
  [...main.children].filter(el=>el.tagName==='DIV'&&el.getAttribute('style')?.includes('height:1px')).forEach(el=>el.remove());
  document.querySelectorAll('[data-page]').forEach(el=>el.removeAttribute('data-page'));
  function showPage(key){
