@@ -225,6 +225,28 @@ body[data-tab="integrations"] [data-page]:not([data-page~="integrations"]){displ
 .tab-page[hidden]{display:none!important}
 .tab-page{min-width:0}
 
+
+/* Import/export and integrations: responsive, explicit, and easy to scan */
+.import-center-grid{grid-template-columns:repeat(3,minmax(0,1fr));align-items:stretch;margin:14px 0!important}
+.import-center-grid>.card{display:flex;flex-direction:column;gap:10px;padding:clamp(14px,1.6vw,22px);min-width:0}
+.import-center-grid>.card .settings-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:auto}
+.import-center-grid>.card button{max-width:100%;white-space:normal}
+#dataHub,#integrationDirectory,#webhookPanel,#recordManager{min-width:0;width:100%;box-sizing:border-box}
+#integrationDirectory>.grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;align-items:stretch}
+#integrationDirectory>.grid>.card{display:flex;flex-direction:column;gap:9px;min-width:0;padding:18px}
+#integrationDirectory>.grid>.card p:last-child{margin-top:auto}
+#integrationDirectory a{overflow-wrap:anywhere}
+.integration-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:14px 0}
+.integration-step{border:1px solid var(--line);border-radius:12px;padding:14px;min-width:0;background:var(--card)}
+.integration-step strong{display:block;margin-bottom:6px;color:var(--brand-blue)}
+.integration-status{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:8px 0 14px}
+.integration-status .tag{background:#fff4d6;color:#73510a;border-color:#efd38c}
+#webhookPanel .formrow{align-items:start}
+#webhookPanel input,#webhookPanel select{width:100%;min-width:0;box-sizing:border-box}
+#webhookStatus{margin-top:12px}
+@media(max-width:850px){.import-center-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}#integrationDirectory>.grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}.integration-steps{grid-template-columns:1fr}}
+@media(max-width:560px){.import-center-grid,#integrationDirectory>.grid{grid-template-columns:minmax(0,1fr)!important}.import-center-grid>.card,#integrationDirectory>.grid>.card{padding:15px}.import-center-grid .settings-actions button,#webhookPanel .settings-actions button{flex:1 1 100%;width:100%}.integration-status{align-items:flex-start;flex-direction:column}}
+
 </style>
 </head>
 <body><main class="shell">
@@ -293,13 +315,14 @@ body[data-tab="integrations"] [data-page]:not([data-page~="integrations"]){displ
 <footer class="footer"><span>myTIME · Prototype</span><span><a href="https://fossna.com/" target="_blank" rel="noreferrer">FOSS North America</a> · Not an official payroll system</span></footer>
 <section class="card" id="dataHub" style="margin-top:18px" aria-labelledby="dataHubHeading">
 <div class="section-head"><div><h2 id="dataHubHeading">Import &amp; Export Center</h2><p class="sub">Import previous punches, preview changes, and back up your time records.</p></div><span class="tag">DATA TOOLS</span></div>
-<div class="grid" style="grid-template-columns:repeat(3,minmax(0,1fr));margin:12px 0">
+<div class="grid import-center-grid">
 <article class="card"><div class="metric-label">IMPORT</div><strong>Excel, CSV or JSON</strong><p class="sub">Import a styled .xlsx workbook or CSV containing any dates worked. Preview before saving; JSON backups can be merged too.</p><label for="punchImportFile" class="primary" style="display:inline-block;padding:10px 13px;border-radius:10px;cursor:pointer">Choose file</label><input id="punchImportFile" type="file" accept=".csv,.json,.xlsx,text/csv,application/json,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden></article>
 <article class="card"><div class="metric-label">EXPORT</div><strong>Branded Excel workbook</strong><p class="sub">Styled daily punches, paid-hour formulas, weekly summary, time-bank entries and instructions.</p><div class="settings-actions"><button class="primary" id="hubExportXlsx">Download Excel workbook</button><button class="quiet" id="hubExportCsv">Download CSV</button><button class="quiet" id="hubExportJson">Download JSON</button></div></article>
 <article class="card"><div class="metric-label">TEMPLATE</div><strong>Import previous dates</strong><p class="sub">Enter one row per work date in the formatted Excel template, then upload it here.</p><div class="settings-actions"><button class="quiet" id="downloadImportTemplate">Get Excel template</button><button class="quiet" id="downloadCsvTemplate">CSV template</button></div></article>
 </div>
 <div class="notice" id="importStatus" role="status" aria-live="polite">Choose an Excel (.xlsx), CSV, or myTIME JSON file. Use one row per work date and times like 08:00 or 17:00. Nothing is changed until you confirm.</div>
 <div id="importPreviewWrap" hidden style="margin-top:14px"><div class="section-head"><h3 style="margin:0;font-size:15px">Import preview</h3><div class="settings-actions"><button class="primary" id="commitPunchImport" disabled>Import valid rows</button><button class="quiet" id="cancelPunchImport">Cancel</button></div></div><div class="tablewrap"><table><thead><tr><th>Date</th><th>Clock in</th><th>Lunch out</th><th>Lunch in</th><th>Clock out</th><th>Validation</th></tr></thead><tbody id="importPreviewRows"></tbody></table></div></div>
+</section>
 <section class="card" id="recordManager" data-page="records" style="margin-top:18px" aria-labelledby="recordManagerHeading">
  <div class="section-head"><div><h2 id="recordManagerHeading">Manage saved punches</h2><p class="sub">Review, correct, add or remove a day’s records. Changes save in this browser only.</p></div><span class="tag">EDITABLE RECORDS</span></div>
  <div class="safe-hint"><strong>Before correcting a bad import:</strong> download a JSON backup first. You can also export CSV or Excel, edit it in a spreadsheet, then import and review the preview before confirming.</div>
@@ -318,8 +341,9 @@ body[data-tab="integrations"] [data-page]:not([data-page~="integrations"]){displ
  <div class="tablewrap"><table><thead><tr><th>Date</th><th>Clock in</th><th>Lunch out</th><th>Lunch in</th><th>Clock out</th><th>Paid time</th><th>Actions</th></tr></thead><tbody id="recordManagerRows"><tr><td colspan="7">No saved records yet.</td></tr></tbody></table></div>
  <p class="notice">Delete removes the entire selected date’s punch record from this browser. This does not delete a downloaded backup or change a company payroll system.</p>
 </section>
-<div style="height:1px;background:var(--line);margin:22px 0"></div>
-<div class="section-head"><div><h3 style="margin:0;font-size:16px">Optional webhook</h3><p class="sub">Send data on demand to a trusted HTTPS webhook, such as your own Power Automate flow.</p></div><span class="tag">OPT-IN</span></div>
+<section class="card" id="webhookPanel" style="margin-top:18px" aria-labelledby="webhookPanelHeading">
+<div style="height:1px;background:var(--line);margin:0 0 18px"></div>
+<div class="section-head"><div><h3 id="webhookPanelHeading" style="margin:0;font-size:16px">Optional webhook</h3><p class="sub">Send data on demand to a trusted HTTPS webhook, such as a Make.com Custom Webhook. Saving a URL does not connect an account; use “Send now” to test the receiver.</p></div><span class="tag">OPT-IN</span></div>
 <div class="formrow"><div class="field"><label for="webhookUrl">Webhook URL</label><input id="webhookUrl" type="url" placeholder="https://your-secure-endpoint.example/webhook"></div><div class="field"><label for="webhookMode">Branded notification</label><select id="webhookMode"><option value="weekly-report">Weekly timecard email report</option><option value="punches">Punch records only</option><option value="backup">Full backup</option></select></div></div><div class="formrow"><div class="field"><label for="reportEmail">Email recipient (for email workflows)</label><input id="reportEmail" type="email" placeholder="you@company.com" autocomplete="email"></div><div class="field"><label for="reportName">Report display name</label><input id="reportName" type="text" placeholder="My weekly timecard"></div></div><p class="sub">Weekly report payload includes a FOSS-branded HTML email body, subject, date range, daily punch details and total hours. Configure your webhook receiver to send the email. Automatic weekly delivery requires a scheduled flow.</p>
 <div class="settings-actions"><button class="quiet" id="saveWebhook">Save webhook on this device</button><button class="primary" id="sendWebhook">Send now</button><button class="quiet" id="clearWebhook">Forget webhook</button></div>
 <p class="notice">Security: this static site has no private server. Use only an endpoint you trust; never put passwords or API keys here. Browser CORS rules may block a request. Background sync and secure company sign-in need a server-side integration and are not enabled.</p>
