@@ -121,9 +121,10 @@ body[data-tab="records"] [data-page]:not([data-page~="records"]),
 body[data-tab="import"] [data-page]:not([data-page~="import"]),
 body[data-tab="settings"] [data-page]:not([data-page~="settings"]),
 body[data-tab="integrations"] [data-page]:not([data-page~="integrations"]){display:none!important}
-/* Break/lunch schedule and optional webhook belong on Dashboard only. */
+/* Break/lunch schedule belongs on Dashboard; manual webhook setup belongs on Integrations. */
 body[data-tab]:not([data-tab="dashboard"]) .schedule-reminders,
-body[data-tab]:not([data-tab="dashboard"]) #webhookPanel{display:none!important;}
+body[data-tab]:not([data-tab="integrations"]) #webhookPanel{display:none!important;}
+@media print{#webhookPanel,.schedule-reminders{display:none!important;margin:0!important;padding:0!important;break-before:auto!important;break-after:auto!important;page-break-before:auto!important;page-break-after:auto!important}}
 .record-tools{display:flex;gap:10px;align-items:end;flex-wrap:wrap;margin:12px 0}
 .record-tools .field{min-width:190px;flex:1}
 .record-editor{padding:16px;background:#f7f9ff;border:1px solid var(--line);border-radius:14px;margin:14px 0}
@@ -505,7 +506,7 @@ body[data-tab]:not([data-tab="dashboard"]) #webhookPanel{display:none!important;
  move(document.getElementById('dataHub'),'import');
  move(document.getElementById('integrationDirectory'),'integrations');
  move(document.querySelector('.schedule-reminders'),'dashboard');
- move(document.getElementById('webhookPanel'),'dashboard');
+ move(document.getElementById('webhookPanel'),'integrations');
  [...main.children].filter(el=>el.tagName==='DIV'&&el.getAttribute('style')?.includes('height:1px')).forEach(el=>el.remove());
  document.querySelectorAll('[data-page]').forEach(el=>el.removeAttribute('data-page'));
  function showPage(key){
