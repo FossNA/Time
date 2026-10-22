@@ -500,93 +500,98 @@ function renderMyTimeCalendar(){
  const page=document.getElementById('page-calendar');if(!page)return;
  if(!document.getElementById('myTimeCalendarRoot')){
   page.innerHTML=`<section class="card" id="myTimeCalendarRoot">
-   <div class="section-head"><div><div class="metric-label">MYTIME CALENDAR</div><h2 style="margin:4px 0">Monthly time calendar</h2><p class="sub">Every day shows your punches, lunch, and both 15-minute breaks. Select any day to review or update its break record.</p></div>
-   <div class="settings-actions"><button type="button" class="quiet" id="calendarPrev" aria-label="Previous month">‹ Previous</button><button type="button" class="quiet" id="calendarToday">Today</button><button type="button" class="quiet" id="calendarNext" aria-label="Next month">Next ›</button></div></div>
-   <div class="calendar-month-bar"><h3 id="calendarMonthTitle" style="margin:8px 0 14px"></h3><span class="sub">Select a day to see details</span></div><div class="mytime-calendar-wrap"><div class="mytime-calendar-grid" id="myTimeCalendarGrid"></div></div>
-   <div class="notice" id="calendarLatePrompt" role="status" aria-live="polite" hidden></div>
-   <section class="card" style="margin-top:18px;background:var(--bg)" id="calendarDayDetail">
+   <div class="section-head"><div><div class="metric-label">MYTIME CALENDAR</div><h2 style="margin:4px 0">Calendar & punch history</h2><p class="sub">Browse any date, inspect saved clock punches, and review a full week or month. Records are read from this browser's local time log.</p></div>
+   <div class="settings-actions"><button type="button" class="quiet" id="calendarPrev">‹ Previous month</button><button type="button" class="quiet" id="calendarToday">Today</button><button type="button" class="quiet" id="calendarNext">Next month ›</button></div></div>
+   <div class="calendar-month-bar"><h3 id="calendarMonthTitle" style="margin:8px 0"></h3><label class="sub">Jump to date <input id="calendarDatePicker" type="date" style="margin-left:6px"></label></div>
+   <div class="mytime-calendar-wrap"><div class="mytime-calendar-grid" id="myTimeCalendarGrid"></div></div>
+   <section class="card" id="calendarDayDetail" style="margin-top:18px;background:var(--bg)">
     <div class="section-head"><div><div class="metric-label">SELECTED DAY</div><h3 id="calendarSelectedTitle" style="margin:4px 0"></h3></div><span class="tag" id="calendarSavedBadge">Local record</span></div>
     <div class="mytime-detail-grid" id="calendarPunchDetails"></div>
-    <h3 style="margin-top:18px">Lunch and 15-minute breaks</h3><p class="sub">Record what actually happened. Skipped breaks are recorded for accuracy only; they are not counted as make-up time or recommended as a way to recover hours.</p>
+    <p class="sub" id="calendarDaySummary" style="margin-top:12px"></p>
+    <h3 style="margin-top:18px">Lunch and rest-break record</h3><p class="sub">Record whether breaks were taken, skipped, or not recorded. This is a recordkeeping aid, not a payroll adjustment.</p>
     <div class="mytime-break-grid" id="calendarBreakControls"></div>
-    <p class="notice" style="margin-top:12px">If you're running late, keep required lunch and rest breaks. The planner can help estimate an approved later finish or another approved schedule adjustment instead.</p>
    </section>
-   <section class="card" style="margin-top:18px"><div class="section-head"><div><h3 style="margin:0">Recent punches · last 14 days</h3><p class="sub">A quick view of yesterday and last week, independent of the month currently selected above.</p></div><div class="settings-actions"><button type="button" class="quiet" id="calendarYesterday">Yesterday</button><button type="button" class="quiet" id="calendarLastWeek">Last week</button></div></div><div class="tablewrap"><table class="calendar-ledger"><thead><tr><th>Date</th><th>Clock in</th><th>Lunch out</th><th>Lunch in</th><th>Clock out</th><th>Recorded punches</th><th></th></tr></thead><tbody id="calendarRecentRows"></tbody></table></div></section><section class="card" style="margin-top:18px"><div class="section-head"><div><h3 style="margin:0">Daily punches for this month</h3><p class="sub">A full month-by-month ledger of clock-in/out, lunch, paid time and 15-minute breaks.</p></div></div><div class="tablewrap"><table class="calendar-ledger"><thead><tr><th>Date</th><th>Clock in</th><th>Lunch out</th><th>Lunch in</th><th>Clock out</th><th>Morning 15 min</th><th>Afternoon 15 min</th><th>Paid time</th></tr></thead><tbody id="calendarMonthRows"></tbody></table></div></section>
+   <section class="card" style="margin-top:18px"><div class="section-head"><div><h3 style="margin:0">Last week · Monday–Sunday</h3><p class="sub" id="calendarWeekTitle">Saved punches for the previous Monday–Sunday week.</p></div><button type="button" class="quiet" id="calendarExportWeek">Export week CSV</button></div><div class="tablewrap"><table class="calendar-ledger"><thead><tr><th>Date</th><th>Clock in</th><th>Lunch out</th><th>Lunch in</th><th>Clock out</th><th>Paid time</th><th>Record</th></tr></thead><tbody id="calendarWeekRows"></tbody></table></div></section>
+   <section class="card" style="margin-top:18px"><div class="section-head"><div><h3 style="margin:0">Daily punches for this month</h3><p class="sub">Every date in the displayed month, including days with no saved punches.</p></div><button type="button" class="quiet" id="calendarExportMonth">Export month CSV</button></div><div class="tablewrap"><table class="calendar-ledger"><thead><tr><th>Date</th><th>Clock in</th><th>Lunch out</th><th>Lunch in</th><th>Clock out</th><th>Morning break</th><th>Afternoon break</th><th>Paid time</th><th></th></tr></thead><tbody id="calendarMonthRows"></tbody></table></div></section>
+   <section class="card" style="margin-top:18px"><div class="section-head"><div><h3 style="margin:0">Recent punch history · 14 days</h3><p class="sub">Quickly open yesterday or any recent day.</p></div><div class="settings-actions"><button type="button" class="quiet" id="calendarYesterday">Yesterday</button><button type="button" class="quiet" id="calendarLastWeek">Open last week</button></div></div><div class="tablewrap"><table class="calendar-ledger"><thead><tr><th>Date</th><th>Clock in</th><th>Lunch out</th><th>Lunch in</th><th>Clock out</th><th>Saved punches</th><th></th></tr></thead><tbody id="calendarRecentRows"></tbody></table></div></section>
   </section>`;
-  document.getElementById('calendarPrev').onclick=()=>{myTimeCalendarMonth=new Date(myTimeCalendarMonth.getFullYear(),myTimeCalendarMonth.getMonth()-1,1);myTimeSelectedDate=myTimeCalendarMonth.getFullYear()+'-'+String(myTimeCalendarMonth.getMonth()+1).padStart(2,'0')+'-01';renderMyTimeCalendar()};
-  document.getElementById('calendarNext').onclick=()=>{myTimeCalendarMonth=new Date(myTimeCalendarMonth.getFullYear(),myTimeCalendarMonth.getMonth()+1,1);myTimeSelectedDate=myTimeCalendarMonth.getFullYear()+'-'+String(myTimeCalendarMonth.getMonth()+1).padStart(2,'0')+'-01';renderMyTimeCalendar()};
-  document.getElementById('calendarToday').onclick=()=>{myTimeSelectedDate=todayKey();myTimeCalendarMonth=new Date(new Date().getFullYear(),new Date().getMonth(),1);renderMyTimeCalendar()};
+  document.getElementById('calendarPrev').onclick=()=>{myTimeCalendarMonth=new Date(myTimeCalendarMonth.getFullYear(),myTimeCalendarMonth.getMonth()-1,1);renderMyTimeCalendar()};
+  document.getElementById('calendarNext').onclick=()=>{myTimeCalendarMonth=new Date(myTimeCalendarMonth.getFullYear(),myTimeCalendarMonth.getMonth()+1,1);renderMyTimeCalendar()};
+  document.getElementById('calendarToday').onclick=()=>{myTimeSelectedDate=todayKey();myTimeCalendarMonth=new Date();myTimeCalendarMonth.setDate(1);renderMyTimeCalendar()};
+  document.getElementById('calendarDatePicker').onchange=e=>{if(!e.target.value)return;myTimeSelectedDate=e.target.value;const d=new Date(myTimeSelectedDate+'T12:00:00');myTimeCalendarMonth=new Date(d.getFullYear(),d.getMonth(),1);renderMyTimeCalendar()};
   document.getElementById('calendarYesterday').onclick=()=>{const d=new Date();d.setDate(d.getDate()-1);myTimeSelectedDate=keyDate(d);myTimeCalendarMonth=new Date(d.getFullYear(),d.getMonth(),1);renderMyTimeCalendar()};
-  document.getElementById('calendarLastWeek').onclick=()=>{const d=new Date();const monday=(d.getDay()+6)%7;d.setDate(d.getDate()-monday-7);myTimeSelectedDate=keyDate(d);myTimeCalendarMonth=new Date(d.getFullYear(),d.getMonth(),1);renderMyTimeCalendar()};
+  document.getElementById('calendarLastWeek').onclick=()=>{const d=weekMonday(new Date());d.setDate(d.getDate()-7);myTimeSelectedDate=keyDate(d);myTimeCalendarMonth=new Date(d.getFullYear(),d.getMonth(),1);renderMyTimeCalendar()};
+  document.getElementById('calendarExportWeek').onclick=()=>exportCalendarCsv(calendarDateKeys('week'));
+  document.getElementById('calendarExportMonth').onclick=()=>exportCalendarCsv(calendarDateKeys('month'));
  }
- const title=document.getElementById('calendarMonthTitle'),grid=document.getElementById('myTimeCalendarGrid');
- title.textContent=myTimeCalendarMonth.toLocaleDateString(undefined,{month:'long',year:'numeric'});
- grid.innerHTML='';
- ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(d=>{const e=document.createElement('div');e.className='mytime-calendar-weekday';e.textContent=d;grid.appendChild(e)});
- const first=new Date(myTimeCalendarMonth.getFullYear(),myTimeCalendarMonth.getMonth(),1),offset=first.getDay(),days=new Date(first.getFullYear(),first.getMonth()+1,0).getDate();
- const monthKey=first.getFullYear()+'-'+String(first.getMonth()+1).padStart(2,'0');
- for(let i=0;i<offset;i++){const blank=document.createElement('div');blank.className='mytime-calendar-empty';grid.appendChild(blank)}
- const dayRows=[];
- const showTs=ts=>ts?fmtTime(ts):'—';
- const statusLabel=(rec,key)=>({taken:'Taken',skipped:'Skipped','not-recorded':'Not recorded'}[(rec?.breakStatus||{})[key]||'not-recorded']);
- const breakLabel=(rec,key)=>{const status=statusLabel(rec,key);const t=rec?.breakTimes?.[key]||{};return status+(t.start||t.end?' · '+(t.start||'—')+'–'+(t.end||'—'):'')};
- for(let dayNo=1;dayNo<=days;dayNo++){
-  const d=new Date(first.getFullYear(),first.getMonth(),dayNo),k=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(dayNo).padStart(2,'0'),r=data[k],btn=document.createElement('button');
+ const keyDateLocal=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+ const start=new Date(myTimeCalendarMonth.getFullYear(),myTimeCalendarMonth.getMonth(),1,12);
+ const monthEnd=new Date(start.getFullYear(),start.getMonth()+1,0,12);
+ const monthKeys=Array.from({length:monthEnd.getDate()},(_,i)=>keyDateLocal(new Date(start.getFullYear(),start.getMonth(),i+1,12)));
+ const selectedDate=new Date(myTimeSelectedDate+'T12:00:00');
+ if(Number.isNaN(selectedDate.getTime()))myTimeSelectedDate=todayKey();
+ document.getElementById('calendarMonthTitle').textContent=start.toLocaleDateString(undefined,{month:'long',year:'numeric'});
+ document.getElementById('calendarDatePicker').value=myTimeSelectedDate;
+ const grid=document.getElementById('myTimeCalendarGrid');grid.innerHTML='';
+ ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(label=>{const e=document.createElement('div');e.className='mytime-calendar-weekday';e.textContent=label;grid.appendChild(e)});
+ for(let i=0;i<start.getDay();i++){const blank=document.createElement('div');blank.className='mytime-calendar-empty';grid.appendChild(blank)}
+ const timeFor=(rec,type)=>{const p=rec?.punches||[];const item=type==='out'?[...p].reverse().find(x=>x.type==='out'):p.find(x=>x.type===type);return item?.ts?fmtTime(item.ts):'—'};
+ const recordFor=k=>{const r=data[k];return r&&Array.isArray(r.punches)?r:{punches:[]}};
+ const dayHasRecord=k=>{const r=recordFor(k);return r.punches.length>0||!!(data[k]&&((data[k].breakStatus)||(data[k].breakTimes)))};
+ const statusFor=(rec,name)=>({taken:'Taken',skipped:'Skipped','not-recorded':'Not recorded'}[(rec?.breakStatus||{})[name]||'not-recorded']);
+ const breakFor=(rec,name)=>{const t=rec?.breakTimes?.[name]||{};const status=statusFor(rec,name);return status+((t.start||t.end)?' · '+(t.start||'—')+'–'+(t.end||'—'):'')};
+ const dayPaid=k=>{const rec=recordFor(k);if(!rec.punches.length)return '—';const out=[...rec.punches].reverse().find(x=>x.type==='out');return fmtMin(paidMs(rec,out?.ts||Date.now())/60000)};
+ const rowValues=k=>{const r=recordFor(k);return [k,timeFor(r,'in'),timeFor(r,'lunch-start'),timeFor(r,'lunch-end'),timeFor(r,'out')]};
+ const selectDay=k=>{myTimeSelectedDate=k;const d=new Date(k+'T12:00:00');myTimeCalendarMonth=new Date(d.getFullYear(),d.getMonth(),1);renderMyTimeCalendar()};
+ monthKeys.forEach(k=>{
+  const rec=recordFor(k),btn=document.createElement('button'),d=new Date(k+'T12:00:00');
   btn.type='button';btn.className='mytime-calendar-day'+(k===myTimeSelectedDate?' selected':'')+(k===todayKey()?' today':'');btn.setAttribute('aria-pressed',k===myTimeSelectedDate?'true':'false');
-  const num=document.createElement('strong');num.textContent=String(dayNo);btn.appendChild(num);
-  const p=r?.punches||[],ci=p.find(x=>x.type==='in'),lo=p.find(x=>x.type==='lunch-start'),li=p.find(x=>x.type==='lunch-end'),co=[...p].reverse().find(x=>x.type==='out');
-  const times=document.createElement('small');times.className='calendar-day-punches';times.textContent=ci?'In '+showTs(ci.ts)+(co?' · Out '+showTs(co.ts):' · In progress'):'No punches';btn.appendChild(times);
-  const br=document.createElement('small');br.className='calendar-day-lunch';br.textContent='Lunch · '+statusLabel(r,'lunch');btn.appendChild(br);
-  const br2=document.createElement('small');br2.className='calendar-day-breaks';br2.textContent='Breaks · '+statusLabel(r,'morning')+'/'+statusLabel(r,'afternoon');btn.appendChild(br2);
-  btn.title=[k,ci?'In '+showTs(ci.ts):'No clock-in',lo?'Lunch out '+showTs(lo.ts):'No lunch out',li?'Lunch in '+showTs(li.ts):'No lunch in',co?'Out '+showTs(co.ts):'No clock-out',breakLabel(r,'morning'),breakLabel(r,'afternoon')].join(' · ');
-  btn.onclick=()=>{myTimeSelectedDate=k;renderMyTimeCalendar()};grid.appendChild(btn);
-  const tr=document.createElement('tr');if(k===myTimeSelectedDate)tr.className='calendar-ledger-selected';
-  const paid=r?fmtMin(paidMs(r,co?.ts||Date.now())/60000):'—';
-  const vals=[k,showTs(ci?.ts),showTs(lo?.ts),showTs(li?.ts),showTs(co?.ts),breakLabel(r,'morning'),breakLabel(r,'afternoon'),paid];
-  vals.forEach(v=>{const td=document.createElement('td');td.textContent=v;tr.appendChild(td)});
-  tr.tabIndex=0;tr.setAttribute('role','button');tr.setAttribute('aria-label','Select '+k);tr.onclick=()=>{myTimeSelectedDate=k;renderMyTimeCalendar()};tr.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();myTimeSelectedDate=k;renderMyTimeCalendar()}};
-  dayRows.push(tr);
- }
- for(let i=offset+days;i<42;i++){const blank=document.createElement('div');blank.className='mytime-calendar-empty';grid.appendChild(blank)}
- const monthBody=document.getElementById('calendarMonthRows');monthBody.innerHTML='';dayRows.forEach(row=>monthBody.appendChild(row));
- const recentBody=document.getElementById('calendarRecentRows');recentBody.innerHTML='';
- const today=new Date();today.setHours(12,0,0,0);
- for(let ago=0;ago<14;ago++){
-  const d=new Date(today);d.setDate(today.getDate()-ago);const rk=keyDate(d),rr=data[rk],rp=rr?.punches||[],getRecent=t=>rp.find(x=>x.type===t),outRecent=[...rp].reverse().find(x=>x.type==='out');
-  const tr=document.createElement('tr');if(rk===myTimeSelectedDate)tr.className='calendar-ledger-selected';
-  const values=[new Date(rk+'T12:00:00').toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric',year:'numeric'}),showTs(getRecent('in')?.ts),showTs(getRecent('lunch-start')?.ts),showTs(getRecent('lunch-end')?.ts),showTs(outRecent?.ts),String(rp.length)];
-  values.forEach(v=>{const td=document.createElement('td');td.textContent=v;tr.appendChild(td)});
-  const actionCell=document.createElement('td'),selectDay=document.createElement('button');selectDay.type='button';selectDay.className='quiet';selectDay.textContent='View day';selectDay.onclick=()=>{myTimeSelectedDate=rk;myTimeCalendarMonth=new Date(d.getFullYear(),d.getMonth(),1);renderMyTimeCalendar()};actionCell.appendChild(selectDay);tr.appendChild(actionCell);recentBody.appendChild(tr);
- }
- document.getElementById('calendarYesterday').textContent='Yesterday · '+keyDate(new Date(Date.now()-86400000));
- const k=myTimeSelectedDate;document.getElementById('calendarSelectedTitle').textContent=new Date(k+'T12:00:00').toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric',year:'numeric'});
- const rec=data[k],p=rec?.punches||[],get=t=>p.find(x=>x.type===t),last=[...p].reverse().find(x=>x.type==='out');
- const details=[['Clock in',get('in')?.ts],['Lunch out',get('lunch-start')?.ts],['Lunch in',get('lunch-end')?.ts],['Clock out',last?.ts]];
- const detailBox=document.getElementById('calendarPunchDetails');detailBox.innerHTML='';
- details.forEach(([label,ts])=>{const box=document.createElement('div');box.className='mytime-detail-item';const l=document.createElement('span');l.textContent=label;const v=document.createElement('strong');v.textContent=showTs(ts);box.append(l,v);detailBox.appendChild(box)});
- document.getElementById('calendarSavedBadge').textContent=rec?'Saved on this device':'No saved punches';
- const root=rec?ensureBreakFields(k):{breakStatus:{lunch:'not-recorded',morning:'not-recorded',afternoon:'not-recorded'},breakTimes:{morning:{start:'',end:''},afternoon:{start:'',end:''}}},controls=document.getElementById('calendarBreakControls');controls.innerHTML='';
- const entries=[['lunch','Lunch status'],['morning','Morning 15-minute break'],['afternoon','Afternoon 15-minute break']];
- entries.forEach(([key,label])=>{
+  const n=document.createElement('strong');n.textContent=String(d.getDate());btn.appendChild(n);
+  const punch=document.createElement('small');punch.className='calendar-day-punches';punch.textContent=rec.punches.length?'In '+timeFor(rec,'in')+' · Out '+timeFor(rec,'out'):'No punches saved';btn.appendChild(punch);
+  const lunch=document.createElement('small');lunch.className='calendar-day-lunch';lunch.textContent='Lunch '+(rec.punches.some(x=>x.type==='lunch-start'||x.type==='lunch-end')?'recorded':'—');btn.appendChild(lunch);
+  const paid=document.createElement('small');paid.className='calendar-day-breaks';paid.textContent='Paid '+dayPaid(k);btn.appendChild(paid);
+  btn.title=k+' · '+punch.textContent;btn.onclick=()=>selectDay(k);grid.appendChild(btn);
+ });
+ while(grid.children.length<49){const blank=document.createElement('div');blank.className='mytime-calendar-empty';grid.appendChild(blank)}
+ const selected=recordFor(myTimeSelectedDate),has=dayHasRecord(myTimeSelectedDate),p=selected.punches;
+ document.getElementById('calendarSelectedTitle').textContent=new Date(myTimeSelectedDate+'T12:00:00').toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+ document.getElementById('calendarSavedBadge').textContent=has?'Saved on this device':'No saved record';
+ const details=document.getElementById('calendarPunchDetails');details.innerHTML='';
+ [['Clock in','in'],['Lunch out','lunch-start'],['Lunch in','lunch-end'],['Clock out','out']].forEach(([label,type])=>{const box=document.createElement('div');box.className='mytime-detail-item';const l=document.createElement('span'),v=document.createElement('strong');l.textContent=label;v.textContent=timeFor(selected,type);box.append(l,v);details.appendChild(box)});
+ const complete=p.filter(x=>x&&x.type).length;document.getElementById('calendarDaySummary').textContent=complete?complete+' punch event(s) saved · paid time '+dayPaid(myTimeSelectedDate):'No punch events are saved for this date in this browser. If you clocked in on another device or browser, those records will not automatically appear here.';
+ const breakRoot=has?ensureBreakFields(myTimeSelectedDate):{breakStatus:{lunch:'not-recorded',morning:'not-recorded',afternoon:'not-recorded'},breakTimes:{morning:{start:'',end:''},afternoon:{start:'',end:''}}};
+ const controls=document.getElementById('calendarBreakControls');controls.innerHTML='';
+ [['lunch','Lunch status'],['morning','Morning 15-minute break'],['afternoon','Afternoon 15-minute break']].forEach(([name,label])=>{
   const box=document.createElement('div');box.className='mytime-break-item';const h=document.createElement('strong');h.textContent=label;box.appendChild(h);
-  const select=document.createElement('select');select.setAttribute('aria-label',label+' status');
-  [['not-recorded','Not recorded'],['taken','Taken'],['skipped','Skipped']].forEach(([v,t])=>{const o=document.createElement('option');o.value=v;o.textContent=t;select.appendChild(o)});
-  select.value=root.breakStatus[key];select.onchange=()=>{const rr=ensureBreakFields(k);rr.breakStatus[key]=select.value;save();renderMyTimeCalendar();if(typeof renderPlanning==='function')renderPlanning()};box.appendChild(select);
-  if(key!=='lunch'){
-   const timeRow=document.createElement('div');timeRow.className='mytime-break-times';
-   ['start','end'].forEach(part=>{const labelEl=document.createElement('label');labelEl.textContent=part==='start'?'Start time':'End time';const input=document.createElement('input');input.type='time';input.value=root.breakTimes[key][part]||'';input.setAttribute('aria-label',label+' '+part);input.onchange=()=>{const rr=ensureBreakFields(k);rr.breakTimes[key][part]=input.value;save();renderMyTimeCalendar()};labelEl.appendChild(input);timeRow.appendChild(labelEl)});box.appendChild(timeRow);
-  }
+  const sel=document.createElement('select');sel.setAttribute('aria-label',label+' status');
+  [['not-recorded','Not recorded'],['taken','Taken'],['skipped','Skipped']].forEach(([v,t])=>{const o=document.createElement('option');o.value=v;o.textContent=t;sel.appendChild(o)});
+  sel.value=breakRoot.breakStatus[name];sel.onchange=()=>{const rec=ensureBreakFields(myTimeSelectedDate);rec.breakStatus[name]=sel.value;save();renderMyTimeCalendar()};box.appendChild(sel);
+  if(name!=='lunch'){const times=document.createElement('div');times.className='mytime-break-times';['start','end'].forEach(part=>{const lab=document.createElement('label');lab.textContent=part==='start'?'Start time':'End time';const inp=document.createElement('input');inp.type='time';inp.value=breakRoot.breakTimes[name][part]||'';inp.onchange=()=>{const rec=ensureBreakFields(myTimeSelectedDate);rec.breakTimes[name][part]=inp.value;save();renderMyTimeCalendar()};lab.appendChild(inp);times.appendChild(lab)});box.appendChild(times)}
   controls.appendChild(box);
  });
- const latePanel=document.getElementById('calendarLatePrompt');latePanel.hidden=true;latePanel.innerHTML='';
- if(k===todayKey()){
-  const now=Date.now(),scheduledStart=parseTime(settings.startTime||'08:00'),nowM=new Date().getHours()*60+new Date().getMinutes(),firstIn=get('in'),lateBy=firstIn?Math.max(0,Math.floor((new Date(firstIn.ts).getHours()*60+new Date(firstIn.ts).getMinutes())-scheduledStart)):Math.max(0,nowM-scheduledStart);
-  if(lateBy>0&&nowM>=scheduledStart){
-   latePanel.hidden=false;latePanel.innerHTML='<strong>You are '+lateBy+' minute(s) past your scheduled start.</strong><p>Your two 15-minute breaks are paid. If you skip one, mark it “Skipped” in the calendar to apply a 15-minute credit to your recovery estimate. Lunch is tracked separately. Follow workplace policy for required breaks.</p><div class="settings-actions"><button type="button" class="quiet" id="calendarKeepBreaks">Yes — keep my scheduled breaks</button><button type="button" class="primary" id="calendarRecoveryOptions">Show make-up options</button></div><p class="sub" id="calendarRecoveryAdvice" hidden>Your recovery estimate can include 15 minutes for each paid 15-minute break you mark “Skipped” (up to 30 minutes per day). These credits adjust the planner only; they do not change recorded punch time or payroll. Other options include an approved later finish, earlier start, or authorized schedule adjustment.</p>';
-   document.getElementById('calendarKeepBreaks').onclick=()=>{latePanel.innerHTML='<strong>Break plan noted for today.</strong><p>Your calendar will continue to show the actual break status you record below.</p>'};
-   document.getElementById('calendarRecoveryOptions').onclick=()=>{document.getElementById('calendarRecoveryAdvice').hidden=false};
-  }
- }
+ const monday=weekMonday(new Date());monday.setDate(monday.getDate()-7);
+ const weekKeys=Array.from({length:7},(_,i)=>{const d=new Date(monday);d.setDate(d.getDate()+i);return keyDateLocal(d)});
+ document.getElementById('calendarWeekTitle').textContent=weekKeys[0]+' through '+weekKeys[6]+' · previous Monday–Sunday';
+ const fillTable=(id,keys,mode)=>{const body=document.getElementById(id);body.innerHTML='';keys.forEach(k=>{const rec=recordFor(k),tr=document.createElement('tr');if(k===myTimeSelectedDate)tr.className='calendar-ledger-selected';
+  const vals=mode==='month'?[k,timeFor(rec,'in'),timeFor(rec,'lunch-start'),timeFor(rec,'lunch-end'),timeFor(rec,'out'),breakFor(data[k],'morning'),breakFor(data[k],'afternoon'),dayPaid(k)]:mode==='week'?[new Date(k+'T12:00:00').toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'}),timeFor(rec,'in'),timeFor(rec,'lunch-start'),timeFor(rec,'lunch-end'),timeFor(rec,'out'),dayPaid(k)]:[new Date(k+'T12:00:00').toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric',year:'numeric'}),timeFor(rec,'in'),timeFor(rec,'lunch-start'),timeFor(rec,'lunch-end'),timeFor(rec,'out'),String(rec.punches.length)];
+  vals.forEach(v=>{const td=document.createElement('td');td.textContent=v;tr.appendChild(td)});
+  const td=document.createElement('td'),b=document.createElement('button');b.type='button';b.className='quiet';b.textContent='View';b.onclick=()=>selectDay(k);td.appendChild(b);tr.appendChild(td);body.appendChild(tr);
+ })};
+ fillTable('calendarWeekRows',weekKeys,'week');fillTable('calendarMonthRows',monthKeys,'month');
+ const recentKeys=Array.from({length:14},(_,i)=>{const d=new Date();d.setDate(d.getDate()-i);return keyDateLocal(d)});
+ fillTable('calendarRecentRows',recentKeys,'recent');
+}
+function calendarDateKeys(scope){
+ const keyDateLocal=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+ if(scope==='week'){const d=weekMonday(new Date());d.setDate(d.getDate()-7);return Array.from({length:7},(_,i)=>{const x=new Date(d);x.setDate(x.getDate()+i);return keyDateLocal(x)})}
+ const first=new Date(myTimeCalendarMonth.getFullYear(),myTimeCalendarMonth.getMonth(),1,12),count=new Date(first.getFullYear(),first.getMonth()+1,0).getDate();
+ return Array.from({length:count},(_,i)=>keyDateLocal(new Date(first.getFullYear(),first.getMonth(),i+1,12)));
+}
+function exportCalendarCsv(keys){
+ const q=v=>{const s=String(v??'');return '"'+s.replace(/"/g,'""')+'"';};
+ const rows=[['Date','Clock in','Lunch out','Lunch in','Clock out','Paid time','Punch count','Morning break status','Afternoon break status']];
+ keys.forEach(k=>{const r=data[k]||{punches:[]},p=r.punches||[],get=t=>p.find(x=>x.type===t),out=[...p].reverse().find(x=>x.type==='out'),clock=t=>{const item=t==='out'?out:get(t);return item?.ts?fmtTime(item.ts):''};rows.push([k,clock('in'),clock('lunch-start'),clock('lunch-end'),clock('out'),p.length?fmtMin(paidMs(r,out?.ts||Date.now())/60000):'',p.length,(r.breakStatus||{}).morning||'not-recorded',(r.breakStatus||{}).afternoon||'not-recorded'])});
+ const csv=rows.map(row=>row.map(q).join(',')).join('\r\n'),blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='myTIME-calendar-'+keys[0]+'-to-'+keys[keys.length-1]+'.csv';document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
 }
 /* Direct editing and deletion for any saved date */
 function recordHH(ts){if(!ts)return '';const d=new Date(ts);return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}
