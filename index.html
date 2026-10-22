@@ -6,7 +6,7 @@
 <link rel="icon" type="image/x-icon" href="https://www.fossanalytics.com/favicon.ico">
 <link rel="shortcut icon" href="https://www.fossanalytics.com/favicon.ico">
 <link rel="apple-touch-icon" href="https://www.fossanalytics.com/Design/static/foss-logo.png">
-<meta name="application-name" content="myTIME by FOSS"><title>myTIME | Time Clock</title>
+<meta name="application-name" content="myTIME by FOSS"><link rel="manifest" href="/manifest.json"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="myTIME"><title>myTIME | Time Clock</title>
 <style>
 :root{--ink:#09266f;--brand-blue:#2458c6;--muted:#65718a;--bg:#f5f7fc;--card:#fff;--line:#e0e6f2;--green:#2458c6;--lime:#dce7ff;--red:#a83d38;--shadow:0 12px 34px #09266f0b}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "Purista","Segoe UI",Arial,sans-serif}button,input,select{font:inherit}button{cursor:pointer;border:0;border-radius:12px;padding:12px 16px;font-weight:700;transition:.15s}button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #a3c85a;outline-offset:2px}.shell{max-width:1160px;margin:auto;padding:26px 22px 48px}.top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:25px}.brand{display:flex;align-items:center;gap:12px}.foss-logo{display:block;width:clamp(150px,14vw,220px);max-width:34vw;height:auto;object-fit:contain}.logo-fallback{display:none;color:var(--brand-blue);font-size:22px;font-weight:900;letter-spacing:.04em}.brand strong{display:block;font-size:18px;letter-spacing:.12em}.brand small{color:var(--muted);font-size:12px}.local{color:var(--muted);font-size:13px;text-align:right}.hero{background:var(--ink);color:white;border-radius:24px;padding:30px;display:grid;grid-template-columns:1.15fr .85fr;gap:28px;box-shadow:var(--shadow)}.eyebrow{text-transform:uppercase;letter-spacing:.16em;color:var(--lime);font-size:11px;font-weight:800}.clock{font-size:clamp(42px,7vw,70px);font-weight:750;letter-spacing:-.06em;line-height:1.1;margin:13px 0 6px;font-variant-numeric:tabular-nums}.date{color:#c1ceca}.status{display:inline-flex;align-items:center;gap:8px;border:1px solid #ffffff2c;border-radius:99px;padding:7px 11px;font-size:12px;margin-top:20px}.dot{width:7px;height:7px;border-radius:50%;background:var(--lime)}.punchpanel{background:#ffffff0b;border:1px solid #ffffff22;border-radius:18px;padding:20px;align-self:stretch;display:flex;flex-direction:column;justify-content:center;gap:10px}.punchpanel h2{font-size:16px;margin:0 0 5px}.punchpanel p{font-size:13px;color:#c1ceca;margin:0 0 8px}.primary{background:var(--brand-blue);color:#fff}.primary:hover{filter:brightness(.95)}.secondary{background:#fff;color:var(--ink)}.quiet{background:#e8edfa;color:var(--ink)}button:disabled{opacity:.35;cursor:not-allowed}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:18px 0}.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:var(--shadow);min-width:0}.metric-label{color:var(--muted);font-size:12px;font-weight:700}.metric{font-size:30px;font-weight:750;letter-spacing:-.04em;margin:8px 0 2px;font-variant-numeric:tabular-nums}.sub{font-size:12px;color:var(--muted)}.progress{height:7px;border-radius:99px;background:#e8edfa;overflow:hidden;margin:12px 0 6px}.progress span{display:block;height:100%;background:var(--green);width:0;transition:width .3s}.layout{display:grid;grid-template-columns:1.15fr .85fr;gap:18px}.section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}.section-head h2{font-size:17px;margin:0}.tag{background:#e8edfa;color:#153c92;border-radius:99px;padding:5px 9px;font-size:11px;font-weight:800}.timeline{display:grid;gap:0}.event{display:grid;grid-template-columns:76px 14px 1fr;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);align-items:start}.event:last-child{border:0}.event time{font-variant-numeric:tabular-nums;font-weight:700;font-size:13px}.rail{width:9px;height:9px;border-radius:50%;background:var(--green);margin-top:5px;box-shadow:0 0 0 4px #e8edfa}.event strong{font-size:13px}.event small{display:block;color:var(--muted);font-size:12px}.empty{padding:20px 0;color:var(--muted);font-size:13px}.formrow{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field{display:grid;gap:6px;margin-bottom:12px}.field label{font-size:12px;font-weight:700;color:var(--muted)}.field input,.field select{width:100%;padding:10px 11px;border:1px solid var(--line);border-radius:10px;background:white;color:var(--ink)}.settings-actions{display:flex;gap:8px;flex-wrap:wrap}.tablewrap{overflow:auto}table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;padding:11px 9px;border-bottom:1px solid var(--line);white-space:nowrap}th{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}.schedule-reminders{margin:0 0 18px}.schedule-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.schedule-item{display:flex;align-items:center;gap:12px;padding:14px;border:1px solid var(--line);border-radius:14px;background:#fff}.schedule-icon{width:38px;height:38px;display:grid;place-items:center;border-radius:11px;background:#edf2ff;font-size:18px;flex-shrink:0}.schedule-item strong{display:block;font-size:15px}.schedule-item small{display:block;color:var(--muted);font-size:12px}.schedule-item.is-next{border-color:#2458c6;box-shadow:0 0 0 2px #2458c61a}.schedule-item.is-past{opacity:.65}.schedule-popup{margin:0 0 14px;padding:14px 16px;border:1px solid #f1d28c;border-radius:14px;background:#fff7df;display:flex;align-items:center;justify-content:space-between;gap:12px;color:#634600}.schedule-popup[hidden]{display:none}.schedule-popup button{padding:7px 10px;background:#fff;border:1px solid #ead7a6;color:#634600}.notice{font-size:12px;color:var(--muted);padding:12px 14px;background:#edf2ef;border-radius:12px;margin-top:14px}.footer{margin-top:24px;display:flex;justify-content:space-between;gap:12px;color:var(--muted);font-size:11px}.footer a{color:inherit}@media(max-width:780px){.hero,.layout{grid-template-columns:1fr}.grid{grid-template-columns:1fr}.hero{padding:22px}.top{align-items:flex-start}.local{max-width:130px}.formrow{grid-template-columns:1fr 1fr}}@media(max-width:460px){.shell{padding:16px 12px 32px}.brand small{display:none}.formrow{grid-template-columns:1fr}.card{padding:16px}}
 
@@ -396,10 +396,40 @@ body[data-tab]:not([data-tab="dashboard"]) #webhookPanel{display:none!important;
 .provider-brand svg{display:block;width:42px;height:42px;flex:0 0 42px}
 .google-brand svg{padding:2px}.microsoft-brand svg{padding:3px}
 
+
+/* myTIME enhancements: analytics, theme, and install controls */
+:root{color-scheme:light}
+body.dark-mode{--ink:#e7edff;--brand-blue:#7ea5ff;--muted:#a7b4d0;--bg:#101827;--card:#172236;--line:#2b3a55;--green:#7ea5ff;--lime:#dce7ff;--red:#ff8f86;--shadow:0 12px 34px #00000026;color:var(--ink)}
+body.dark-mode .card,body.dark-mode .profile-card{background:var(--card);color:var(--ink);border-color:var(--line)}
+body.dark-mode input,body.dark-mode select,body.dark-mode textarea{background:#101827;color:var(--ink);border-color:var(--line)}
+body.dark-mode .quiet{background:#263752;color:#e7edff}
+body.dark-mode .recovery{background:#1c2b43;border-color:#334b70;color:#e7edff}
+body.dark-mode .progress{background:#2b3a55}
+body.dark-mode .app-tab{color:#b9c7e3}
+body.dark-mode .app-tab.active{background:#263752;color:#fff}
+body.dark-mode .tablewrap table{color:var(--ink)}
+body.dark-mode th{background:#1c2b43;color:#e7edff}
+body.dark-mode .notice{background:#1c2b43;color:#c1cde4;border-color:#334b70}
+.top-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap;justify-content:flex-end}
+.enhance-btn{padding:9px 12px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;font-size:12px}
+.analytics-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:12px}
+.analytics-grid .card{padding:16px}
+.analytics-chart{display:flex;align-items:end;gap:8px;min-height:140px;padding:12px 4px 0}
+.analytics-bar{flex:1;min-width:0;text-align:center;display:flex;flex-direction:column;justify-content:end;height:128px;gap:6px}
+.analytics-bar-fill{width:100%;min-height:3px;border-radius:7px 7px 2px 2px;background:var(--brand-blue)}
+.analytics-bar small{font-size:10px;color:var(--muted);white-space:nowrap}
+.analytics-bar strong{font-size:10px;overflow:hidden}
+.analytics-warning{border-left:4px solid #d79a25;padding:9px 12px;background:#fff6df;color:#73510a;border-radius:8px;margin:8px 0;font-size:12px}
+body.dark-mode .analytics-warning{background:#3a301c;color:#ffe4a1;border-color:#d79a25}
+#analyticsErrorList{padding-left:20px}
+@media(max-width:850px){.analytics-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.top-actions{justify-content:flex-start}}
+@media(max-width:520px){.analytics-grid{grid-template-columns:1fr 1fr}.top-actions .local{display:none}.enhance-btn{flex:1}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+
 </style>
 </head>
 <body><main class="shell">
-<header class="top"><div class="brand"><img class="foss-logo" src="https://www.fossanalytics.com/Design/static/foss-logo.png" alt="FOSS" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-block'"><span class="logo-fallback" aria-hidden="true">FOSS</span><div><strong>myTIME</strong><small>FOSS North America · Personal time clock</small></div></div><div class="top-actions"><div class="local" id="timezoneLabel">Local time · loading</div><button type="button" class="profile-trigger" id="profileTrigger"><span class="mini-avatar" id="miniAvatar">YOU</span><span id="profileButtonName">My profile</span><span aria-hidden="true">⌄</span></button></div></header>
+<header class="top"><div class="brand"><img class="foss-logo" src="https://www.fossanalytics.com/Design/static/foss-logo.png" alt="FOSS" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-block'"><span class="logo-fallback" aria-hidden="true">FOSS</span><div><strong>myTIME</strong><small>FOSS North America · Personal time clock</small></div></div><div class="top-actions"><button type="button" class="enhance-btn" id="themeToggle" aria-pressed="false" title="Switch light and dark theme">☾ Dark mode</button><button type="button" class="enhance-btn" id="installAppBtn" hidden>＋ Install app</button><div class="local" id="timezoneLabel">Local time · loading</div><button type="button" class="profile-trigger" id="profileTrigger"><span class="mini-avatar" id="miniAvatar">YOU</span><span id="profileButtonName">My profile</span><span aria-hidden="true">⌄</span></button></div></header>
 <nav class="app-tabs" aria-label="myTIME pages" id="appTabs">
   <button type="button" class="app-tab active" data-tab="dashboard">Dashboard</button>
   <button type="button" class="app-tab" data-tab="calendar">Calendar</button>
@@ -1019,4 +1049,78 @@ else if(el('webhookMode').value==='weekly-report'){payload={source:'myTIME',even
 else{payload={source:'myTIME',event:'full_backup',sentAt:new Date().toISOString(),backup:{version:2,settings,data,bankEntries}};}say('Sending…');try{const res=await fetch(u,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),mode:'cors'});if(!res.ok)throw Error('HTTP '+res.status);say('Webhook accepted the request (HTTP '+res.status+'). Check the receiving flow to confirm processing.')}catch(e){say('Could not confirm webhook: '+(e.message||'network/CORS error')+'. No automatic retry was made.')}};
 })();
 
-</script></body></html>
+</script>
+<script>
+/* myTIME quality-of-life layer: analytics, local recovery snapshot, theme, install */
+(function(){
+ 'use strict';
+ const $id=id=>document.getElementById(id);
+ const AUTO_KEY='foss-time-recovery-snapshot-v1';
+ const THEME_KEY='foss-time-theme-v1';
+ const themeBtn=$id('themeToggle'),installBtn=$id('installAppBtn');
+ function setTheme(mode){
+  const dark=mode==='dark';
+  document.body.classList.toggle('dark-mode',dark);
+  if(themeBtn){themeBtn.textContent=dark?'☀ Light mode':'☾ Dark mode';themeBtn.setAttribute('aria-pressed',String(dark));themeBtn.title=dark?'Switch to light theme':'Switch to dark theme'}
+  const meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.content=dark?'#101827':'#09266f';
+ }
+ let savedTheme='light';try{savedTheme=localStorage.getItem(THEME_KEY)||'light'}catch{}
+ setTheme(savedTheme);
+ if(themeBtn)themeBtn.addEventListener('click',()=>{const mode=document.body.classList.contains('dark-mode')?'light':'dark';setTheme(mode);try{localStorage.setItem(THEME_KEY,mode)}catch{}});
+ let installPrompt=null;
+ window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPrompt=e;if(installBtn)installBtn.hidden=false});
+ window.addEventListener('appinstalled',()=>{installPrompt=null;if(installBtn){installBtn.hidden=true;installBtn.textContent='✓ App installed'}});
+ if(installBtn)installBtn.addEventListener('click',async()=>{if(installPrompt){installPrompt.prompt();await installPrompt.userChoice;installPrompt=null;installBtn.hidden=true}else{alert('To install myTIME, use your browser menu and choose “Install this site as an app” or “Add to Home screen.” If that option is unavailable, this browser may not support installation yet.')}});
+ if('serviceWorker' in navigator && location.protocol==='https:'){window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}))}
+ function allDates(){return Object.keys(data||{}).filter(k=>/^\d{4}-\d{2}-\d{2}$/.test(k)).sort()}
+ function paidMinutesFor(k){const rec=data[k];if(!rec||!Array.isArray(rec.punches)||!rec.punches.length)return 0;const out=[...rec.punches].reverse().find(p=>p.type==='out');return Math.round(paidMs(rec,out?.ts||(k===todayKey()?Date.now():rec.punches[rec.punches.length-1]?.ts||Date.now()))/60000)}
+ function formatHours(min){return (min/60).toLocaleString(undefined,{minimumFractionDigits:1,maximumFractionDigits:2})+' h'}
+ function validationIssues(){
+  const issues=[];
+  allDates().forEach(k=>{const ps=(data[k]?.punches||[]).filter(p=>p&&Number.isFinite(Number(p.ts))).slice().sort((a,b)=>a.ts-b.ts);let active=false,lunch=false,last=null;
+   ps.forEach(p=>{if(last&&p.ts<last.ts)issues.push(k+': punch timestamps are out of order');if(p.type==='in'){if(active)issues.push(k+': another clock-in appears before the previous clock-out');active=true}
+    else if(p.type==='lunch-start'){if(!active)issues.push(k+': lunch-out without an active work period');if(lunch)issues.push(k+': duplicate lunch-out');lunch=true;active=false}
+    else if(p.type==='lunch-end'){if(!lunch)issues.push(k+': lunch-in without a lunch-out');lunch=false;active=true}
+    else if(p.type==='out'){if(!active)issues.push(k+': clock-out without a matching clock-in');active=false}
+    last=p;
+   });
+   if(lunch)issues.push(k+': lunch-out has no matching lunch-in');
+   if(active&&k!==todayKey())issues.push(k+': work period has no clock-out');
+   const times=ps.map(p=>p.ts);if(times.some(t=>!Number.isFinite(t)))issues.push(k+': invalid punch timestamp');
+   if(new Set(ps.map(p=>p.type+'|'+p.ts)).size<ps.length)issues.push(k+': duplicate punch entries detected');
+  });
+  return [...new Set(issues)];
+ }
+ function renderAnalytics(){
+  const root=$id('myTimeAnalytics');if(!root)return;
+  const now=new Date(),days=allDates(),month=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0'),monthDays=days.filter(k=>k.startsWith(month)),weekStart=new Date(now);weekStart.setHours(0,0,0,0);weekStart.setDate(weekStart.getDate()-((weekStart.getDay()+6)%7));const weekKey=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');const weekDays=days.filter(k=>{const d=new Date(k+'T12:00:00');return d>=weekStart&&d<=now});
+  const mins=keys=>keys.reduce((n,k)=>n+paidMinutesFor(k),0),today=paidMinutesFor(todayKey()),w=mins(weekDays),m=mins(monthDays),goal=Math.max(1,Number(settings.goalHours||8)*60),allIssues=validationIssues();
+  const dayLabels=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];const bars=dayLabels.map((label,i)=>{const d=new Date(weekStart);d.setDate(d.getDate()+i);const k=weekKey(d),v=paidMinutesFor(k);return {label,value:v}});const max=Math.max(goal,...bars.map(b=>b.value),1);
+  root.innerHTML='<div class="section-head"><div><div class="metric-label">YOUR TIME, AT A GLANCE</div><h2 style="margin:4px 0">Work analytics</h2><p class="sub">Calculated from saved records on this browser. Open shifts are estimates and may change as you punch.</p></div><button type="button" class="quiet" id="refreshAnalytics">Refresh</button></div>'+
+   '<div class="analytics-grid"><article class="card"><div class="metric-label">TODAY</div><div class="metric">'+formatHours(today)+'</div><div class="sub">Paid time recorded</div></article><article class="card"><div class="metric-label">THIS WEEK</div><div class="metric">'+formatHours(w)+'</div><div class="sub">'+weekDays.length+' day(s) with records</div></article><article class="card"><div class="metric-label">THIS MONTH</div><div class="metric">'+formatHours(m)+'</div><div class="sub">'+monthDays.length+' day(s) with records</div></article><article class="card"><div class="metric-label">DATA CHECKS</div><div class="metric">'+allIssues.length+'</div><div class="sub">'+(allIssues.length?'item(s) to review':'No obvious punch sequence issues')+'</div></article></div>'+
+   '<div class="layout" style="margin-top:14px"><article class="card"><div class="section-head"><h3 style="margin:0">This week</h3><span class="tag">PAID HOURS</span></div><div class="analytics-chart">'+bars.map(b=>'<div class="analytics-bar"><strong>'+ (b.value?formatHours(b.value):'—')+'</strong><div class="analytics-bar-fill" style="height:'+Math.max(3,Math.round(b.value/max*90))+'px" title="'+b.label+': '+formatHours(b.value)+'"></div><small>'+b.label+'</small></div>').join('')+'</div><p class="sub">Daily goal reference: '+formatHours(goal)+'. Compare recorded hours with your schedule; this is not payroll approval.</p></article><article class="card"><div class="section-head"><h3 style="margin:0">Record quality</h3><span class="tag">'+(allIssues.length?'REVIEW':'CHECKED')+'</span></div><p class="sub">Automatic checks look for unmatched punches and duplicate or incomplete sequences.</p>'+(allIssues.length?'<div class="analytics-warning">Review these records before exporting.</div><ul id="analyticsErrorList">'+allIssues.slice(0,8).map(x=>'<li>'+x.replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</li>').join('')+'</ul>'+(allIssues.length>8?'<p class="sub">Showing 8 of '+allIssues.length+' findings.</p>':''):'<p>✓ No obvious punch sequence issues found.</p>')+'<div class="settings-actions"><button type="button" class="quiet" id="goImportChecks">Import &amp; export</button><button type="button" class="quiet" id="downloadRecoveryNow">Download backup</button></div></article></div>';
+  $id('refreshAnalytics').onclick=renderAnalytics;$id('goImportChecks').onclick=()=>window.myTimeShowPage&&window.myTimeShowPage('import');$id('downloadRecoveryNow').onclick=()=>download('myTIME-recovery-'+todayKey()+'.json',JSON.stringify({version:2,exportedAt:new Date().toISOString(),settings,data,bankEntries},null,2),'application/json');
+ }
+ function mountAnalytics(){
+  const dash=document.getElementById('page-dashboard');if(!dash||$id('myTimeAnalytics'))return;
+  const sec=document.createElement('section');sec.id='myTimeAnalytics';sec.className='card';sec.style.marginTop='18px';dash.appendChild(sec);renderAnalytics();
+ }
+ function snapshot(){
+  try{const snap={version:2,createdAt:new Date().toISOString(),settings,data,bankEntries};localStorage.setItem(AUTO_KEY,JSON.stringify(snap));localStorage.setItem(AUTO_KEY+'-status',new Date().toISOString())}catch(e){/* quota/privacy mode: manual export remains available */}
+ }
+ const previousSave=save;save=function(){previousSave();snapshot();renderAnalytics()};
+ const previousSaveSet=saveSet;saveSet=function(){previousSaveSet();snapshot();renderAnalytics()};
+ const priorRender=render;render=function(){priorRender();snapshot();renderAnalytics()};
+ // Offer recovery if records were cleared but an earlier automatic snapshot remains.
+ try{
+  const raw=localStorage.getItem(AUTO_KEY),current=JSON.parse(localStorage.getItem(KEY)||'{}');
+  if(raw&&(!current||!Object.keys(current).length)){const backup=JSON.parse(raw);if(backup.data&&Object.keys(backup.data).length&&confirm('myTIME found an automatic recovery snapshot from '+new Date(backup.createdAt||Date.now()).toLocaleString()+'. Restore those local records?')){data=backup.data;if(backup.settings)settings=backup.settings;if(Array.isArray(backup.bankEntries))bankEntries=backup.bankEntries;save();saveSet();localStorage.setItem(BANKKEY,JSON.stringify(bankEntries));applySettings();render()}}
+ }catch{}
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mountAnalytics);else mountAnalytics();
+ // Refresh analytics when navigating back to the dashboard.
+ document.getElementById('appTabs')?.addEventListener('click',e=>{if(e.target.closest('[data-tab="dashboard"]'))setTimeout(renderAnalytics,0)});
+ window.addEventListener('storage',e=>{if(e.key===KEY||e.key===SETKEY){try{data=load(KEY,{});settings=load(SETKEY,settings);renderAnalytics()}catch{}}});
+})();
+</script>
+
+</body></html>
