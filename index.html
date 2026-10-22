@@ -476,7 +476,7 @@ body[data-tab="integrations"] [data-page]:not([data-page~="integrations"]){displ
   });
   if(key==='calendar'&&typeof renderMyTimeCalendar==='function')renderMyTimeCalendar();
   if(key==='records'&&typeof renderRecordManager==='function')renderRecordManager();
-  if(key==='timesheets'&&typeof renderPlanning==='function')renderPlanning();
+  if(key==='weekly'&&typeof renderPlanning==='function')renderPlanning();
  }
  nav.querySelectorAll('.app-tab').forEach(btn=>btn.addEventListener('click',()=>showPage(btn.dataset.tab)));
  const updateNavBrand=()=>document.body.classList.toggle('nav-compact',window.scrollY>120);
