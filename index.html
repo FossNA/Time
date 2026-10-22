@@ -175,6 +175,8 @@ body[data-tab="integrations"] [data-page]:not([data-page~="integrations"]){displ
   body{display:block!important}
   .shell{width:100%!important;max-width:none!important;margin:0!important;padding:0!important}
   .top,.app-tabs,.profile-backdrop,#profilePanel,.top-actions,.settings-actions,button,.no-print,.notice,.subtle-actions{display:none!important}
+  /* Keep today’s break and lunch schedule on screen, never in print or Save as PDF. */
+  .schedule-reminders{display:none!important}
   .tab-page[hidden]{display:none!important}
   .tab-page:not([hidden]){display:flex!important;gap:12pt!important;padding:0!important;margin:0!important;width:100%!important}
 
