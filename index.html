@@ -192,6 +192,24 @@ body[data-tab="integrations"] [data-page]:not([data-page~="integrations"]){displ
 #page-dashboard .timeline{margin-top:8px}
 #page-dashboard > .hero + .grid{margin-top:0!important}
 @media(max-width:760px){.tab-page{gap:14px}.app-tabs{gap:6px}.app-tab{padding:10px 11px}}
+
+.mytime-calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:7px}
+.mytime-calendar-weekday{text-align:center;color:var(--muted);font-size:12px;font-weight:700;padding:6px 0}
+.mytime-calendar-empty{min-height:76px}
+.mytime-calendar-day{min-width:0;min-height:76px;text-align:left;display:flex;flex-direction:column;gap:5px;align-items:flex-start;border:1px solid var(--line);background:var(--card);border-radius:10px;padding:8px;color:var(--ink)}
+.mytime-calendar-day small{font-size:10px;color:var(--muted);overflow-wrap:anywhere}
+.mytime-calendar-day.selected{outline:2px solid var(--brand-blue);background:var(--lime)}
+.mytime-calendar-day.today{border-color:var(--brand-blue)}
+.mytime-detail-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.mytime-detail-item,.mytime-break-item{border:1px solid var(--line);border-radius:10px;padding:12px;min-width:0}
+.mytime-detail-item{display:flex;flex-direction:column;gap:8px}
+.mytime-detail-item span{font-size:12px;color:var(--muted)}
+.mytime-break-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.mytime-break-item{display:flex;flex-direction:column;gap:10px}
+.mytime-break-item select,.mytime-break-item input{width:100%;min-width:0;padding:9px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink)}
+.mytime-break-times{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.mytime-break-times label{font-size:11px;color:var(--muted)}
+@media(max-width:650px){.mytime-calendar-grid{gap:3px}.mytime-calendar-day{min-height:58px;padding:5px;border-radius:7px}.mytime-calendar-day small{font-size:9px}.mytime-detail-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.mytime-break-grid{grid-template-columns:1fr}}
 /* Explicit tab pages: only the selected page is visible */
 .tab-page[hidden]{display:none!important}
 .tab-page{min-width:0}
@@ -202,6 +220,7 @@ body[data-tab="integrations"] [data-page]:not([data-page~="integrations"]){displ
 <header class="top"><div class="brand"><a href="https://fossna.com/" aria-label="FOSS North America website"><img class="foss-logo" src="https://www.fossanalytics.com/Design/static/foss-logo.png" alt="FOSS" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-block'"><span class="logo-fallback" aria-hidden="true">FOSS</span></a><div><strong>myTIME</strong><small>FOSS North America · Personal time clock</small></div></div><div class="top-actions"><div class="local" id="timezoneLabel">Local time · loading</div><button type="button" class="profile-trigger" id="profileTrigger"><span class="mini-avatar" id="miniAvatar">YOU</span><span id="profileButtonName">My profile</span><span aria-hidden="true">⌄</span></button></div></header>
 <nav class="app-tabs" aria-label="myTIME pages" id="appTabs">
   <button type="button" class="app-tab active" data-tab="dashboard">Dashboard</button>
+  <button type="button" class="app-tab" data-tab="calendar">Calendar</button>
   <button type="button" class="app-tab" data-tab="timesheets">Weekly &amp; monthly</button>
   <button type="button" class="app-tab" data-tab="records">Manage records</button>
   <button type="button" class="app-tab" data-tab="import">Import &amp; export</button>
@@ -301,7 +320,7 @@ body[data-tab="integrations"] [data-page]:not([data-page~="integrations"]){displ
 (function setupAppTabs(){
  const main=document.querySelector('main.shell'),nav=document.getElementById('appTabs');
  if(!main||!nav)return;
- const labels={dashboard:'Dashboard',timesheets:'Weekly & monthly',records:'Manage records',import:'Import & export',settings:'Settings',integrations:'Integrations'};
+ const labels={dashboard:'Dashboard',calendar:'Calendar',timesheets:'Weekly & monthly',records:'Manage records',import:'Import & export',settings:'Settings',integrations:'Integrations'};
  const pages={};
  Object.keys(labels).forEach(key=>{
   let page=document.getElementById('page-'+key);
@@ -346,12 +365,79 @@ body[data-tab="integrations"] [data-page]:not([data-page~="integrations"]){displ
   nav.querySelectorAll('.app-tab').forEach(btn=>{
    const active=btn.dataset.tab===key;btn.classList.toggle('active',active);btn.setAttribute('aria-current',active?'page':'false');
   });
+  if(key==='calendar'&&typeof renderMyTimeCalendar==='function')renderMyTimeCalendar();
   if(key==='records'&&typeof renderRecordManager==='function')renderRecordManager();
   if(key==='timesheets'&&typeof renderPlanning==='function')renderPlanning();
  }
  nav.querySelectorAll('.app-tab').forEach(btn=>btn.addEventListener('click',()=>showPage(btn.dataset.tab)));
  showPage('dashboard');window.myTimeShowPage=showPage;
 })();
+
+
+/* Monthly calendar and explicit break-status records. Break status is descriptive only and never grants make-up time. */
+let myTimeCalendarMonth = new Date(new Date().getFullYear(),new Date().getMonth(),1);
+let myTimeSelectedDate = todayKey();
+function ensureBreakFields(k){
+ const r=data[k]||(data[k]={punches:[],audit:[]});
+ r.breakStatus=r.breakStatus||{};
+ ['lunch','morning','afternoon'].forEach(x=>{if(!['taken','skipped','not-recorded'].includes(r.breakStatus[x]))r.breakStatus[x]='not-recorded'});
+ r.breakTimes=r.breakTimes||{};
+ ['morning','afternoon'].forEach(x=>{r.breakTimes[x]=r.breakTimes[x]||{start:'',end:''}});
+ return r;
+}
+function renderMyTimeCalendar(){
+ const page=document.getElementById('page-calendar');if(!page)return;
+ if(!document.getElementById('myTimeCalendarRoot')){
+  page.innerHTML=`<section class="card" id="myTimeCalendarRoot">
+   <div class="section-head"><div><div class="metric-label">MYTIME CALENDAR</div><h2 style="margin:4px 0">Monthly time calendar</h2><p class="sub">Select a day to review saved punches and explicitly recorded break status.</p></div>
+   <div class="settings-actions"><button type="button" class="quiet" id="calendarPrev" aria-label="Previous month">‹</button><button type="button" class="quiet" id="calendarToday">Today</button><button type="button" class="quiet" id="calendarNext" aria-label="Next month">›</button></div></div>
+   <h3 id="calendarMonthTitle" style="margin:8px 0 14px"></h3><div class="mytime-calendar-grid" id="myTimeCalendarGrid"></div>
+   <section class="card" style="margin-top:18px;background:var(--bg)" id="calendarDayDetail">
+    <div class="section-head"><div><div class="metric-label">SELECTED DAY</div><h3 id="calendarSelectedTitle" style="margin:4px 0"></h3></div><span class="badge" id="calendarSavedBadge">Local record</span></div>
+    <div class="mytime-detail-grid" id="calendarPunchDetails"></div>
+    <div class="divider" style="margin:18px 0;border-top:1px solid var(--line)"></div>
+    <h3>Lunch and breaks</h3><p class="sub">Set status only when confirmed. “Not recorded” is not the same as “Skipped.” Reference break windows: 9:45–10:00 AM and 2:45–3:00 PM.</p>
+    <div class="mytime-break-grid" id="calendarBreakControls"></div>
+    <p class="notice" style="margin-top:12px">Timekeeping note: a skipped break is not assumed to be legally available for make-up time. Break status does not create time credit or alter paid-hour calculations.</p>
+   </section></section>`;
+  document.getElementById('calendarPrev').onclick=()=>{myTimeCalendarMonth=new Date(myTimeCalendarMonth.getFullYear(),myTimeCalendarMonth.getMonth()-1,1);renderMyTimeCalendar()};
+  document.getElementById('calendarNext').onclick=()=>{myTimeCalendarMonth=new Date(myTimeCalendarMonth.getFullYear(),myTimeCalendarMonth.getMonth()+1,1);renderMyTimeCalendar()};
+  document.getElementById('calendarToday').onclick=()=>{myTimeSelectedDate=todayKey();myTimeCalendarMonth=new Date(new Date().getFullYear(),new Date().getMonth(),1);renderMyTimeCalendar()};
+ }
+ const title=document.getElementById('calendarMonthTitle'),grid=document.getElementById('myTimeCalendarGrid');
+ title.textContent=myTimeCalendarMonth.toLocaleDateString(undefined,{month:'long',year:'numeric'});
+ grid.innerHTML='';
+ ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(d=>{const e=document.createElement('div');e.className='mytime-calendar-weekday';e.textContent=d;grid.appendChild(e)});
+ const first=new Date(myTimeCalendarMonth.getFullYear(),myTimeCalendarMonth.getMonth(),1),offset=first.getDay(),days=new Date(first.getFullYear(),first.getMonth()+1,0).getDate();
+ for(let i=0;i<offset;i++){const blank=document.createElement('div');blank.className='mytime-calendar-empty';grid.appendChild(blank)}
+ for(let dayNo=1;dayNo<=days;dayNo++){
+  const d=new Date(first.getFullYear(),first.getMonth(),dayNo),k=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(dayNo).padStart(2,'0'),r=data[k],btn=document.createElement('button');
+  btn.type='button';btn.className='mytime-calendar-day'+(k===myTimeSelectedDate?' selected':'')+(k===todayKey()?' today':'');btn.setAttribute('aria-pressed',k===myTimeSelectedDate?'true':'false');
+  const num=document.createElement('strong');num.textContent=String(dayNo);btn.appendChild(num);
+  const p=r?.punches||[];const status=document.createElement('small');status.textContent=p.length?'Punches saved':(r?.breakStatus?'Breaks recorded':'No record');btn.appendChild(status);
+  if(p.length){const times=document.createElement('small');const ci=p.find(x=>x.type==='in');times.textContent=ci?'In '+hh(ci.ts):'Punches';btn.appendChild(times)}
+  btn.onclick=()=>{myTimeSelectedDate=k;renderMyTimeCalendar()};grid.appendChild(btn);
+ }
+ const k=myTimeSelectedDate;document.getElementById('calendarSelectedTitle').textContent=new Date(k+'T12:00:00').toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+ const rec=data[k],p=rec?.punches||[],get=t=>p.find(x=>x.type===t),last=[...p].reverse().find(x=>x.type==='out');
+ const details=[['Clock in',get('in')?.ts],['Lunch out',get('lunch-start')?.ts],['Lunch in',get('lunch-end')?.ts],['Clock out',last?.ts]];
+ const detailBox=document.getElementById('calendarPunchDetails');detailBox.innerHTML='';
+ details.forEach(([label,ts])=>{const box=document.createElement('div');box.className='mytime-detail-item';const l=document.createElement('span');l.textContent=label;const v=document.createElement('strong');v.textContent=ts?fmtTime(ts):'Not recorded';box.append(l,v);detailBox.appendChild(box)});
+ document.getElementById('calendarSavedBadge').textContent=rec?'Saved data':'No saved record';
+ const root=ensureBreakFields(k),controls=document.getElementById('calendarBreakControls');controls.innerHTML='';
+ const entries=[['lunch','Lunch status'],['morning','Morning break'],['afternoon','Afternoon break']];
+ entries.forEach(([key,label])=>{
+  const box=document.createElement('div');box.className='mytime-break-item';const h=document.createElement('strong');h.textContent=label;box.appendChild(h);
+  const select=document.createElement('select');select.setAttribute('aria-label',label+' status');
+  [['not-recorded','Not recorded'],['taken','Taken'],['skipped','Skipped']].forEach(([v,t])=>{const o=document.createElement('option');o.value=v;o.textContent=t;select.appendChild(o)});
+  select.value=root.breakStatus[key];select.onchange=()=>{ensureBreakFields(k).breakStatus[key]=select.value;save();renderMyTimeCalendar()};box.appendChild(select);
+  if(key!=='lunch'){
+   const timeRow=document.createElement('div');timeRow.className='mytime-break-times';
+   ['start','end'].forEach(part=>{const labelEl=document.createElement('label');labelEl.textContent=part==='start'?'Start time':'End time';const input=document.createElement('input');input.type='time';input.value=root.breakTimes[key][part]||'';input.setAttribute('aria-label',label+' '+part);input.onchange=()=>{const rr=ensureBreakFields(k);rr.breakTimes[key][part]=input.value;save();renderMyTimeCalendar()};labelEl.appendChild(input);timeRow.appendChild(labelEl)});box.appendChild(timeRow);
+  }
+  controls.appendChild(box);
+ });
+}
 
 /* Direct editing and deletion for any saved date */
 function recordHH(ts){if(!ts)return '';const d=new Date(ts);return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}
@@ -407,7 +493,7 @@ function openWorkSettings(open){$('workSettingsPanel').hidden=!open;$('workSetti
 $('openWorkSettings').onclick=()=>openWorkSettings(true);
 $('cancelSettings').onclick=()=>{applySettings();openWorkSettings(false)};
 function day(){return data[todayKey()]||(data[todayKey()]={punches:[],audit:[]})}function parseTime(s){let [h,m]=s.split(':').map(Number);return h*60+m}function fmtMin(n){n=Math.max(0,Math.floor(n));return Math.floor(n/60)+'h '+String(n%60).padStart(2,'0')+'m'}function fmtDate(d){return new Intl.DateTimeFormat(undefined,{weekday:'long',month:'long',day:'numeric',year:'numeric'}).format(d)}function fmtClock(d){return new Intl.DateTimeFormat(settings.timezone==='UTC'?'en-US':undefined,{hour:'numeric',minute:'2-digit',second:'2-digit',...(settings.timezone==='UTC'?{timeZone:'UTC'}:{})}).format(d)}function fmtTime(ts){return new Intl.DateTimeFormat(undefined,{hour:'numeric',minute:'2-digit'}).format(new Date(ts))}function paidMs(rec,now=Date.now()){let p=rec?.punches||[],ms=0,start=null;for(const x of p){if(x.type==='in')start=x.ts;if(x.type==='lunch-start'&&start){ms+=Math.max(0,x.ts-start);start=null}if(x.type==='lunch-end')start=x.ts;if(x.type==='out'&&start){ms+=Math.max(0,x.ts-start);start=null}}if(start)ms+=Math.max(0,now-start);return ms}function lunchMs(rec,now=Date.now()){let p=rec?.punches||[],s=null,ms=0;for(const x of p){if(x.type==='lunch-start')s=x.ts;if(x.type==='lunch-end'&&s){ms+=x.ts-s;s=null}}if(s)ms+=now-s;return ms}function currentState(){let p=day().punches;return p.length?p[p.length-1].type:'none'}function projectedFinish(){let p=day().punches,first=p.find(x=>x.type==='in');if(!first)return null;let start=first.ts,goal=settings.goalHours*3600000,breakPlanned=Math.max(0,parseTime(settings.lunchEnd)-parseTime(settings.lunchStart))*60000;let lunchStarted=p.some(x=>x.type==='lunch-start'),lunchEnded=p.some(x=>x.type==='lunch-end'),lunchActual=lunchMs(day());let remainingLunch=lunchEnded?0:Math.max(0,breakPlanned-lunchActual);let elapsed=paidMs(day());let finish=Date.now()+Math.max(0,goal-elapsed)+remainingLunch;return new Date(finish)}function punch(type){let r=day(),last=currentState();let allowed={none:['in'],'in':['lunch-start','out'],'lunch-start':['lunch-end'],'lunch-end':['lunch-start','out'],out:[]};if(!allowed[last]?.includes(type)){alert('That punch is not available in the current shift sequence.');return}r.punches.push({type,ts:Date.now()});save();render()}function typeName(t){return ({in:'Clock in', 'lunch-start':'Lunch started','lunch-end':'Lunch ended',out:'Clock out'})[t]||t}function renderTimeline(){let p=day().punches;let box=$('timeline');box.innerHTML=p.length?'':'<div class="empty">No punches yet. Clock in to begin your day.</div>';p.forEach(x=>{let e=document.createElement('div');e.className='event';e.innerHTML='<time>'+fmtTime(x.ts)+'</time><span class="rail"></span><div><strong>'+typeName(x.type)+'</strong><small>'+new Date(x.ts).toLocaleDateString()+'</small></div>';box.appendChild(e)})}function renderMonth(){let month=$('monthFilter').value||todayKey().slice(0,7),rows=Object.keys(data).filter(k=>k.startsWith(month)).sort().reverse(),body=$('monthRows');body.innerHTML='';let total=0;rows.forEach(k=>{let r=data[k],p=r.punches||[],first=p.find(x=>x.type==='in'),last=[...p].reverse().find(x=>x.type==='out'),ls=p.find(x=>x.type==='lunch-start'),le=p.find(x=>x.type==='lunch-end'),ms=paidMs(r,last?.ts||Date.now());if(last)total+=ms;let tr=document.createElement('tr');tr.innerHTML='<td>'+k+'</td><td>'+(first?fmtTime(first.ts):'—')+'</td><td>'+(ls&&le?fmtMin((le.ts-ls.ts)/60000):ls?'In progress':'—')+'</td><td>'+(last?fmtTime(last.ts):'—')+'</td><td>'+fmtMin(ms/60000)+'</td><td>'+(last?'Complete':first?'In progress':'—')+'</td>';body.appendChild(tr)});if(!rows.length)body.innerHTML='<tr><td colspan="6">No records for this month.</td></tr>';$('monthSummary').textContent=rows.length+' day(s) · '+fmtMin(total/60000)+' completed paid time · Stored on this device'}function render(){let now=new Date();$('liveClock').textContent=fmtClock(now);$('liveDate').textContent=fmtDate(now);$('timezoneLabel').textContent='Local time · '+(settings.timezone==='UTC'?'UTC':Intl.DateTimeFormat().resolvedOptions().timeZone);let state=currentState(),r=day(),p=r.punches,first=p.find(x=>x.type==='in'),out=p.some(x=>x.type==='out');$('statusText').textContent=state==='none'?'Not clocked in':state==='in'?'Working':state==='lunch-start'?'On lunch':state==='lunch-end'?'Working':'Shift complete';$('actionTitle').textContent=state==='none'?'Ready when you are':state==='in'?'Your shift is underway':state==='lunch-start'?'Enjoy your break':state==='lunch-end'?'Back to work':'You’re all done';$('actionHelp').textContent=state==='none'?'Clock in to start tracking today’s shift.':state==='in'?'Start lunch when you leave, or clock out when your shift ends.':state==='lunch-start'?'End your lunch break when you return.':state==='lunch-end'?'Keep going until you have completed your paid hours.':'Your punches for today are saved on this device.';let btn=$('punchBtn'),second=$('secondaryBtn');btn.hidden=state==='lunch-start'||state==='out';btn.disabled=state==='out';btn.textContent=state==='none'?'Clock in':state==='in'?'Start lunch':state==='lunch-end'?'Clock out':'Clock in';btn.onclick=()=>punch(state==='none'?'in':state==='in'?'lunch-start':'out');second.hidden=state!=='lunch-start';second.textContent='End lunch';second.onclick=()=>punch('lunch-end');let ms=paidMs(r),goal=settings.goalHours*3600000,remain=Math.max(0,goal-ms);$('paidMetric').textContent=fmtMin(ms/60000);$('paidSub').textContent='Goal: '+settings.goalHours+' paid hours';$('remainingMetric').textContent=fmtMin(remain/60000);let pct=Math.min(100,ms/goal*100);$('progressBar').style.width=pct+'%';$('progressLabel').textContent=Math.floor(pct)+'% of daily goal';let fin=projectedFinish();$('finishMetric').textContent=fin?new Intl.DateTimeFormat(undefined,{hour:'numeric',minute:'2-digit'}).format(fin):new Intl.DateTimeFormat(undefined,{hour:'numeric',minute:'2-digit'}).format(new Date(Date.now()+goal+Math.max(0,parseTime(settings.lunchEnd)-parseTime(settings.lunchStart))*60000));$('finishSub').textContent=first?'Forecast adjusts from actual clock-in and lunch punches':'Based on schedule and planned lunch';$('dayTag').textContent=todayKey();renderTimeline();renderMonth()}function applySettings(){for(let k of ['startTime','endTime','lunchStart','lunchEnd','goalHours','timezone']){let el=$(k);if(el)el.value=settings[k]} }$('saveSettings').onclick=()=>{settings={...settings,startTime:$('startTime').value||'08:00',endTime:$('endTime').value||'17:00',lunchStart:$('lunchStart').value||'11:30',lunchEnd:$('lunchEnd').value||'12:30',goalHours:Math.min(16,Math.max(1,Number($('goalHours').value)||8)),timezone:$('timezone').value};saveSet();applySettings();render();renderWorkSettingsSummary();openWorkSettings(false)};function download(name,content,type){let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([content],{type}));a.download=name;a.click();URL.revokeObjectURL(a.href)}$('exportJson').onclick=()=>download('foss-time-backup-'+todayKey()+'.json',JSON.stringify({version:1,settings,data},null,2),'application/json');$('exportCsv').onclick=()=>{let lines=[['Date','First In','Lunch Start','Lunch End','Last Out','Paid Minutes','Punches'].join(',')];Object.keys(data).sort().forEach(k=>{let p=data[k].punches||[],get=t=>p.find(x=>x.type===t),last=[...p].reverse().find(x=>x.type==='out');let cells=[k,get('in')?fmtTime(get('in').ts):'',get('lunch-start')?fmtTime(get('lunch-start').ts):'',get('lunch-end')?fmtTime(get('lunch-end').ts):'',last?fmtTime(last.ts):'',Math.round(paidMs(data[k],last?.ts||Date.now())/60000),p.map(x=>typeName(x.type)+' '+fmtTime(x.ts)).join('; ')];lines.push(cells.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(','))});download('foss-time-timesheet.csv',lines.join('\r\n'),'text/csv')};$('restoreFile').onchange=async e=>{let f=e.target.files[0];if(!f)return;try{let j=JSON.parse(await f.text());if(!j.data||typeof j.data!=='object')throw Error();if(!confirm('Replace local records with this backup? Export a backup first if needed.'))return;data=j.data;if(j.settings)settings=j.settings;save();saveSet();applySettings();render();alert('Backup restored on this device.')}catch{alert('That backup file could not be read.')}};
-const printTitles={dashboard:'Daily Time Report',timesheets:'Weekly & Monthly Timesheet',records:'Time Records',import:'Time Data & Export Report',settings:'Workday Settings',integrations:'Integrations Overview'};
+const printTitles={dashboard:'Daily Time Report',calendar:'Monthly Time Calendar',timesheets:'Weekly & Monthly Timesheet',records:'Time Records',import:'Time Data & Export Report',settings:'Workday Settings',integrations:'Integrations Overview'};
 function preparePrintReport(){
  const active=document.querySelector('.tab-page:not([hidden])')||document.querySelector('#page-dashboard');
  if(!active)return;
@@ -589,7 +675,7 @@ rows.forEach(o=>pending.push(readRow(o)));preview();const ok=pending.filter(r=>!
 el('punchImportFile').addEventListener('change',e=>{if(e.target.files?.[0])importFile(e.target.files[0])});
 el('cancelPunchImport').onclick=()=>{pending.length=0;el('importPreviewWrap').hidden=true;say('Import cancelled; no changes made.')};
 el('commitPunchImport').onclick=()=>{const good=pending.filter(r=>!r.errors.length),dates=[...new Set(good.map(r=>r.date))],dups=dates.filter(d=>data[d]?.punches?.length);if(dups.length&&!confirm(dups.length+' existing date(s) will be replaced. Continue?'))return;good.forEach(r=>{data[r.date]={punches:r.punches,audit:[...(data[r.date]?.audit||[]),{at:Date.now(),reason:'Imported through myTIME Import & Export Center'}]}});save();render();pending.length=0;el('importPreviewWrap').hidden=true;say('Imported '+good.length+' date(s) into this browser.');};
-function rows(){const out=[['Date','Clock In','Lunch Out','Lunch In','Clock Out','Paid Minutes','Punch Sequence']];Object.keys(data).sort().forEach(d=>{const p=data[d]?.punches||[],g=t=>p.find(x=>x.type===t),last=[...p].reverse().find(x=>x.type==='out');out.push([d,hh(g('in')?.ts),hh(g('lunch-start')?.ts),hh(g('lunch-end')?.ts),hh(last?.ts),Math.round(paidMs(data[d],last?.ts||Date.now())/60000),p.map(x=>typeName(x.type)+' '+hh(x.ts)).join('; ')])});return out}
+function rows(){const out=[['Date','Clock In','Lunch Out','Lunch In','Clock Out','Paid Minutes','Punch Sequence','Lunch Status','Morning Break Status','Morning Break Start','Morning Break End','Afternoon Break Status','Afternoon Break Start','Afternoon Break End']];Object.keys(data).sort().forEach(d=>{const p=data[d]?.punches||[],g=t=>p.find(x=>x.type===t),last=[...p].reverse().find(x=>x.type==='out'),r=data[d]||{},bs=r.breakStatus||{},bt=r.breakTimes||{};out.push([d,hh(g('in')?.ts),hh(g('lunch-start')?.ts),hh(g('lunch-end')?.ts),hh(last?.ts),Math.round(paidMs(r,last?.ts||Date.now())/60000),p.map(x=>typeName(x.type)+' '+hh(x.ts)).join('; '),bs.lunch||'not-recorded',bs.morning||'not-recorded',bt.morning?.start||'',bt.morning?.end||'',bs.afternoon||'not-recorded',bt.afternoon?.start||'',bt.afternoon?.end||''])});return out}
 el('hubExportCsv').onclick=()=>csv('myTIME-punches-'+todayKey()+'.csv',rows());
 el('hubExportJson').onclick=()=>download('myTIME-backup-'+todayKey()+'.json',JSON.stringify({version:2,settings,data,bankEntries,exportedAt:new Date().toISOString()},null,2),'application/json');
 function workbookBase(){const w=new ExcelJS.Workbook();w.creator='FOSS North America · myTIME';w.title='myTIME Timecard Workbook';w.created=new Date();return w}
