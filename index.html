@@ -343,6 +343,19 @@ body[data-tab]:not([data-tab="dashboard"]) #webhookPanel{display:none!important;
 @media(max-width:560px){.import-center-grid,#integrationDirectory>.grid{grid-template-columns:minmax(0,1fr)!important}.import-center-grid>.card,#integrationDirectory>.grid>.card{padding:15px}.import-center-grid .settings-actions button,#webhookPanel .settings-actions button{flex:1 1 100%;width:100%}.integration-status{align-items:flex-start;flex-direction:column}}
 
 .status .dot.state-working{background:#22a447;box-shadow:0 0 0 3px #22a4472b}.status .dot.state-break{background:#f2c230;box-shadow:0 0 0 3px #f2c23035}.status .dot.state-locked{background:#9aa3af;box-shadow:0 0 0 3px #9aa3af35}
+
+/* Final guard: keep the schedule and webhook on Dashboard and out of every print mode. */
+body[data-tab]:not([data-tab="dashboard"]) .schedule-reminders,
+body[data-tab]:not([data-tab="dashboard"]) #webhookPanel{display:none!important;visibility:hidden!important;height:0!important;overflow:hidden!important;margin:0!important;padding:0!important;border:0!important}
+@media print{
+  .schedule-reminders,
+  #webhookPanel,
+  body.printing-calendar .schedule-reminders,
+  body.printing-calendar #webhookPanel,
+  #page-dashboard .schedule-reminders,
+  #page-dashboard #webhookPanel{display:none!important;visibility:hidden!important;height:0!important;max-height:0!important;overflow:hidden!important;margin:0!important;padding:0!important;border:0!important;break-before:avoid!important;break-after:avoid!important;page-break-before:avoid!important;page-break-after:avoid!important}
+}
+
 </style>
 </head>
 <body><main class="shell">
@@ -492,7 +505,7 @@ body[data-tab]:not([data-tab="dashboard"]) #webhookPanel{display:none!important;
  move(document.getElementById('dataHub'),'import');
  move(document.getElementById('integrationDirectory'),'integrations');
  move(document.querySelector('.schedule-reminders'),'dashboard');
- move(document.getElementById('webhookUrl')?.closest('section'),'dashboard');
+ move(document.getElementById('webhookPanel'),'dashboard');
  [...main.children].filter(el=>el.tagName==='DIV'&&el.getAttribute('style')?.includes('height:1px')).forEach(el=>el.remove());
  document.querySelectorAll('[data-page]').forEach(el=>el.removeAttribute('data-page'));
  function showPage(key){
