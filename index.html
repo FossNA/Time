@@ -1247,9 +1247,20 @@ renderRecordManager();
  setTheme(savedTheme);
  if(themeBtn)themeBtn.addEventListener('click',()=>{const mode=document.body.classList.contains('dark-mode')?'light':'dark';setTheme(mode);try{localStorage.setItem(THEME_KEY,mode)}catch{}});
  let installPrompt=null;
- window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPrompt=e;if(installBtn)installBtn.hidden=false});
- window.addEventListener('appinstalled',()=>{installPrompt=null;if(installBtn){installBtn.hidden=true;installBtn.textContent='✓ App installed'}});
- if(installBtn)installBtn.addEventListener('click',async()=>{if(installPrompt){installPrompt.prompt();await installPrompt.userChoice;installPrompt=null;installBtn.hidden=true}else{alert('To install myTIME, use your browser menu and choose “Install this site as an app” or “Add to Home screen.” If that option is unavailable, this browser may not support installation yet.')}});
+ const isInstalledApp=()=>window.matchMedia('(display-mode: standalone)').matches||window.matchMedia('(display-mode: fullscreen)').matches||window.navigator.standalone===true;
+ function syncInstallButton(){
+  if(!installBtn)return;
+  if(isInstalledApp()){installBtn.hidden=true;installBtn.setAttribute('aria-hidden','true');installBtn.title='myTIME is running as an installed app';return}
+  installBtn.removeAttribute('aria-hidden');
+  if(installPrompt){installBtn.hidden=false;installBtn.textContent='＋ Install app';installBtn.title='Install myTIME on this computer'}
+  else{installBtn.hidden=false;installBtn.textContent='＋ Install app';installBtn.title='Use your browser menu to install myTIME'}
+ }
+ syncInstallButton();
+ const standaloneQuery=window.matchMedia('(display-mode: standalone)');
+ if(standaloneQuery.addEventListener)standaloneQuery.addEventListener('change',syncInstallButton);
+ window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPrompt=e;syncInstallButton()});
+ window.addEventListener('appinstalled',()=>{installPrompt=null;syncInstallButton()});
+ if(installBtn)installBtn.addEventListener('click',async()=>{if(isInstalledApp()){installBtn.hidden=true;return}if(installPrompt){installPrompt.prompt();const choice=await installPrompt.userChoice;installPrompt=null;if(choice?.outcome==='accepted')installBtn.hidden=true;else syncInstallButton()}else{alert('myTIME may already be installed. Open it from your computer’s Start menu or app launcher. To install from this browser, open the browser menu and choose “Install myTIME” or “Apps → Install this site as an app.”');syncInstallButton()}});
  if('serviceWorker' in navigator && location.protocol==='https:'){window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}))}
 /* Update checker: detects new webpage deployments without requiring F5. */
  (function(){
@@ -1258,7 +1269,16 @@ renderRecordManager();
   let initialTag='',updateFound=false,checking=false;
   function announce(){updateFound=true;banner.classList.add('visible')}
   async function getTag(){
-   try{const r=await fetch('/index.html?mytime-update-check='+Date.now(),{method:'HEAD',cache:'no-store',credentials:'same-origin'});if(!r.ok)return '';return r.headers.get('etag')||r.headers.get('last-modified')||''}catch{return ''}
+   try{
+    const r=await fetch('/index.html?mytime-update-check='+Date.now(),{method:'GET',cache:'no-store',credentials:'same-origin'});
+    if(!r.ok)return '';
+    const etag=r.headers.get('etag')||r.headers.get('last-modified');
+    const html=await r.text();
+    if(etag)return etag;
+    // Some CDN responses omit validators; hash the HTML so deployments are still detected.
+    let hash=2166136261;for(let i=0;i<html.length;i++){hash^=html.charCodeAt(i);hash=Math.imul(hash,16777619)}
+    return 'html-'+(hash>>>0).toString(16);
+   }catch{return ''}
   }
   async function checkPage(){
    if(checking||document.visibilityState==='hidden')return;checking=true;
