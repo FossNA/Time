@@ -26,6 +26,8 @@
 .mytime-calendar-day .calendar-day-punches{color:#214ca9;font-weight:750}
 .mytime-calendar-day .calendar-day-lunch,.mytime-calendar-day .calendar-day-breaks{padding:4px 5px;border-radius:5px;background:#edf2fa}
 .mytime-calendar-day .calendar-day-paid{font-size:11px;font-weight:800;color:#09266f}
+.mytime-calendar-day .calendar-day-overtime{font-size:11px;font-weight:900;color:#a83d38;background:#fff0ef;border:1px solid #f0b8b4;border-radius:6px;padding:4px 5px}
+.mytime-calendar-day .calendar-day-paid.is-over-eight{color:#a83d38}
 .mytime-calendar-day .calendar-no-record{margin-top:2px;color:#9aa5b8;font-style:italic}
 .mytime-calendar-day.selected{outline:3px solid #2458c6;outline-offset:-3px;background:#eaf0ff;z-index:2}
 .mytime-calendar-day.selected>strong{background:#2458c6;color:#fff}
@@ -1377,7 +1379,7 @@ function renderMyTimeCalendar(){
    if(note){const line=document.createElement('small');line.className='calendar-day-recovery';line.textContent='Make-up logged';cell.appendChild(line)}
    if(outTime!=='—'){const line=document.createElement('small');line.className='calendar-day-punches';line.textContent='Out '+outTime;cell.appendChild(line)}
    if(lunchOut!=='—'||lunchIn!=='—'){const line=document.createElement('small');line.className='calendar-day-lunch';line.textContent='Lunch '+(lunchOut==='—'?'—':lunchOut)+' / '+(lunchIn==='—'?'—':lunchIn);cell.appendChild(line)}
-   const paid=document.createElement('small');paid.className='calendar-day-paid';paid.textContent=calendarPaid(k)+' paid';cell.appendChild(paid);
+   const paid=document.createElement('small');const paidMinutes=actualPaidMinutes(rec);paid.className='calendar-day-paid'+(paidMinutes>480?' is-over-eight':'');paid.textContent=calendarPaid(k)+' paid';cell.appendChild(paid);if(paidMinutes>480){const over=document.createElement('small');over.className='calendar-day-overtime';over.textContent='Over 8h by '+fmtMin(paidMinutes-480);cell.appendChild(over)}
    const breaks=document.createElement('small');breaks.className='calendar-day-breaks';breaks.textContent='Breaks: '+statusText;cell.appendChild(breaks);
   } else {const noData=document.createElement('small');noData.className='calendar-no-record';noData.textContent='No punches';cell.appendChild(noData)}
   if(planned>0){const plan=document.createElement('small');plan.className='calendar-day-planned';plan.textContent='Planned '+fmtMin(planned);cell.appendChild(plan)}
