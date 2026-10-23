@@ -506,7 +506,15 @@ body.dark-mode .analytics-warning{background:#3a301c;color:#ffe4a1;border-color:
 <section class="layout"><article class="card"><div class="section-head"><h2>Today's punches</h2><span class="tag" id="dayTag">TODAY</span></div><div id="timeline" class="timeline"><div class="empty">No punches yet. Clock in to begin your day.</div></div><div class="notice">Times are recorded on this device using your local clock. If a punch is wrong, use the correction option and enter a reason.</div></article>
 <div style="display:grid;gap:18px;align-content:start"><article class="card" id="workSettingsPanel" hidden><div class="section-head"><h2>Workday settings</h2><span class="tag">SETTINGS</span></div><div class="formrow"><div class="field"><label for="startTime">Scheduled start</label><input type="time" id="startTime" value="08:00"></div><div class="field"><label for="endTime">Scheduled end</label><input type="time" id="endTime" value="17:00"></div><div class="field"><label for="lunchStart">Usual lunch starts</label><input type="time" id="lunchStart" value="11:30"></div><div class="field"><label for="lunchEnd">Usual lunch ends</label><input type="time" id="lunchEnd" value="12:30"></div><div class="field"><label for="morningBreakTime">Expected morning break</label><input type="time" id="morningBreakTime" value="10:00"></div><div class="field"><label for="afternoonBreakTime">Expected afternoon break</label><input type="time" id="afternoonBreakTime" value="15:00"></div><div class="field"><label for="goalHours">Paid hours per day</label><input type="number" id="goalHours" value="8" min="1" max="16" step=".25"></div><div class="field"><label for="timezone">Timezone display</label><select id="timezone"><option value="local">Device local</option><option value="UTC">UTC</option></select></div></div><div class="settings-actions"><button class="primary" id="saveSettings">Save settings</button><button class="quiet" type="button" id="cancelSettings">Cancel</button></div><div class="notice">These are your default workday settings.</div></article>
 <article class="card" id="workSettingsSummary"><div class="section-head"><h2>My workday settings</h2><span class="tag">READ ONLY</span></div><div class="formrow"><div><div class="metric-label">WORKDAY START</div><div class="metric" id="summaryStart">8:00 AM</div></div><div><div class="metric-label">WORKDAY END</div><div class="metric" id="summaryEnd">5:00 PM</div></div><div><div class="metric-label">LUNCH</div><div class="metric" id="summaryLunch">11:30 AM–12:30 PM</div></div><div><div class="metric-label">MORNING BREAK</div><div class="metric" id="summaryMorningBreak">10:00 AM</div></div><div><div class="metric-label">AFTERNOON BREAK</div><div class="metric" id="summaryAfternoonBreak">3:00 PM</div></div><div><div class="metric-label">PAID HOURS GOAL</div><div class="metric" id="summaryGoal">8 hours</div></div></div><div class="settings-actions" style="margin-top:12px"><button class="quiet" type="button" id="openWorkSettings">⚙ Edit workday settings</button></div><p class="sub">Your schedule is shown here for reference. Change it only in Settings.</p></article>
-<article class="card"><div class="section-head"><h2>Timesheet & backup</h2></div><div class="field"><label for="monthFilter">Month</label><input type="month" id="monthFilter"></div><div class="settings-actions"><button class="quiet" id="exportCsv">Export CSV</button><button class="quiet" id="exportJson">Backup JSON</button><button class="quiet" id="printBtn">Print</button><button class="quiet" id="correctBtn">Correct punch</button></div><div class="field" style="margin-top:14px"><label for="restoreFile">Restore JSON backup</label><input type="file" id="restoreFile" accept=".json,application/json"></div><div class="sub" id="monthSummary">This device only · No cloud sync</div></article></div></section>
+<article class="card"><div class="section-head"><h2>Timesheet & backup</h2></div><div class="field"><label for="monthFilter">Month</label><input type="month" id="monthFilter"></div><div class="settings-actions"><button class="quiet" id="exportCsv">Export CSV</button><button class="quiet" id="exportJson">Backup JSON</button><button class="quiet" id="printBtn">Print</button><button class="quiet" id="correctBtn">Correct punch</button></div><div class="field" style="margin-top:14px"><label for="restoreFile">Restore JSON backup</label><input type="file" id="restoreFile" accept=".json,application/json"></div><div class="sub" id="monthSummary">Local records · encrypted cloud backup available below</div><article class="card" style="margin-top:14px" id="cloudBackupCard">
+ <div class="section-head"><h2>Encrypted cloud profile</h2><span class="tag">CLOUD BACKUP</span></div>
+ <p class="sub">Save and restore your myTIME records across browsers. Your backup is encrypted in this browser before it is uploaded. Use a strong cloud passphrase and keep it safe; it cannot be reset by email.</p>
+ <div class="field"><label for="cloudAccountEmail">Cloud profile email</label><input id="cloudAccountEmail" type="email" autocomplete="email" placeholder="you@fossna.com" maxlength="160"></div>
+ <div class="field"><label for="cloudPassphrase">Cloud passphrase (at least 14 characters)</label><input id="cloudPassphrase" type="password" autocomplete="new-password" minlength="14" placeholder="Use a unique, strong passphrase"></div>
+ <div class="settings-actions"><button class="primary" id="cloudUnlockBtn" type="button">Connect / unlock cloud profile</button><button class="quiet" id="cloudBackupBtn" type="button" disabled>Back up now</button><button class="quiet" id="cloudRestoreBtn" type="button" disabled>Restore from cloud</button><button class="quiet" id="cloudLockBtn" type="button" disabled>Lock cloud profile</button></div>
+ <div class="save-status" id="cloudSyncStatus" role="status" aria-live="polite" style="margin-top:12px"><span class="save-status-dot"></span><span id="cloudSyncStatusText">Not connected · records remain on this device until you connect a cloud profile.</span></div>
+ <p class="sub" id="cloudSyncUpdated"></p>
+</article></article></div></section>
 <section class="card" style="margin-top:18px"><div class="section-head"><h2>Monthly timesheet</h2><span class="tag">LOCAL RECORDS</span></div><div class="tablewrap"><table><thead><tr><th>Date</th><th>First in</th><th>Lunch</th><th>Last out</th><th>Paid time</th><th>Status</th><th>Late / make-up</th></tr></thead><tbody id="monthRows"><tr><td colspan="6">No records for this month.</td></tr></tbody></table></div></section>
 
 <section class="card" style="margin-top:18px" aria-labelledby="recoveryHeading">
@@ -1333,4 +1341,104 @@ renderRecordManager();
 })();
 </script>
 
+<script>
+/* Encrypted per-profile myTIME cloud backup. Passphrase stays in memory and is never sent to the server. */
+(function(){
+ 'use strict';
+ const API='https://foss-mytime-sync.jowu-eee.workers.dev/v1/backup';
+ const el=id=>document.getElementById(id);
+ const email=el('cloudAccountEmail'),pass=el('cloudPassphrase'),unlock=el('cloudUnlockBtn'),backup=el('cloudBackupBtn'),restore=el('cloudRestoreBtn'),lock=el('cloudLockBtn'),status=el('cloudSyncStatusText'),updated=el('cloudSyncUpdated');
+ if(!email||!pass||!unlock)return;
+ let session=null, busy=false, timer=null, remoteMeta=null;
+ function setStatus(message,kind='info'){status.textContent=message;const root=el('cloudSyncStatus');root.classList.toggle('save-status-error',kind==='error');root.classList.toggle('save-status-ok',kind==='success')}
+ function setButtons(){unlock.disabled=busy;backup.disabled=busy||!session;restore.disabled=busy||!session||!remoteMeta?.exists;lock.disabled=busy||!session}
+ const enc=new TextEncoder(), dec=new TextDecoder();
+ function b64(bytes){let s='';for(const b of bytes)s+=String.fromCharCode(b);return btoa(s)}
+ function un64(s){return Uint8Array.from(atob(s),c=>c.charCodeAt(0))}
+ async function sha(bytes){return new Uint8Array(await crypto.subtle.digest('SHA-256',bytes))}
+ async function hex(bytes){return Array.from(bytes,b=>b.toString(16).padStart(2,'0')).join('')}
+ async function derive(mail,pw){
+  const salt=await sha(enc.encode('FOSS-myTIME-cloud-v1:'+mail));
+  const material=await crypto.subtle.importKey('raw',enc.encode(pw),'PBKDF2',false,['deriveBits']);
+  const bits=new Uint8Array(await crypto.subtle.deriveBits({name:'PBKDF2',salt,iterations:310000,hash:'SHA-256'},material,256));
+  const key=await crypto.subtle.importKey('raw',bits,{name:'AES-GCM'},false,['encrypt','decrypt']);
+  const verifier=await hex(await sha(new Uint8Array([...bits,...enc.encode('|myTIME-verifier-v1')])));
+  const account=await hex(await sha(enc.encode('myTIME-account-v1:'+mail)));
+  bits.fill(0);
+  return {key,verifier,account};
+ }
+ async function encryptPayload(obj,key){
+  const iv=crypto.getRandomValues(new Uint8Array(12));
+  const plain=enc.encode(JSON.stringify(obj));
+  const cipher=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},key,plain));
+  return JSON.stringify({v:1,iv:b64(iv),cipher:b64(cipher)});
+ }
+ async function decryptPayload(value,key){
+  const box=JSON.parse(value);if(box.v!==1||!box.iv||!box.cipher)throw Error('Unsupported cloud backup format');
+  const plain=await crypto.subtle.decrypt({name:'AES-GCM',iv:un64(box.iv)},key,un64(box.cipher));
+  return JSON.parse(dec.decode(plain));
+ }
+ function localBackup(){return {app:'FOSS myTIME',version:3,exportedAt:new Date().toISOString(),settings,data,bankEntries,profile:typeof profile!=='undefined'?profile:null,theme:localStorage.getItem('foss-time-theme-v1')||'light'}}
+ async function request(url,options){const r=await fetch(url,{...options,mode:'cors',credentials:'omit',cache:'no-store',redirect:'error',headers:{'Content-Type':'application/json',...(options?.headers||{})}});let j={};try{j=await r.json()}catch{}if(!r.ok){if(j.error==='account_locked')throw Error('This cloud profile is locked with a different passphrase. Check the email and passphrase, or use the passphrase that originally created it.');throw Error(j.message||j.error||('Cloud service returned HTTP '+r.status))}return j}
+ async function fetchRemote(){remoteMeta=await request(API+'?account='+encodeURIComponent(session.account),{method:'GET'});setButtons();return remoteMeta}
+ async function upload(silent=false){
+  if(!session||busy)return;busy=true;setButtons();
+  try{
+   const payload=await encryptPayload(localBackup(),session.key);
+   const result=await request(API,{method:'PUT',body:JSON.stringify({account:session.account,verifier:session.verifier,ciphertext:payload})});
+   remoteMeta={exists:true,updatedAt:result.updatedAt,revision:result.revision,verifier:session.verifier};
+   updated.textContent='Last cloud backup: '+new Date(result.updatedAt).toLocaleString()+' · revision '+result.revision;
+   setStatus(silent?'Changes backed up securely to your cloud profile.':'Cloud backup completed successfully.','success');
+  }catch(e){setStatus('Cloud backup failed: '+e.message,'error')}finally{busy=false;setButtons()}
+ }
+ async function connect(){
+  const mail=email.value.trim().toLowerCase(),pw=pass.value;
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail)){setStatus('Enter a valid email address.','error');return}
+  if(pw.length<14){setStatus('Use a unique passphrase of at least 14 characters.','error');return}
+  if(!crypto.subtle){setStatus('Secure encryption is unavailable in this browser. Open the HTTPS myTIME site.','error');return}
+  busy=true;setButtons();setStatus('Deriving encryption key and checking cloud profile…');
+  try{
+   const derived=await derive(mail,pw);
+   const previous=await request(API+'?account='+encodeURIComponent(derived.account),{method:'GET'});
+   if(previous.exists&&previous.verifier!==derived.verifier){setStatus('Passphrase does not unlock this cloud profile. No data was changed.','error');return}
+   session={email:mail,...derived};remoteMeta=previous;
+   if(previous.exists){
+    updated.textContent='Cloud backup found · last saved '+new Date(previous.updatedAt).toLocaleString();
+    setStatus('Cloud profile unlocked. Choose Restore from cloud to load it, or Back up now to replace it with this device’s records.','success');
+   }else{
+    updated.textContent='No cloud backup exists yet for this profile.';
+    setStatus('Cloud profile is ready. Choose Back up now to create your first encrypted cloud backup.','success');
+   }
+   pass.value='';
+  }catch(e){setStatus('Could not connect: '+e.message,'error')}finally{busy=false;setButtons()}
+ }
+ async function restoreRemote(){
+  if(!session||busy||!remoteMeta?.exists)return;
+  if(!confirm('Restore the encrypted cloud backup to this browser? This replaces current local time records, settings, and time-bank entries. Export a local backup first if you need the current records.'))return;
+  busy=true;setButtons();setStatus('Downloading and decrypting cloud backup…');
+  try{
+   const remote=await request(API+'?account='+encodeURIComponent(session.account),{method:'GET'});
+   if(!remote.exists)throw Error('No cloud backup was found.');
+   if(remote.verifier!==session.verifier)throw Error('Cloud passphrase verification failed.');
+   const obj=await decryptPayload(remote.ciphertext,session.key);
+   if(!obj.data||typeof obj.data!=='object')throw Error('Backup file has no valid time records.');
+   data=obj.data;if(obj.settings)settings=obj.settings;
+   if(Array.isArray(obj.bankEntries)){bankEntries=obj.bankEntries;localStorage.setItem(BANKKEY,JSON.stringify(bankEntries))}
+   if(obj.profile&&typeof obj.profile==='object'){profile={name:String(obj.profile.name||''),email:String(obj.profile.email||''),photo:String(obj.profile.photo||'')};localStorage.setItem('foss-time-profile-v1',JSON.stringify(profile));if(typeof renderProfile==='function')renderProfile()}
+   save();saveSet();if(obj.theme==='dark'||obj.theme==='light')localStorage.setItem('foss-time-theme-v1',obj.theme);
+   applySettings();render();remoteMeta=remote;updated.textContent='Restored cloud backup saved '+new Date(remote.updatedAt).toLocaleString();
+   setStatus('Cloud backup restored to this browser. Verify your timesheet and export a safety copy.','success');
+  }catch(e){setStatus('Restore failed: '+e.message,'error')}finally{busy=false;setButtons()}
+ }
+ unlock.addEventListener('click',connect);
+ backup.addEventListener('click',()=>{if(remoteMeta?.exists&&!confirm('Replace the current cloud backup with this browser’s current records?'))return;upload(false)});
+ restore.addEventListener('click',restoreRemote);
+ lock.addEventListener('click',()=>{session=null;remoteMeta=null;pass.value='';clearTimeout(timer);setButtons();setStatus('Cloud profile locked. Records on this device are unchanged.')});
+ email.value=(typeof profile!=='undefined'&&profile.email)||'';
+ // While unlocked, changes made through the app are backed up after a short idle period.
+ const priorSave=save;save=function(){const result=priorSave();if(session){clearTimeout(timer);timer=setTimeout(()=>upload(true),1800)}return result};
+ const priorSaveSet=saveSet;saveSet=function(){const result=priorSaveSet();if(session){clearTimeout(timer);timer=setTimeout(()=>upload(true),1800)}return result};
+ setButtons();
+})();
+</script>
 </body></html>
