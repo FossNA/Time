@@ -976,8 +976,8 @@ const BANKKEY='foss-time-bank-v1';
 let bankEntries=load(BANKKEY,[]);
 const weekdays=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 const defaultDaySchedule={startTime:'08:00',endTime:'17:00',lunchStart:'11:30',lunchEnd:'12:30',goalHours:8};
-function ensureWeeklySchedule(){if(!settings.weeklySchedule){settings.weeklySchedule={};for(let d=0;d<7;d++)settings.weeklySchedule[d]=d===0||d===6?{...defaultDaySchedule,goalHours:0}:{...defaultDaySchedule};}}
-function scheduleForDate(dateKey){let d=new Date(dateKey+'T12:00:00');ensureWeeklySchedule();return settings.weeklySchedule[d.getDay()]||defaultDaySchedule}
+function ensureWeeklySchedule(){if(!settings.weeklySchedule){settings.weeklySchedule={};for(let d=0;d<7;d++)settings.weeklySchedule[d]=d===0||d===6?{...defaultDaySchedule,goalHours:0}:{...defaultDaySchedule};}else{settings.weeklySchedule[0]={...(settings.weeklySchedule[0]||defaultDaySchedule),goalHours:0};settings.weeklySchedule[6]={...(settings.weeklySchedule[6]||defaultDaySchedule),goalHours:0};}}
+function scheduleForDate(dateKey){let d=new Date(dateKey+'T12:00:00');ensureWeeklySchedule();if(d.getDay()===0||d.getDay()===6)return {...defaultDaySchedule,goalHours:0,workday:false};return {...(settings.weeklySchedule[d.getDay()]||defaultDaySchedule),workday:true};}
 function weekMonday(date){let d=new Date(date);d.setHours(12,0,0,0);d.setDate(d.getDate()-((d.getDay()+6)%7));return d}
 function keyDate(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 function weekKeys(){let start=new Date(($('weekOf').value||keyDate(weekMonday(new Date())))+'T12:00:00');return Array.from({length:7},(_,i)=>{let d=new Date(start);d.setDate(d.getDate()+i);return keyDate(d)})}
