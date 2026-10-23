@@ -1313,7 +1313,7 @@ function ensureBreakFields(k){
  r.breakStatus=r.breakStatus||{};
  ['lunch','morning','afternoon'].forEach(x=>{if(!['taken','skipped','not-recorded'].includes(r.breakStatus[x]))r.breakStatus[x]='not-recorded'});
  r.breakTimes=r.breakTimes||{};
- ['morning','afternoon'].forEach(x=>{r.breakTimes[x]=r.breakTimes[x]||{start:'',end:''}});
+ ['lunch','morning','afternoon'].forEach(x=>{r.breakTimes[x]=r.breakTimes[x]||{start:'',end:''}});
  return r;
 }
 function calendarKeyDate(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
@@ -1404,16 +1404,16 @@ function renderMyTimeCalendar(){
   const sel=document.createElement('select');sel.setAttribute('aria-label',label+' status');
   [['not-recorded','Not recorded'],['taken','Taken'],['skipped','Skipped']].forEach(([v,t])=>{const o=document.createElement('option');o.value=v;o.textContent=t;sel.appendChild(o)});
   sel.value=breakRoot.breakStatus[name];sel.onchange=()=>{const rec=ensureBreakFields(myTimeSelectedDate);rec.breakStatus[name]=sel.value;save();renderMyTimeCalendar()};box.appendChild(sel);
-  if(name!=='lunch'){const times=document.createElement('div');times.className='mytime-break-times';['start','end'].forEach(part=>{const lab=document.createElement('label');lab.textContent=part==='start'?'Start time':'End time';const inp=document.createElement('input');inp.type='time';inp.value=breakRoot.breakTimes[name][part]||'';inp.onchange=()=>{const rec=ensureBreakFields(myTimeSelectedDate);rec.breakTimes[name][part]=inp.value;save();renderMyTimeCalendar()};lab.appendChild(inp);times.appendChild(lab)});box.appendChild(times)}
+  {const times=document.createElement('div');times.className='mytime-break-times';['start','end'].forEach(part=>{const lab=document.createElement('label');lab.textContent=part==='start'?'Start time':'End time';const inp=document.createElement('input');inp.type='time';inp.value=breakRoot.breakTimes[name]?.[part]||'';inp.setAttribute('aria-label',label+' '+(part==='start'?'start time':'end time'));inp.onchange=()=>{const rec=ensureBreakFields(myTimeSelectedDate);rec.breakTimes[name][part]=inp.value;save();renderMyTimeCalendar()};lab.appendChild(inp);times.appendChild(lab)});box.appendChild(times)}
   controls.appendChild(box);
  });
 }
 function calendarIntervalMinutes(rec,startType,endType,fallback){
  const p=rec?.punches||[],start=[...p].reverse().find(x=>x.type===startType),end=[...p].reverse().find(x=>x.type===endType);
- if(start?.ts&&end?.ts&&end.ts>=start.ts)return (end.ts-start.ts)/60000;
- const parseClock=v=>{if(!v||!/^\d{2}:\d{2}$/.test(v))return null;const [h,m]=v.split(':').map(Number);return h*60+m};
+ const parseClock=v=>{if(!v||!/^\\d{2}:\\d{2}$/.test(v))return null;const [h,m]=v.split(':').map(Number);return h*60+m};
  const a=parseClock(fallback?.start),b=parseClock(fallback?.end);
  if(a!==null&&b!==null)return (b-a+1440)%1440;
+ if(start?.ts&&end?.ts&&end.ts>=start.ts)return (end.ts-start.ts)/60000;
  if(start?.ts&&!end?.ts)return (Date.now()-start.ts)/60000;
  return null;
 }
