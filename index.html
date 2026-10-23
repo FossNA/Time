@@ -1654,8 +1654,9 @@ renderRecordManager();
   const root=el('cloudSyncStatus');
   root.classList.toggle('save-status-error',kind==='error');
   root.classList.toggle('save-status-ok',kind==='success');
-  if(session&&kind==='success')setStorageBadge('Encrypted cloud backup ready','Local records plus encrypted cloud backup; automatic backups are scheduled after changes.','success');
-  else if(!session)setStorageBadge('Local-only storage','Time records are stored in this browser until you unlock and create an encrypted cloud backup.','info');
+  if(session&&remoteMeta?.exists&&kind==='success')setStorageBadge('Cloud backup confirmed','An encrypted cloud copy exists. Changes auto-back up while this profile remains unlocked.','success');
+  else if(session&&!remoteMeta?.exists)setStorageBadge('Cloud profile connected · first backup needed','Your profile is unlocked, but no cloud backup exists yet. Create the first backup to protect records across devices.','info');
+  else if(!session)setStorageBadge('Cloud status requires sign-in','Local records are saved in this browser. Unlock your cloud profile to check the remote backup and sync changes.','info');
  }
  function setButtons(){unlock.disabled=busy;backup.disabled=busy||!session;restore.disabled=busy||!session||!remoteMeta?.exists;lock.disabled=busy||!session}
  const enc=new TextEncoder(), dec=new TextDecoder();
@@ -1729,10 +1730,11 @@ renderRecordManager();
     }
    }else{
     updated.textContent='No cloud backup exists yet for this profile.';
-    setStatus('Cloud profile is ready. Back up now creates the first encrypted cloud copy; this device remains the source until then.','success');
+    setStatus('Cloud profile connected. Creating your first encrypted backup now…');
    }
    pass.value='';
   }catch(e){setStatus('Could not connect: '+e.message,'error')}finally{busy=false;setButtons()}
+  if(session&&!remoteMeta?.exists){const hasLocal=Object.values(data||{}).some(r=>r&&Array.isArray(r.punches)&&r.punches.length)||Array.isArray(bankEntries)&&bankEntries.length>0;if(hasLocal)await upload(true);else setStatus('Cloud profile connected. No local time records found yet; your first backup will be created when you save records.','info')}
  }
  async function restoreRemote(){
   if(!session||busy||!remoteMeta?.exists)return;
