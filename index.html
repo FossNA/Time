@@ -848,7 +848,12 @@ $('restoreFile').onchange=async e=>{let f=e.target.files[0];if(!f)return;try{let
 
 /* Local profile autosave. This is not company authentication or cross-device storage. */
 const PROFILEKEY='foss-time-profile-v1';
-let profile=load(PROFILEKEY,{name:'',email:'',photo:''});
+let profile=load(PROFILEKEY,{name:'Josh Wuflestad',email:'jowu@fossna.com',photo:''});
+/* Recover the known FOSS profile identity when browser storage was cleared or partially reset. */
+if(!profile||typeof profile!=='object'||Array.isArray(profile))profile={name:'Josh Wuflestad',email:'jowu@fossna.com',photo:''};
+profile.name=(typeof profile.name==='string'&&profile.name.trim())?profile.name:'Josh Wuflestad';
+profile.email=(typeof profile.email==='string'&&profile.email.trim())?profile.email:'jowu@fossna.com';
+if(typeof profile.photo!=='string')profile.photo='';
 function initialsFor(name,email){const source=(name||email||'YOU').trim();const bits=source.includes('@')?source.split('@')[0].split(/[._ -]+/):source.split(/\s+/);return bits.slice(0,2).map(x=>x[0]||'').join('').toUpperCase()||'YOU'}
 function renderProfile(){
  $('profileName').value=profile.name||'';$('profileEmail').value=profile.email||'';
@@ -904,12 +909,14 @@ function updateProfileButton(){
  if(profile.photo){mini.innerHTML='<img alt="" src="'+profile.photo+'">'}else{mini.textContent=initials}
 }
 function setProfileOpen(open){
- $('profilePanel').hidden=!open;$('profileBackdrop').hidden=!open;
- $('profileTrigger').setAttribute('aria-expanded',String(open));
- if(open)$('profileName').focus();
+ const panel=$('profilePanel'),backdrop=$('profileBackdrop'),trigger=$('profileTrigger');
+ if(!panel||!backdrop||!trigger)return;
+ panel.hidden=!open;backdrop.hidden=!open;
+ trigger.setAttribute('aria-expanded',String(open));
+ if(open){renderProfile();requestAnimationFrame(()=> $('profileName')?.focus())}
 }
 $('profileTrigger').setAttribute('aria-controls','profilePanel');$('profileTrigger').setAttribute('aria-expanded','false');
-$('profileTrigger').onclick=()=>setProfileOpen($('profilePanel').hidden);
+$('profileTrigger').addEventListener('click',()=>setProfileOpen($('profilePanel').hidden));
 $('closeProfile').onclick=()=>setProfileOpen(false);
 $('profileBackdrop').onclick=()=>setProfileOpen(false);
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('profilePanel').hidden)setProfileOpen(false)});
