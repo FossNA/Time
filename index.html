@@ -529,6 +529,46 @@ body.dark-mode .analytics-warning{background:#3a301c;color:#ffe4a1;border-color:
 @media print{body.printing-calendar #page-calendar{display:block!important}body.printing-calendar #page-calendar>*:not(#myTimeCalendarRoot){display:none!important}body.printing-calendar #myTimeCalendarRoot>*:not(#calendarPrintReport){display:none!important}body.printing-calendar #calendarPrintReport{display:block!important;width:100%!important;font:8pt/1.25 "Segoe UI",Arial,sans-serif!important;color:#15264c!important}body.printing-calendar .calendar-print-head{display:flex!important;justify-content:space-between;align-items:center;gap:12pt;background:#09266f!important;color:#fff!important;padding:12pt 14pt;margin-bottom:12pt;print-color-adjust:exact;-webkit-print-color-adjust:exact}body.printing-calendar .calendar-print-brand{display:flex;align-items:center;gap:9pt}body.printing-calendar .calendar-print-logo{width:90pt;max-height:32pt;object-fit:contain;filter:brightness(0) invert(1)}body.printing-calendar .calendar-print-brand-name{font-size:17pt;font-weight:800;color:#fff}body.printing-calendar .calendar-print-tagline{font-size:7pt;color:#dbe7ff}body.printing-calendar .calendar-print-meta{text-align:right;font-size:7pt;line-height:1.6;color:#e3ebff}body.printing-calendar .calendar-print-meta strong{display:block;font-size:9pt;color:#fff}body.printing-calendar .calendar-print-title{display:flex;justify-content:space-between;align-items:end;margin:0 0 8pt}body.printing-calendar .calendar-print-title h1{font-size:20pt;margin:0;color:#09266f!important}body.printing-calendar .calendar-print-title p{font-size:8pt;color:#64718b;margin:4pt 0}body.printing-calendar .calendar-print-grid{display:grid!important;grid-template-columns:repeat(7,minmax(0,1fr));border-top:1px solid #cbd6e6;border-left:1px solid #cbd6e6;width:100%;break-inside:avoid}body.printing-calendar .calendar-print-weekday{background:#123d78!important;color:#fff!important;text-align:center;font-weight:700;padding:6pt 1pt;border-right:1px solid #fff;border-bottom:1px solid #cbd6e6;print-color-adjust:exact;-webkit-print-color-adjust:exact}body.printing-calendar .calendar-print-day{min-height:68pt;padding:4pt;border-right:1px solid #cbd6e6;border-bottom:1px solid #cbd6e6;overflow:hidden;break-inside:avoid;background:#fff}body.printing-calendar .calendar-print-day.outside-month{background:#f5f7fb;color:#9aa6b8}body.printing-calendar .calendar-print-day.is-today{background:#edf5ff!important;border:1.5px solid #2d78cf}body.printing-calendar .calendar-print-day-number{font-size:9pt;font-weight:800;color:#15345e;margin-bottom:5pt}body.printing-calendar .calendar-print-punch{font-size:6.3pt;line-height:1.3;margin:2pt 0;overflow-wrap:anywhere;color:#3f5d7f}body.printing-calendar .calendar-print-dot{color:#24965b;font-weight:900;margin-right:2pt}body.printing-calendar .calendar-print-hours{margin-top:5pt;padding:3pt 1pt;background:#e7f0fa!important;text-align:center;font-size:7pt;font-weight:800;color:#123d78!important;print-color-adjust:exact;-webkit-print-color-adjust:exact}body.printing-calendar .calendar-print-summary{display:grid;grid-template-columns:1.1fr 1fr .9fr;gap:7pt;margin-top:9pt;break-inside:avoid}body.printing-calendar .calendar-print-card{border:1px solid #d7e1ef;padding:7pt;background:#f8fbff!important;print-color-adjust:exact;-webkit-print-color-adjust:exact}body.printing-calendar .calendar-print-card h2{font-size:9pt;margin:0 0 5pt;color:#123d78!important}body.printing-calendar .calendar-print-stat{display:flex;justify-content:space-between;gap:5pt;margin:3pt 0;font-size:7pt}body.printing-calendar .calendar-print-stat.total{border-top:1px solid #b8c9df;padding-top:4pt;margin-top:4pt;font-weight:800;color:#09266f}body.printing-calendar .calendar-print-legend{display:flex;flex-wrap:wrap;gap:6pt;font-size:6.5pt;color:#506783}body.printing-calendar .calendar-print-foot{display:flex;justify-content:space-between;gap:10pt;border-top:1px solid #cbd6e6;margin-top:8pt;padding-top:6pt;font-size:6.3pt;color:#64718b}body.printing-calendar .print-report-head,body.printing-calendar .print-report-foot{display:none!important}}
 /* Force a real seven-column calendar in print output. */
 @page calendar-month{size:letter landscape;margin:.35in}@media print{body.printing-calendar{page:calendar-month!important;background:#fff!important}body.printing-calendar #page-calendar{display:block!important;visibility:visible!important}body.printing-calendar #myTimeCalendarRoot{display:block!important;visibility:visible!important;width:100%!important;max-width:none!important;margin:0!important;padding:0!important;border:0!important;box-shadow:none!important}body.printing-calendar #calendarPrintReport{display:block!important;visibility:visible!important;width:100%!important;height:auto!important;overflow:visible!important}body.printing-calendar #calendarPrintReport .calendar-print-grid{display:grid!important;grid-template-columns:repeat(7,minmax(0,1fr))!important;grid-auto-flow:row!important;width:100%!important;gap:0!important;border-top:1px solid #9aaac0!important;border-left:1px solid #9aaac0!important}body.printing-calendar #calendarPrintReport .calendar-print-weekday{display:block!important;min-width:0!important}body.printing-calendar #calendarPrintReport .calendar-print-day{display:block!important;min-width:0!important;min-height:77pt!important;height:77pt!important;box-sizing:border-box!important;break-inside:avoid!important}body.printing-calendar #calendarPrintReport .calendar-print-summary{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;break-inside:avoid!important}body.printing-calendar #calendarPrintReport .calendar-print-head{display:flex!important}body.printing-calendar #calendarPrintReport .calendar-print-title{display:flex!important}body.printing-calendar #calendarPrintReport .calendar-print-foot{display:flex!important}body.printing-calendar .no-print{display:none!important}}#updateNotice{display:none;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:12px auto;padding:12px 16px;border:1px solid #b9c9ed;border-radius:14px;background:#edf3ff;color:#09266f;font-weight:650;box-shadow:0 8px 22px #09266f10}#updateNotice.visible{display:flex}#updateNotice button{padding:9px 14px;border-radius:10px;background:#09266f;color:#fff}#updateNotice small{font-weight:400;color:inherit}@media(prefers-reduced-motion:no-preference){#updateNotice.visible{animation:updateNoticeIn .2s ease-out}}@keyframes updateNoticeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+
+/* FOSS myTIME dark theme refinements — FOSS navy/blue identity, clear contrast */
+body.dark-mode{--ink:#f3f6ff;--brand-blue:#6f9cff;--muted:#b4c1d9;--bg:#0b1424;--card:#152238;--line:#30415d;--green:#79b7a0;--lime:#263b59;--red:#ff9a94;--shadow:0 14px 36px #02071370;background:#0b1424;color:#f3f6ff;color-scheme:dark}
+body.dark-mode .shell,body.dark-mode .tab-page,body.dark-mode .section-head,body.dark-mode .metric-label,body.dark-mode label,body.dark-mode p,body.dark-mode h1,body.dark-mode h2,body.dark-mode h3,body.dark-mode h4{color:var(--ink)}
+body.dark-mode .top{background:linear-gradient(135deg,#0c1a31,#152b4b);border:1px solid #30496d;color:#fff;box-shadow:0 14px 34px #02071355}
+body.dark-mode .foss-logo{filter:brightness(0) invert(1)}
+body.dark-mode .logo-fallback{color:#fff}
+body.dark-mode .brand small,body.dark-mode .local,body.dark-mode .sub,body.dark-mode .calendar-legend{color:#b4c1d9!important}
+body.dark-mode .card,body.dark-mode .profile-card,body.dark-mode .mytime-calendar-wrap,body.dark-mode .custom-webhooks{background:#152238!important;color:#f3f6ff!important;border-color:#30415d!important;box-shadow:0 12px 30px #02071335}
+body.dark-mode .app-tabs{background:#111f34!important;border-color:#30415d!important}
+body.dark-mode .app-tab{color:#c7d4ec!important}
+body.dark-mode .app-tab.active{background:#2a4d83!important;color:#fff!important;border-color:#547bb6!important}
+body.dark-mode .app-tab:hover,body.dark-mode .mytime-calendar-day:hover{background:#233a5b!important;color:#fff!important}
+body.dark-mode button,body.dark-mode .enhance-btn,body.dark-mode .profile-trigger{color:#f3f6ff;border-color:#3b5275}
+body.dark-mode button.primary{background:#2458c6!important;color:#fff!important;border-color:#6f9cff!important}
+body.dark-mode button.quiet,body.dark-mode .quiet{background:#243650!important;color:#edf3ff!important;border-color:#405776!important}
+body.dark-mode button.secondary{background:#1a2b44!important;color:#f3f6ff!important;border-color:#405776!important}
+body.dark-mode input,body.dark-mode select,body.dark-mode textarea{background:#0c1728!important;color:#f3f6ff!important;border-color:#3b5275!important}
+body.dark-mode input::placeholder,body.dark-mode textarea::placeholder{color:#93a5c2!important}
+body.dark-mode input:focus,body.dark-mode select:focus,body.dark-mode textarea:focus{outline:2px solid #83aaff!important;outline-offset:1px}
+body.dark-mode .mytime-calendar-grid{background:#30415d!important;border-color:#30415d!important}
+body.dark-mode .mytime-calendar-weekday{background:#2458c6!important;color:#fff!important;border-color:#405776!important}
+body.dark-mode .mytime-calendar-empty{background:#101b2d!important;border-color:#30415d!important}
+body.dark-mode .mytime-calendar-day{background:#152238!important;color:#f3f6ff!important;border-color:#30415d!important}
+body.dark-mode .mytime-calendar-day.has-record{background:#192b45!important}
+body.dark-mode .mytime-calendar-day>strong{color:#f3f6ff!important}
+body.dark-mode .mytime-calendar-day.today>strong{background:#2458c6!important;color:#fff!important}
+body.dark-mode .mytime-calendar-day.selected,body.dark-mode .mytime-calendar-day.selected>strong{background:#294a7c!important;color:#fff!important}
+body.dark-mode .mytime-calendar-day small,body.dark-mode .mytime-calendar-day .calendar-no-record{color:#c0cde2!important}
+body.dark-mode .mytime-calendar-day .calendar-day-punches,body.dark-mode .mytime-calendar-day .calendar-day-paid{color:#a9c5ff!important}
+body.dark-mode .mytime-calendar-day .calendar-record-badge{background:#263f64!important;color:#dce8ff!important}
+body.dark-mode .mytime-calendar-day .calendar-day-lunch,body.dark-mode .mytime-calendar-day .calendar-day-breaks{background:#243650!important;color:#e0eaff!important}
+body.dark-mode .mytime-detail-item,body.dark-mode .notice,body.dark-mode .recovery,body.dark-mode .mytime-break-control{background:#1a2b44!important;color:#edf3ff!important;border-color:#3b5275!important}
+body.dark-mode .tablewrap,body.dark-mode table,body.dark-mode td{background:#152238!important;color:#edf3ff!important;border-color:#30415d!important}
+body.dark-mode th{background:#223957!important;color:#fff!important;border-color:#405776!important}
+body.dark-mode tr:nth-child(even) td{background:#192b45!important}
+body.dark-mode .progress{background:#30415d!important}
+body.dark-mode .notice{color:#dce8ff!important}
+body.dark-mode .calendar-month-bar{color:#f3f6ff!important}
+body.dark-mode .legend-dot{border-color:#7da7ff!important}
 </style>
 </head>
 <body><div id="updateNotice" role="status" aria-live="polite"><div><strong>myTIME update available</strong><br><small>Save any changes, then reload to use the latest version.</small></div><button type="button" id="applyUpdateBtn">Update myTIME</button></div><main class="shell">
@@ -1165,10 +1205,11 @@ function renderMyTimeCalendar(){
   page.innerHTML=`<section class="card" id="myTimeCalendarRoot">
    <div class="section-head"><div><div class="metric-label">LOCAL RECORDS</div><h2 style="margin:4px 0">Monthly timesheet</h2><p class="sub">A straightforward archive of saved clock punches on this browser/device. Use Weekly schedule & punches for planning your Mon–Sun week.</p></div></div>
    <div class="calendar-month-bar"><div class="settings-actions"><button type="button" class="quiet" id="calendarPrev">‹ Previous</button><button type="button" class="quiet" id="calendarToday">Current month</button><button type="button" class="quiet" id="calendarNext">Next ›</button></div><h3 id="calendarMonthTitle" style="margin:0"></h3><label class="sub">Jump to date <input id="calendarDatePicker" type="date" style="margin-left:6px"></label></div>
-   <div class="grid" style="grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:14px 0">
-    <article class="card"><div class="metric-label">Days with punches</div><strong id="calendarDaysCount" style="font-size:25px">0</strong></article>
-    <article class="card"><div class="metric-label">Paid time this month</div><strong id="calendarPaidTotal" style="font-size:25px">0h 00m</strong></article>
-    <article class="card"><div class="metric-label">Punch events</div><strong id="calendarPunchTotal" style="font-size:25px">0</strong></article>
+   <div class="grid calendar-hours-summary" style="grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:14px 0">
+    <article class="card"><div class="metric-label">Scheduled hours</div><strong id="calendarScheduledTotal" style="font-size:25px">0h 00m</strong><small class="sub">From your saved weekly work schedule</small></article>
+    <article class="card"><div class="metric-label">Actual paid hours</div><strong id="calendarPaidTotal" style="font-size:25px">0h 00m</strong><small class="sub">Calculated from clock punches</small></article>
+    <article class="card"><div class="metric-label">Hours balance</div><strong id="calendarHoursBalance" style="font-size:25px">0h 00m</strong><small class="sub">Actual paid minus scheduled</small></article>
+    <article class="card"><div class="metric-label">Days / punch events</div><strong id="calendarDaysCount" style="font-size:25px">0</strong><small class="sub"><span id="calendarPunchTotal">0</span> punch events</small></article>
    </div>
    <div class="section-head calendar-records-head"><div><h3 style="margin:0">Monthly calendar</h3><p class="sub">Select any date to see its saved punches, lunch, and rest breaks. Days with records are marked on the calendar.</p></div><div class="settings-actions no-print"><button type="button" class="quiet" id="calendarPrintWeek">Print weekly</button><button type="button" class="primary" id="calendarPrintMonth">Print monthly</button><button type="button" class="quiet" id="calendarExportMonth">Export month CSV</button></div></div>
    <div class="mytime-calendar-wrap" aria-label="Monthly timecard calendar"><div class="mytime-calendar-grid" id="myTimeCalendarGrid" role="grid" aria-label="Monthly saved time records"></div></div>
@@ -1198,10 +1239,12 @@ function renderMyTimeCalendar(){
  const calGrid=document.getElementById('myTimeCalendarGrid');calGrid.innerHTML='';
  ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach((label,i)=>{const h=document.createElement('div');h.className='mytime-calendar-weekday';h.setAttribute('role','columnheader');h.textContent=label;calGrid.appendChild(h)});
  for(let i=0;i<first.getDay();i++){const empty=document.createElement('div');empty.className='mytime-calendar-empty';empty.setAttribute('aria-hidden','true');calGrid.appendChild(empty)}
- let days=0,totalMs=0,punchTotal=0;
+ let days=0,totalMs=0,scheduledMinutesTotal=0,punchTotal=0;
  keys.forEach(k=>{
-  const rec=calendarRecord(k),p=rec.punches||[],has=p.length>0;
+  const rec=calendarRecord(k),p=rec.punches||[],has=p.length>0,schedule=scheduleForDate(k),planned=plannedMinutes(schedule);
+  scheduledMinutesTotal+=planned;
   if(has){days++;punchTotal+=p.length;const out=[...p].reverse().find(x=>x.type==='out'),last=p[p.length-1];const end=out?.ts||(k===todayKey()?Date.now():last?.ts||Date.now());totalMs+=paidMs(rec,end)}
+
   const late=lateStartMinutes(k),note=recoveryNote(k);const status=rec.breakStatus||{},statusText=['morning','afternoon'].map(n=>({taken:'Taken',skipped:'Skipped','not-recorded':'Not recorded'}[status[n]||'not-recorded'])).join(' / ');
   const d=new Date(k+'T12:00:00'),cell=document.createElement('button');cell.type='button';cell.className='mytime-calendar-day'+(has?' has-record':'')+(k===myTimeSelectedDate?' selected':'')+(k===todayKey()?' today':'');cell.setAttribute('role','gridcell');cell.setAttribute('aria-label',d.toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric',year:'numeric'})+(has?', '+p.length+' saved punch events':' , no saved punches'));cell.setAttribute('aria-pressed',k===myTimeSelectedDate?'true':'false');
   const dateNum=document.createElement('strong');dateNum.textContent=String(d.getDate());cell.appendChild(dateNum);
@@ -1215,10 +1258,14 @@ function renderMyTimeCalendar(){
    const paid=document.createElement('small');paid.className='calendar-day-paid';paid.textContent=calendarPaid(k)+' paid';cell.appendChild(paid);
    const breaks=document.createElement('small');breaks.className='calendar-day-breaks';breaks.textContent='Breaks: '+statusText;cell.appendChild(breaks);
   } else {const noData=document.createElement('small');noData.className='calendar-no-record';noData.textContent='No punches';cell.appendChild(noData)}
+  if(planned>0){const plan=document.createElement('small');plan.className='calendar-day-planned';plan.textContent='Planned '+fmtMin(planned);cell.appendChild(plan)}
+
   cell.onclick=()=>{myTimeSelectedDate=k;renderMyTimeCalendar()};calGrid.appendChild(cell);
  });
  document.getElementById('calendarDaysCount').textContent=String(days);
  document.getElementById('calendarPaidTotal').textContent=fmtMin(totalMs/60000);
+ document.getElementById('calendarScheduledTotal').textContent=fmtMin(scheduledMinutesTotal);
+ document.getElementById('calendarHoursBalance').textContent=(totalMs/60000-scheduledMinutesTotal>=0?'+':'')+fmtMin(totalMs/60000-scheduledMinutesTotal);
  document.getElementById('calendarPunchTotal').textContent=String(punchTotal);
  const selected=calendarRecord(myTimeSelectedDate),p=selected.punches||[],has=!!(data[myTimeSelectedDate]&&(p.length||(data[myTimeSelectedDate].breakStatus)||(data[myTimeSelectedDate].breakTimes)));
  document.getElementById('calendarSelectedTitle').textContent=new Date(myTimeSelectedDate+'T12:00:00').toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric',year:'numeric'});
