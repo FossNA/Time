@@ -31,7 +31,10 @@
 .mytime-calendar-day .calendar-no-record{margin-top:2px;color:#9aa5b8;font-style:italic}
 .mytime-calendar-day.selected{outline:3px solid #2458c6;outline-offset:-3px;background:#eaf0ff;z-index:2}
 .mytime-calendar-day.selected>strong{background:#2458c6;color:#fff}
-.mytime-calendar-day.today>strong{box-shadow:0 0 0 2px #a3c85a}
+.mytime-calendar-day.today:not(.selected){outline:3px solid #a3c85a;outline-offset:-3px;background:#f4f9e9;z-index:1}
+.mytime-calendar-day.today:not(.selected)>strong{box-shadow:0 0 0 2px #6d8e2b;background:#e5f2c9;color:#35510b}
+.mytime-calendar-day.today.selected{outline:3px solid #2458c6;outline-offset:-3px;background:#eaf0ff}
+.mytime-calendar-day.today.selected>strong{background:#2458c6;color:#fff;box-shadow:0 0 0 2px #a3c85a}
 .calendar-legend{display:flex;gap:18px;flex-wrap:wrap;padding:12px 4px 0;color:#65718a;font-size:11px}
 .calendar-legend span{display:inline-flex;align-items:center;gap:7px}
 .legend-dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#dce7ff;border:1px solid #2458c6}
