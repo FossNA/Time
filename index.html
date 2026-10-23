@@ -620,226 +620,6 @@ body.dark-mode .analytics-warning{background:#3a301c;color:#ffe4a1;border-color:
 </main>
 <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
 <script>
-/* myTIME tab navigation — group content into real pages */
-(function setupAppTabs(){
- const main=document.querySelector('main.shell'),nav=document.getElementById('appTabs');
- if(!main||!nav)return;
- const labels={dashboard:'Dashboard',calendar:'Calendar',timesheets:'Timesheet & backup',weekly:'Weekly schedule & punches',records:'Manage records',import:'Import & export',settings:'Settings',integrations:'Integrations'};
- const pages={};
- Object.keys(labels).forEach(key=>{
-  let page=document.getElementById('page-'+key);
-  if(!page){page=document.createElement('div');page.id='page-'+key;page.className='tab-page';page.dataset.tabPage=key;nav.insertAdjacentElement('afterend',page);}
-  pages[key]=page;
- });
- const move=(el,key)=>{if(el)pages[key].appendChild(el)};
- const oldLayout=document.querySelector('.layout');
- if(oldLayout){
-  const timelineCard=oldLayout.querySelector('#timeline')?.closest('article');
-  const settingsPanel=document.getElementById('workSettingsPanel');
-  const settingsSummary=document.getElementById('workSettingsSummary');
-  const quickTimesheet=document.getElementById('monthFilter')?.closest('article');
-  move(timelineCard,'dashboard');
-  move(settingsPanel,'settings');move(settingsSummary,'settings');
-  move(quickTimesheet,'timesheets');
-  oldLayout.remove();
- }
- move(document.querySelector('.hero'),'dashboard');
- move(document.querySelector('section.grid[aria-label="Today\'s totals"]'),'dashboard');
- move(document.querySelector('#recoveryPanel')?.closest('section'),'dashboard');
- // Keep the clock/punch hero first, summary metrics second, and today's punches below them.
- const dashboardHero=pages.dashboard.querySelector('.hero');
- const dashboardTotals=pages.dashboard.querySelector('section.grid[aria-label="Today\'s totals"]');
- const dashboardPunches=pages.dashboard.querySelector('#timeline')?.closest('article');
- const dashboardRecovery=pages.dashboard.querySelector('#recoveryPanel')?.closest('section');
- [dashboardHero,dashboardTotals,dashboardPunches,dashboardRecovery].forEach(el=>{if(el)pages.dashboard.appendChild(el)});
-
- move(document.querySelector('#monthRows')?.closest('section'),'timesheets');
- move(document.querySelector('#weekRows')?.closest('section'),'weekly');
- move(document.querySelector('#bankForm')?.closest('section'),'weekly');
- move(document.getElementById('recordManager'),'records');
- move(document.getElementById('dataHub'),'import');
- move(document.getElementById('integrationDirectory'),'integrations');
- move(document.querySelector('.schedule-reminders'),'dashboard');
- // Webhook controls are already nested in #integrationDirectory in the source markup.
- [...main.children].filter(el=>el.tagName==='DIV'&&el.getAttribute('style')?.includes('height:1px')).forEach(el=>el.remove());
- document.querySelectorAll('[data-page]').forEach(el=>el.removeAttribute('data-page'));
- function showPage(key){
-  if(!pages[key])key='dashboard';
-  document.body.dataset.tab=key;
-  Object.entries(pages).forEach(([name,el])=>{el.hidden=name!==key;el.setAttribute('aria-hidden',name===key?'false':'true')});
-  nav.querySelectorAll('.app-tab').forEach(btn=>{
-   const active=btn.dataset.tab===key;btn.classList.toggle('active',active);btn.setAttribute('aria-current',active?'page':'false');
-  });
-  if(key==='calendar'&&typeof renderMyTimeCalendar==='function')renderMyTimeCalendar();
-  if(key==='records'&&typeof renderRecordManager==='function')renderRecordManager();
-  if(key==='weekly'&&typeof renderPlanning==='function')renderPlanning();
- }
- nav.querySelectorAll('.app-tab').forEach(btn=>btn.addEventListener('click',()=>showPage(btn.dataset.tab)));
- const updateNavBrand=()=>document.body.classList.toggle('nav-compact',window.scrollY>120);
- window.addEventListener('scroll',updateNavBrand,{passive:true});updateNavBrand();
- showPage('dashboard');window.myTimeShowPage=showPage;
-})();
-
-
-/* Monthly timesheet: local punch records only. Weekly schedule lives on its own tab. */
-let myTimeCalendarMonth = new Date(new Date().getFullYear(),new Date().getMonth(),1);
-let myTimeSelectedDate = todayKey();
-function ensureBreakFields(k){
- const r=data[k]||(data[k]={punches:[],audit:[]});
- r.breakStatus=r.breakStatus||{};
- ['lunch','morning','afternoon'].forEach(x=>{if(!['taken','skipped','not-recorded'].includes(r.breakStatus[x]))r.breakStatus[x]='not-recorded'});
- r.breakTimes=r.breakTimes||{};
- ['morning','afternoon'].forEach(x=>{r.breakTimes[x]=r.breakTimes[x]||{start:'',end:''}});
- return r;
-}
-function calendarKeyDate(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
-function calendarRecord(k){const r=data[k];return r&&Array.isArray(r.punches)?r:{punches:[]}}
-function calendarPunchTime(rec,type){const p=rec?.punches||[],x=type==='out'?[...p].reverse().find(v=>v.type==='out'):p.find(v=>v.type===type);return x?.ts?fmtTime(x.ts):'—'}
-function calendarPaid(k){const r=calendarRecord(k);if(!r.punches.length)return '—';const out=[...r.punches].reverse().find(x=>x.type==='out'),last=r.punches[r.punches.length-1];const end=out?.ts||(k===todayKey()?Date.now():last?.ts||Date.now());return fmtMin(paidMs(r,end)/60000)}
-function renderMyTimeCalendar(){
- const page=document.getElementById('page-calendar');if(!page)return;
- if(!document.getElementById('myTimeCalendarRoot')){
-  page.innerHTML=`<section class="card" id="myTimeCalendarRoot">
-   <div class="section-head"><div><div class="metric-label">LOCAL RECORDS</div><h2 style="margin:4px 0">Monthly timesheet</h2><p class="sub">A straightforward archive of saved clock punches on this browser/device. Use Weekly schedule & punches for planning your Mon–Sun week.</p></div></div>
-   <div class="calendar-month-bar"><div class="settings-actions"><button type="button" class="quiet" id="calendarPrev">‹ Previous</button><button type="button" class="quiet" id="calendarToday">Current month</button><button type="button" class="quiet" id="calendarNext">Next ›</button></div><h3 id="calendarMonthTitle" style="margin:0"></h3><label class="sub">Jump to date <input id="calendarDatePicker" type="date" style="margin-left:6px"></label></div>
-   <div class="grid" style="grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:14px 0">
-    <article class="card"><div class="metric-label">Days with punches</div><strong id="calendarDaysCount" style="font-size:25px">0</strong></article>
-    <article class="card"><div class="metric-label">Paid time this month</div><strong id="calendarPaidTotal" style="font-size:25px">0h 00m</strong></article>
-    <article class="card"><div class="metric-label">Punch events</div><strong id="calendarPunchTotal" style="font-size:25px">0</strong></article>
-   </div>
-   <div class="section-head"><div><h3 style="margin:0">Daily records</h3><p class="sub">One row per day. Punches stay together in chronological order; print reports contain actual punches only, not scheduled lunch times.</p></div><div class="settings-actions no-print"><button type="button" class="quiet" id="calendarPrintWeek">Print weekly</button><button type="button" class="primary" id="calendarPrintMonth">Print monthly</button><button type="button" class="quiet" id="calendarExportMonth">Export month CSV</button></div></div>
-   <div class="tablewrap"><table class="calendar-ledger"><thead><tr><th>Date</th><th>Clock in</th><th>Lunch out</th><th>Lunch in</th><th>Clock out</th><th>Break status</th><th>Paid time</th><th></th></tr></thead><tbody id="calendarMonthRows"></tbody></table></div>
-   <section class="card" id="calendarDayDetail" style="margin-top:18px;background:var(--bg)">
-    <div class="section-head"><div><div class="metric-label">SELECTED DAY</div><h3 id="calendarSelectedTitle" style="margin:4px 0"></h3></div><span class="tag" id="calendarSavedBadge">No saved record</span></div>
-    <div class="mytime-detail-grid" id="calendarPunchDetails"></div><p class="sub" id="calendarDaySummary" style="margin-top:12px"></p>
-    <h3 style="margin-top:18px">Lunch and rest-break record</h3><p class="sub">Choose Taken, Skipped, or Not recorded. These labels document what happened; they do not alter payroll or automatically grant make-up credit.</p>
-    <div class="mytime-break-grid" id="calendarBreakControls"></div>
-   </section>
-   <section id="calendarPrintReport" aria-hidden="true"></section>
-  </section>`;
-  document.getElementById('calendarPrev').onclick=()=>{myTimeCalendarMonth=new Date(myTimeCalendarMonth.getFullYear(),myTimeCalendarMonth.getMonth()-1,1);renderMyTimeCalendar()};
-  document.getElementById('calendarNext').onclick=()=>{myTimeCalendarMonth=new Date(myTimeCalendarMonth.getFullYear(),myTimeCalendarMonth.getMonth()+1,1);renderMyTimeCalendar()};
-  document.getElementById('calendarToday').onclick=()=>{myTimeSelectedDate=todayKey();myTimeCalendarMonth=new Date(new Date().getFullYear(),new Date().getMonth(),1);renderMyTimeCalendar()};
-  document.getElementById('calendarDatePicker').onchange=e=>{if(!e.target.value)return;myTimeSelectedDate=e.target.value;const d=new Date(myTimeSelectedDate+'T12:00:00');myTimeCalendarMonth=new Date(d.getFullYear(),d.getMonth(),1);renderMyTimeCalendar()};
-  document.getElementById('calendarExportMonth').onclick=()=>exportCalendarCsv(calendarDateKeys('month'));
-  document.getElementById('calendarPrintMonth').onclick=()=>printCalendarReport('month');
-  document.getElementById('calendarPrintWeek').onclick=()=>printCalendarReport('week');
- }
- const first=new Date(myTimeCalendarMonth.getFullYear(),myTimeCalendarMonth.getMonth(),1,12),count=new Date(first.getFullYear(),first.getMonth()+1,0).getDate();
- const keys=Array.from({length:count},(_,i)=>calendarKeyDate(new Date(first.getFullYear(),first.getMonth(),i+1,12)));
- if(!/^\d{4}-\d{2}-\d{2}$/.test(myTimeSelectedDate||''))myTimeSelectedDate=todayKey();
- document.getElementById('calendarMonthTitle').textContent=first.toLocaleDateString(undefined,{month:'long',year:'numeric'});
- document.getElementById('calendarDatePicker').value=myTimeSelectedDate;
- const rows=document.getElementById('calendarMonthRows');rows.innerHTML='';
- let days=0,totalMs=0,punchTotal=0;
- keys.forEach(k=>{
-  const rec=calendarRecord(k),p=rec.punches||[],has=p.length>0;
-  if(has){days++;punchTotal+=p.length;const out=[...p].reverse().find(x=>x.type==='out'),last=p[p.length-1];const end=out?.ts||(k===todayKey()?Date.now():last?.ts||Date.now());totalMs+=paidMs(rec,end)}
-  const status=rec.breakStatus||{},statusText=['morning','afternoon'].map(n=>({taken:'Taken',skipped:'Skipped','not-recorded':'Not recorded'}[status[n]||'not-recorded'])).join(' / ');
-  const tr=document.createElement('tr');if(k===myTimeSelectedDate)tr.className='calendar-ledger-selected';
-  const dateCell=new Date(k+'T12:00:00').toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'});
-  [dateCell,calendarPunchTime(rec,'in'),calendarPunchTime(rec,'lunch-start'),calendarPunchTime(rec,'lunch-end'),calendarPunchTime(rec,'out'),statusText,calendarPaid(k)].forEach(v=>{const td=document.createElement('td');td.textContent=v;tr.appendChild(td)});
-  const td=document.createElement('td'),btn=document.createElement('button');btn.type='button';btn.className='quiet';btn.textContent=k===myTimeSelectedDate?'Selected':'View';btn.onclick=()=>{myTimeSelectedDate=k;renderMyTimeCalendar()};td.appendChild(btn);tr.appendChild(td);rows.appendChild(tr);
- });
- document.getElementById('calendarDaysCount').textContent=String(days);
- document.getElementById('calendarPaidTotal').textContent=fmtMin(totalMs/60000);
- document.getElementById('calendarPunchTotal').textContent=String(punchTotal);
- const selected=calendarRecord(myTimeSelectedDate),p=selected.punches||[],has=!!(data[myTimeSelectedDate]&&(p.length||(data[myTimeSelectedDate].breakStatus)||(data[myTimeSelectedDate].breakTimes)));
- document.getElementById('calendarSelectedTitle').textContent=new Date(myTimeSelectedDate+'T12:00:00').toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric',year:'numeric'});
- document.getElementById('calendarSavedBadge').textContent=has?'Saved on this device':'No saved record';
- const details=document.getElementById('calendarPunchDetails');details.innerHTML='';
- [['Clock in','in'],['Lunch out','lunch-start'],['Lunch in','lunch-end'],['Clock out','out']].forEach(([label,type])=>{const box=document.createElement('div');box.className='mytime-detail-item';const l=document.createElement('span'),v=document.createElement('strong');l.textContent=label;v.textContent=calendarPunchTime(selected,type);box.append(l,v);details.appendChild(box)});
- document.getElementById('calendarDaySummary').textContent=p.length?p.length+' punch event(s) saved · paid time '+calendarPaid(myTimeSelectedDate):'No punches saved for this date in this browser. Records from another browser/device are not automatically synced.';
- const breakRoot=has?ensureBreakFields(myTimeSelectedDate):{breakStatus:{lunch:'not-recorded',morning:'not-recorded',afternoon:'not-recorded'},breakTimes:{morning:{start:'',end:''},afternoon:{start:'',end:''}}};
- const controls=document.getElementById('calendarBreakControls');controls.innerHTML='';
- [['lunch','Lunch status'],['morning','Morning 15-minute break'],['afternoon','Afternoon 15-minute break']].forEach(([name,label])=>{
-  const box=document.createElement('div');box.className='mytime-break-item';const h=document.createElement('strong');h.textContent=label;box.appendChild(h);
-  const sel=document.createElement('select');sel.setAttribute('aria-label',label+' status');
-  [['not-recorded','Not recorded'],['taken','Taken'],['skipped','Skipped']].forEach(([v,t])=>{const o=document.createElement('option');o.value=v;o.textContent=t;sel.appendChild(o)});
-  sel.value=breakRoot.breakStatus[name];sel.onchange=()=>{const rec=ensureBreakFields(myTimeSelectedDate);rec.breakStatus[name]=sel.value;save();renderMyTimeCalendar()};box.appendChild(sel);
-  if(name!=='lunch'){const times=document.createElement('div');times.className='mytime-break-times';['start','end'].forEach(part=>{const lab=document.createElement('label');lab.textContent=part==='start'?'Start time':'End time';const inp=document.createElement('input');inp.type='time';inp.value=breakRoot.breakTimes[name][part]||'';inp.onchange=()=>{const rec=ensureBreakFields(myTimeSelectedDate);rec.breakTimes[name][part]=inp.value;save();renderMyTimeCalendar()};lab.appendChild(inp);times.appendChild(lab)});box.appendChild(times)}
-  controls.appendChild(box);
- });
-}
-function calendarDateKeys(scope){
- const first=new Date(myTimeCalendarMonth.getFullYear(),myTimeCalendarMonth.getMonth(),1,12),count=new Date(first.getFullYear(),first.getMonth()+1,0).getDate();
- return Array.from({length:count},(_,i)=>calendarKeyDate(new Date(first.getFullYear(),first.getMonth(),i+1,12)));
-}
-function printCalendarReport(scope){
- const esc=v=>String(v??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
- let keys;
- if(scope==='week'){
-  const d=new Date((myTimeSelectedDate||todayKey())+'T12:00:00'),dayOffset=(d.getDay()+6)%7,monday=new Date(d);monday.setDate(d.getDate()-dayOffset);
-  keys=Array.from({length:7},(_,i)=>{const x=new Date(monday);x.setDate(monday.getDate()+i);return calendarKeyDate(x)});
- }else keys=calendarDateKeys('month');
- const title=scope==='week'?'Weekly timesheet':'Monthly timesheet',dateRange=keys[0]+' — '+keys[keys.length-1];
- const rows=keys.map(k=>{
-  const r=calendarRecord(k),p=r.punches||[],first=t=>p.find(x=>x.type===t),last=t=>[...p].reverse().find(x=>x.type===t);
-  const types=[['in','Punch in'],['morning-break-start','15 min break start'],['morning-break-end','15 min break end'],['lunch-start','Lunch start'],['lunch-end','Lunch end'],['afternoon-break-start','15 min break start'],['afternoon-break-end','15 min break end'],['out','Punch out']];
-  const punches=types.map(([type,label])=>{const x=type==='out'?last(type):first(type);return label+': '+(x?.ts?fmtTime(x.ts):'—')});
-  const out=last('out'),lastPunch=p[p.length-1],end=out?.ts||(k===todayKey()?Date.now():lastPunch?.ts||Date.now());
-  const paid=p.length?fmtMin(paidMs(r,end)/60000):'—';
-  return '<tr><td>'+esc(new Date(k+'T12:00:00').toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric',year:'numeric'}))+'</td><td>'+punches.map(esc).join('<span class="print-sep"> | </span>')+'</td><td>'+esc(paid)+'</td></tr>';
- }).join('');
- const report=document.getElementById('calendarPrintReport');if(!report)return;
- report.innerHTML='<header class="print-report-head"><div class="print-brand">FOSS North America · myTIME</div><h1>'+title+'</h1><p>'+esc(dateRange)+'</p></header><table class="print-timesheet"><thead><tr><th>Date</th><th>Daily punches (actual recorded times)</th><th>Paid time</th></tr></thead><tbody>'+rows+'</tbody></table><footer class="print-report-foot">Generated from punch records saved in this browser/device. Scheduled lunch times are intentionally excluded.</footer>';
- report.style.display='block';report.setAttribute('aria-hidden','false');document.body.classList.add('printing-calendar');
- const cleanup=()=>{report.style.display='none';report.setAttribute('aria-hidden','true');document.body.classList.remove('printing-calendar');window.removeEventListener('afterprint',cleanup)};
- window.addEventListener('afterprint',cleanup);window.print();setTimeout(cleanup,1500);
-}
-function exportCalendarCsv(keys){
- const q=v=>{const s=String(v??'');return '"'+s.replace(/"/g,'""')+'"';};
- const rows=[['Date','Clock in','Lunch out','Lunch in','Clock out','Paid time','Punch count','Lunch status','Morning break status','Afternoon break status','Morning break start','Morning break end','Afternoon break start','Afternoon break end']];
- keys.forEach(k=>{const r=data[k]||{punches:[]},p=r.punches||[],get=t=>p.find(x=>x.type===t),out=[...p].reverse().find(x=>x.type==='out'),clock=t=>{const item=t==='out'?out:get(t);return item?.ts?fmtTime(item.ts):''};rows.push([k,clock('in'),clock('lunch-start'),clock('lunch-end'),clock('out'),p.length?fmtMin(paidMs(r,out?.ts||Date.now())/60000):'',p.length,(r.breakStatus||{}).lunch||'not-recorded',(r.breakStatus||{}).morning||'not-recorded',(r.breakStatus||{}).afternoon||'not-recorded',r.breakTimes?.morning?.start||'',r.breakTimes?.morning?.end||'',r.breakTimes?.afternoon?.start||'',r.breakTimes?.afternoon?.end||''])});
- const csv=rows.map(row=>row.map(q).join(',')).join('\r\n'),blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='myTIME-monthly-timesheet-'+keys[0]+'-to-'+keys[keys.length-1]+'.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
-}
-/* Direct editing and deletion for any saved date */
-function recordHH(ts){if(!ts)return '';const d=new Date(ts);return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}
-function managerRecordTimes(k){const p=data[k]?.punches||[],first=t=>p.find(x=>x.type===t);return {cin:first('in')?.ts,lo:first('lunch-start')?.ts,li:first('lunch-end')?.ts,cout:[...p].reverse().find(x=>x.type==='out')?.ts}}
-function renderRecordManager(){
- const body=document.getElementById('recordManagerRows');if(!body)return;
- const filter=(document.getElementById('recordSearch')?.value||'').trim(),keys=Object.keys(data).filter(k=>!filter||k.includes(filter)).sort().reverse();body.innerHTML='';
- if(!keys.length){body.innerHTML='<tr><td colspan="7">No matching saved records.</td></tr>';return}
- keys.forEach(k=>{const p=managerRecordTimes(k),rec=data[k],paid=paidMs(rec,[...(rec.punches||[])].reverse().find(x=>x.type==='out')?.ts||Date.now());const tr=document.createElement('tr');
-  [k, p.cin?fmtTime(p.cin):'—',p.lo?fmtTime(p.lo):'—',p.li?fmtTime(p.li):'—',p.cout?fmtTime(p.cout):'—',fmtMin(paid/60000)].forEach(v=>{const td=document.createElement('td');td.textContent=v;tr.appendChild(td)});
-  const td=document.createElement('td'),actions=document.createElement('div');actions.className='record-row-actions';const edit=document.createElement('button');edit.type='button';edit.className='quiet';edit.textContent='Edit';edit.onclick=()=>openRecordEditor(k);const del=document.createElement('button');del.type='button';del.className='danger';del.textContent='Delete';del.onclick=()=>deleteRecordDate(k);actions.append(edit,del);td.appendChild(actions);tr.appendChild(td);body.appendChild(tr);
- });
-}
-function openRecordEditor(k){
- const input=document.getElementById('recordDate');input.value=k;const exists=!!data[k];const p=managerRecordTimes(k);
- document.getElementById('editClockIn').value=recordHH(p.cin);document.getElementById('editLunchOut').value=recordHH(p.lo);document.getElementById('editLunchIn').value=recordHH(p.li);document.getElementById('editClockOut').value=recordHH(p.cout);
- document.getElementById('editReason').value='';document.getElementById('recordEditorTitle').textContent=(exists?'Edit punches for ':'Add punches for ')+k;document.getElementById('deleteRecordDay').hidden=!exists;document.getElementById('recordEditor').hidden=false;
-}
-function deleteRecordDate(k){
- if(!data[k])return;if(!confirm('Permanently delete all punch records for '+k+' from this browser? Download a backup first if you may need them.'))return;
- delete data[k];save();render();renderRecordManager();document.getElementById('recordEditor').hidden=true;
-}
-document.getElementById('recordSearch')?.addEventListener('input',renderRecordManager);
-document.getElementById('recordDate')?.addEventListener('change',e=>{if(e.target.value)openRecordEditor(e.target.value)});
-document.getElementById('newRecordBtn')?.addEventListener('click',()=>{const d=document.getElementById('recordDate');if(!d.value)d.value=todayKey();openRecordEditor(d.value)});
-document.getElementById('cancelRecordEdit')?.addEventListener('click',()=>document.getElementById('recordEditor').hidden=true);
-document.getElementById('deleteRecordDay')?.addEventListener('click',()=>deleteRecordDate(document.getElementById('recordDate').value));
-document.getElementById('saveRecordEdit')?.addEventListener('click',()=>{
- const k=document.getElementById('recordDate').value;if(!/^\d{4}-\d{2}-\d{2}$/.test(k)){alert('Choose a valid work date first.');return}
- const values=[['in',document.getElementById('editClockIn').value],['lunch-start',document.getElementById('editLunchOut').value],['lunch-end',document.getElementById('editLunchIn').value],['out',document.getElementById('editClockOut').value]],seq=values.filter(x=>x[1]).map(x=>x[1]);
- if(!seq.length){alert('Enter at least one punch time, or use Delete to remove the date.');return}
- for(let i=1;i<seq.length;i++)if(seq[i]<seq[i-1]){alert('Punch times must be chronological: clock in, lunch out, lunch in, clock out.');return}
- if(values[1][1]&&!values[0][1]||values[2][1]&&!values[1][1]||values[3][1]&&!values[0][1]){alert('Add the preceding punch first (clock in before lunch, lunch out before lunch in, and clock in before clock out).');return}
- const punches=values.filter(x=>x[1]).map(([type,t])=>({type,ts:new Date(k+'T'+t+':00').getTime()}));
- const reason=document.getElementById('editReason').value.trim()||'Manually edited in Manage records';
- const audit=[...(data[k]?.audit||[]),{at:Date.now(),reason}];data[k]={...(data[k]||{}),punches,audit};save();render();renderRecordManager();document.getElementById('recordEditor').hidden=true;
- const status=document.getElementById('importStatus');if(status)status.textContent='Saved corrections for '+k+'.';
-});
-document.getElementById('downloadRecordsCsv')?.addEventListener('click',()=>{
- const escapeCsv=v=>'"'+String(v??'').replace(/"/g,'""')+'"',lines=[['Date','Clock In','Lunch Out','Lunch In','Clock Out','Paid Minutes','Notes']];
- Object.keys(data).sort().forEach(k=>{const p=managerRecordTimes(k),rec=data[k],out=[...(rec.punches||[])].reverse().find(x=>x.type==='out'),mins=Math.round(paidMs(rec,out?.ts||Date.now())/60000);lines.push([k,recordHH(p.cin),recordHH(p.lo),recordHH(p.li),recordHH(p.cout),mins,(rec.audit||[]).map(a=>a.reason).filter(Boolean).join(' | ')])});
- const blob=new Blob([lines.map(r=>r.map(escapeCsv).join(',')).join('\r\n')],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='myTIME-editable-records-'+todayKey()+'.csv';a.click();URL.revokeObjectURL(url);
-});
-const beforeManagerRender=render;render=function(){beforeManagerRender();renderRecordManager()};
-renderRecordManager();
-
-</script>
-<script>
 const $=id=>document.getElementById(id);const KEY='foss-time-v1';const SETKEY='foss-time-settings-v1';const todayKey=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};let data=load(KEY,{}),settings=load(SETKEY,{startTime:'08:00',endTime:'17:00',lunchStart:'11:30',lunchEnd:'12:30',morningBreakTime:'10:00',afternoonBreakTime:'15:00',goalHours:8,timezone:'local'});function load(k,f){try{return JSON.parse(localStorage.getItem(k))||f}catch{return f}}function save(){localStorage.setItem(KEY,JSON.stringify(data))}function saveSet(){localStorage.setItem(SETKEY,JSON.stringify(settings))}
 function humanTime(value){if(!value)return '—';const [h,m]=value.split(':').map(Number);return new Date(2000,0,1,h,m).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})}
 function renderWorkSettingsSummary(){$('summaryStart').textContent=humanTime(settings.startTime);$('summaryEnd').textContent=humanTime(settings.endTime);$('summaryLunch').textContent=humanTime(settings.lunchStart)+'–'+humanTime(settings.lunchEnd);$('summaryMorningBreak').textContent=humanTime(settings.morningBreakTime||'10:00');$('summaryAfternoonBreak').textContent=humanTime(settings.afternoonBreakTime||'15:00');$('summaryGoal').textContent=Number(settings.goalHours||8)+' hours'}
@@ -1118,6 +898,226 @@ if(el('webhookMode').value==='punches'){payload={source:'myTIME',event:'punch_re
 else if(el('webhookMode').value==='weekly-report'){payload={source:'myTIME',event:'weekly_timecard_report',sentAt:new Date().toISOString(),to:recipient,subject:'myTIME Weekly Timecard — '+now.toLocaleDateString(),reportName:reportName,periodDays:7,totalPaidMinutes:totalMinutes,totalPaidHours:Number((totalMinutes/60).toFixed(2)),records:reportRows.map(r=>({date:r[0],clockIn:r[1],lunchOut:r[2],lunchIn:r[3],clockOut:r[4],paidMinutes:r[5]})),htmlBody:htmlBody,branding:{brand:'FOSS North America',product:'myTIME',primaryColor:'#09266f',accentColor:'#2458c6',logoUrl:'https://www.fossanalytics.com/Design/static/foss-logo.png'}};}
 else{payload={source:'myTIME',event:'full_backup',sentAt:new Date().toISOString(),backup:{version:2,settings,data,bankEntries}};}say('Sending…');try{let res;if((el('webhookProvider')?.value||'power-automate')==='power-automate'){res=await fetch('/api/power-automate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:u,payload})});}else if(el('webhookProvider')?.value==='make'){res=await fetch('/api/make-webhook',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:u,payload})});}else{res=await fetch(u,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),mode:'cors'});}const result=await res.json().catch(()=>({}));if(!res.ok)throw Error(result.error||('HTTP '+res.status));say((el('webhookProvider')?.value==='make'?'Make.com accepted the request. Check scenario history to confirm Outlook delivery.':'Power Automate accepted the request. Check your flow run history to confirm the next actions completed.'))}catch(e){say('Could not send webhook: '+(e.message||'network error')+'. Check the flow URL, trigger permissions, and run history. No automatic retry was made.')}};
 })();
+
+</script>
+<script>
+/* myTIME tab navigation — group content into real pages */
+(function setupAppTabs(){
+ const main=document.querySelector('main.shell'),nav=document.getElementById('appTabs');
+ if(!main||!nav)return;
+ const labels={dashboard:'Dashboard',calendar:'Calendar',timesheets:'Timesheet & backup',weekly:'Weekly schedule & punches',records:'Manage records',import:'Import & export',settings:'Settings',integrations:'Integrations'};
+ const pages={};
+ Object.keys(labels).forEach(key=>{
+  let page=document.getElementById('page-'+key);
+  if(!page){page=document.createElement('div');page.id='page-'+key;page.className='tab-page';page.dataset.tabPage=key;nav.insertAdjacentElement('afterend',page);}
+  pages[key]=page;
+ });
+ const move=(el,key)=>{if(el)pages[key].appendChild(el)};
+ const oldLayout=document.querySelector('.layout');
+ if(oldLayout){
+  const timelineCard=oldLayout.querySelector('#timeline')?.closest('article');
+  const settingsPanel=document.getElementById('workSettingsPanel');
+  const settingsSummary=document.getElementById('workSettingsSummary');
+  const quickTimesheet=document.getElementById('monthFilter')?.closest('article');
+  move(timelineCard,'dashboard');
+  move(settingsPanel,'settings');move(settingsSummary,'settings');
+  move(quickTimesheet,'timesheets');
+  oldLayout.remove();
+ }
+ move(document.querySelector('.hero'),'dashboard');
+ move(document.querySelector('section.grid[aria-label="Today\'s totals"]'),'dashboard');
+ move(document.querySelector('#recoveryPanel')?.closest('section'),'dashboard');
+ // Keep the clock/punch hero first, summary metrics second, and today's punches below them.
+ const dashboardHero=pages.dashboard.querySelector('.hero');
+ const dashboardTotals=pages.dashboard.querySelector('section.grid[aria-label="Today\'s totals"]');
+ const dashboardPunches=pages.dashboard.querySelector('#timeline')?.closest('article');
+ const dashboardRecovery=pages.dashboard.querySelector('#recoveryPanel')?.closest('section');
+ [dashboardHero,dashboardTotals,dashboardPunches,dashboardRecovery].forEach(el=>{if(el)pages.dashboard.appendChild(el)});
+
+ move(document.querySelector('#monthRows')?.closest('section'),'timesheets');
+ move(document.querySelector('#weekRows')?.closest('section'),'weekly');
+ move(document.querySelector('#bankForm')?.closest('section'),'weekly');
+ move(document.getElementById('recordManager'),'records');
+ move(document.getElementById('dataHub'),'import');
+ move(document.getElementById('integrationDirectory'),'integrations');
+ move(document.querySelector('.schedule-reminders'),'dashboard');
+ // Webhook controls are already nested in #integrationDirectory in the source markup.
+ [...main.children].filter(el=>el.tagName==='DIV'&&el.getAttribute('style')?.includes('height:1px')).forEach(el=>el.remove());
+ document.querySelectorAll('[data-page]').forEach(el=>el.removeAttribute('data-page'));
+ function showPage(key){
+  if(!pages[key])key='dashboard';
+  document.body.dataset.tab=key;
+  Object.entries(pages).forEach(([name,el])=>{el.hidden=name!==key;el.setAttribute('aria-hidden',name===key?'false':'true')});
+  nav.querySelectorAll('.app-tab').forEach(btn=>{
+   const active=btn.dataset.tab===key;btn.classList.toggle('active',active);btn.setAttribute('aria-current',active?'page':'false');
+  });
+  if(key==='calendar'&&typeof renderMyTimeCalendar==='function')renderMyTimeCalendar();
+  if(key==='records'&&typeof renderRecordManager==='function')renderRecordManager();
+  if(key==='weekly'&&typeof renderPlanning==='function')renderPlanning();
+ }
+ nav.querySelectorAll('.app-tab').forEach(btn=>btn.addEventListener('click',()=>showPage(btn.dataset.tab)));
+ const updateNavBrand=()=>document.body.classList.toggle('nav-compact',window.scrollY>120);
+ window.addEventListener('scroll',updateNavBrand,{passive:true});updateNavBrand();
+ showPage('dashboard');window.myTimeShowPage=showPage;
+})();
+
+
+/* Monthly timesheet: local punch records only. Weekly schedule lives on its own tab. */
+let myTimeCalendarMonth = new Date(new Date().getFullYear(),new Date().getMonth(),1);
+let myTimeSelectedDate = todayKey();
+function ensureBreakFields(k){
+ const r=data[k]||(data[k]={punches:[],audit:[]});
+ r.breakStatus=r.breakStatus||{};
+ ['lunch','morning','afternoon'].forEach(x=>{if(!['taken','skipped','not-recorded'].includes(r.breakStatus[x]))r.breakStatus[x]='not-recorded'});
+ r.breakTimes=r.breakTimes||{};
+ ['morning','afternoon'].forEach(x=>{r.breakTimes[x]=r.breakTimes[x]||{start:'',end:''}});
+ return r;
+}
+function calendarKeyDate(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function calendarRecord(k){const r=data[k];return r&&Array.isArray(r.punches)?r:{punches:[]}}
+function calendarPunchTime(rec,type){const p=rec?.punches||[],x=type==='out'?[...p].reverse().find(v=>v.type==='out'):p.find(v=>v.type===type);return x?.ts?fmtTime(x.ts):'—'}
+function calendarPaid(k){const r=calendarRecord(k);if(!r.punches.length)return '—';const out=[...r.punches].reverse().find(x=>x.type==='out'),last=r.punches[r.punches.length-1];const end=out?.ts||(k===todayKey()?Date.now():last?.ts||Date.now());return fmtMin(paidMs(r,end)/60000)}
+function renderMyTimeCalendar(){
+ const page=document.getElementById('page-calendar');if(!page)return;
+ if(!document.getElementById('myTimeCalendarRoot')){
+  page.innerHTML=`<section class="card" id="myTimeCalendarRoot">
+   <div class="section-head"><div><div class="metric-label">LOCAL RECORDS</div><h2 style="margin:4px 0">Monthly timesheet</h2><p class="sub">A straightforward archive of saved clock punches on this browser/device. Use Weekly schedule & punches for planning your Mon–Sun week.</p></div></div>
+   <div class="calendar-month-bar"><div class="settings-actions"><button type="button" class="quiet" id="calendarPrev">‹ Previous</button><button type="button" class="quiet" id="calendarToday">Current month</button><button type="button" class="quiet" id="calendarNext">Next ›</button></div><h3 id="calendarMonthTitle" style="margin:0"></h3><label class="sub">Jump to date <input id="calendarDatePicker" type="date" style="margin-left:6px"></label></div>
+   <div class="grid" style="grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:14px 0">
+    <article class="card"><div class="metric-label">Days with punches</div><strong id="calendarDaysCount" style="font-size:25px">0</strong></article>
+    <article class="card"><div class="metric-label">Paid time this month</div><strong id="calendarPaidTotal" style="font-size:25px">0h 00m</strong></article>
+    <article class="card"><div class="metric-label">Punch events</div><strong id="calendarPunchTotal" style="font-size:25px">0</strong></article>
+   </div>
+   <div class="section-head"><div><h3 style="margin:0">Daily records</h3><p class="sub">One row per day. Punches stay together in chronological order; print reports contain actual punches only, not scheduled lunch times.</p></div><div class="settings-actions no-print"><button type="button" class="quiet" id="calendarPrintWeek">Print weekly</button><button type="button" class="primary" id="calendarPrintMonth">Print monthly</button><button type="button" class="quiet" id="calendarExportMonth">Export month CSV</button></div></div>
+   <div class="tablewrap"><table class="calendar-ledger"><thead><tr><th>Date</th><th>Clock in</th><th>Lunch out</th><th>Lunch in</th><th>Clock out</th><th>Break status</th><th>Paid time</th><th></th></tr></thead><tbody id="calendarMonthRows"></tbody></table></div>
+   <section class="card" id="calendarDayDetail" style="margin-top:18px;background:var(--bg)">
+    <div class="section-head"><div><div class="metric-label">SELECTED DAY</div><h3 id="calendarSelectedTitle" style="margin:4px 0"></h3></div><span class="tag" id="calendarSavedBadge">No saved record</span></div>
+    <div class="mytime-detail-grid" id="calendarPunchDetails"></div><p class="sub" id="calendarDaySummary" style="margin-top:12px"></p>
+    <h3 style="margin-top:18px">Lunch and rest-break record</h3><p class="sub">Choose Taken, Skipped, or Not recorded. These labels document what happened; they do not alter payroll or automatically grant make-up credit.</p>
+    <div class="mytime-break-grid" id="calendarBreakControls"></div>
+   </section>
+   <section id="calendarPrintReport" aria-hidden="true"></section>
+  </section>`;
+  document.getElementById('calendarPrev').onclick=()=>{myTimeCalendarMonth=new Date(myTimeCalendarMonth.getFullYear(),myTimeCalendarMonth.getMonth()-1,1);renderMyTimeCalendar()};
+  document.getElementById('calendarNext').onclick=()=>{myTimeCalendarMonth=new Date(myTimeCalendarMonth.getFullYear(),myTimeCalendarMonth.getMonth()+1,1);renderMyTimeCalendar()};
+  document.getElementById('calendarToday').onclick=()=>{myTimeSelectedDate=todayKey();myTimeCalendarMonth=new Date(new Date().getFullYear(),new Date().getMonth(),1);renderMyTimeCalendar()};
+  document.getElementById('calendarDatePicker').onchange=e=>{if(!e.target.value)return;myTimeSelectedDate=e.target.value;const d=new Date(myTimeSelectedDate+'T12:00:00');myTimeCalendarMonth=new Date(d.getFullYear(),d.getMonth(),1);renderMyTimeCalendar()};
+  document.getElementById('calendarExportMonth').onclick=()=>exportCalendarCsv(calendarDateKeys('month'));
+  document.getElementById('calendarPrintMonth').onclick=()=>printCalendarReport('month');
+  document.getElementById('calendarPrintWeek').onclick=()=>printCalendarReport('week');
+ }
+ const first=new Date(myTimeCalendarMonth.getFullYear(),myTimeCalendarMonth.getMonth(),1,12),count=new Date(first.getFullYear(),first.getMonth()+1,0).getDate();
+ const keys=Array.from({length:count},(_,i)=>calendarKeyDate(new Date(first.getFullYear(),first.getMonth(),i+1,12)));
+ if(!/^\d{4}-\d{2}-\d{2}$/.test(myTimeSelectedDate||''))myTimeSelectedDate=todayKey();
+ document.getElementById('calendarMonthTitle').textContent=first.toLocaleDateString(undefined,{month:'long',year:'numeric'});
+ document.getElementById('calendarDatePicker').value=myTimeSelectedDate;
+ const rows=document.getElementById('calendarMonthRows');rows.innerHTML='';
+ let days=0,totalMs=0,punchTotal=0;
+ keys.forEach(k=>{
+  const rec=calendarRecord(k),p=rec.punches||[],has=p.length>0;
+  if(has){days++;punchTotal+=p.length;const out=[...p].reverse().find(x=>x.type==='out'),last=p[p.length-1];const end=out?.ts||(k===todayKey()?Date.now():last?.ts||Date.now());totalMs+=paidMs(rec,end)}
+  const status=rec.breakStatus||{},statusText=['morning','afternoon'].map(n=>({taken:'Taken',skipped:'Skipped','not-recorded':'Not recorded'}[status[n]||'not-recorded'])).join(' / ');
+  const tr=document.createElement('tr');if(k===myTimeSelectedDate)tr.className='calendar-ledger-selected';
+  const dateCell=new Date(k+'T12:00:00').toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'});
+  [dateCell,calendarPunchTime(rec,'in'),calendarPunchTime(rec,'lunch-start'),calendarPunchTime(rec,'lunch-end'),calendarPunchTime(rec,'out'),statusText,calendarPaid(k)].forEach(v=>{const td=document.createElement('td');td.textContent=v;tr.appendChild(td)});
+  const td=document.createElement('td'),btn=document.createElement('button');btn.type='button';btn.className='quiet';btn.textContent=k===myTimeSelectedDate?'Selected':'View';btn.onclick=()=>{myTimeSelectedDate=k;renderMyTimeCalendar()};td.appendChild(btn);tr.appendChild(td);rows.appendChild(tr);
+ });
+ document.getElementById('calendarDaysCount').textContent=String(days);
+ document.getElementById('calendarPaidTotal').textContent=fmtMin(totalMs/60000);
+ document.getElementById('calendarPunchTotal').textContent=String(punchTotal);
+ const selected=calendarRecord(myTimeSelectedDate),p=selected.punches||[],has=!!(data[myTimeSelectedDate]&&(p.length||(data[myTimeSelectedDate].breakStatus)||(data[myTimeSelectedDate].breakTimes)));
+ document.getElementById('calendarSelectedTitle').textContent=new Date(myTimeSelectedDate+'T12:00:00').toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+ document.getElementById('calendarSavedBadge').textContent=has?'Saved on this device':'No saved record';
+ const details=document.getElementById('calendarPunchDetails');details.innerHTML='';
+ [['Clock in','in'],['Lunch out','lunch-start'],['Lunch in','lunch-end'],['Clock out','out']].forEach(([label,type])=>{const box=document.createElement('div');box.className='mytime-detail-item';const l=document.createElement('span'),v=document.createElement('strong');l.textContent=label;v.textContent=calendarPunchTime(selected,type);box.append(l,v);details.appendChild(box)});
+ document.getElementById('calendarDaySummary').textContent=p.length?p.length+' punch event(s) saved · paid time '+calendarPaid(myTimeSelectedDate):'No punches saved for this date in this browser. Records from another browser/device are not automatically synced.';
+ const breakRoot=has?ensureBreakFields(myTimeSelectedDate):{breakStatus:{lunch:'not-recorded',morning:'not-recorded',afternoon:'not-recorded'},breakTimes:{morning:{start:'',end:''},afternoon:{start:'',end:''}}};
+ const controls=document.getElementById('calendarBreakControls');controls.innerHTML='';
+ [['lunch','Lunch status'],['morning','Morning 15-minute break'],['afternoon','Afternoon 15-minute break']].forEach(([name,label])=>{
+  const box=document.createElement('div');box.className='mytime-break-item';const h=document.createElement('strong');h.textContent=label;box.appendChild(h);
+  const sel=document.createElement('select');sel.setAttribute('aria-label',label+' status');
+  [['not-recorded','Not recorded'],['taken','Taken'],['skipped','Skipped']].forEach(([v,t])=>{const o=document.createElement('option');o.value=v;o.textContent=t;sel.appendChild(o)});
+  sel.value=breakRoot.breakStatus[name];sel.onchange=()=>{const rec=ensureBreakFields(myTimeSelectedDate);rec.breakStatus[name]=sel.value;save();renderMyTimeCalendar()};box.appendChild(sel);
+  if(name!=='lunch'){const times=document.createElement('div');times.className='mytime-break-times';['start','end'].forEach(part=>{const lab=document.createElement('label');lab.textContent=part==='start'?'Start time':'End time';const inp=document.createElement('input');inp.type='time';inp.value=breakRoot.breakTimes[name][part]||'';inp.onchange=()=>{const rec=ensureBreakFields(myTimeSelectedDate);rec.breakTimes[name][part]=inp.value;save();renderMyTimeCalendar()};lab.appendChild(inp);times.appendChild(lab)});box.appendChild(times)}
+  controls.appendChild(box);
+ });
+}
+function calendarDateKeys(scope){
+ const first=new Date(myTimeCalendarMonth.getFullYear(),myTimeCalendarMonth.getMonth(),1,12),count=new Date(first.getFullYear(),first.getMonth()+1,0).getDate();
+ return Array.from({length:count},(_,i)=>calendarKeyDate(new Date(first.getFullYear(),first.getMonth(),i+1,12)));
+}
+function printCalendarReport(scope){
+ const esc=v=>String(v??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+ let keys;
+ if(scope==='week'){
+  const d=new Date((myTimeSelectedDate||todayKey())+'T12:00:00'),dayOffset=(d.getDay()+6)%7,monday=new Date(d);monday.setDate(d.getDate()-dayOffset);
+  keys=Array.from({length:7},(_,i)=>{const x=new Date(monday);x.setDate(monday.getDate()+i);return calendarKeyDate(x)});
+ }else keys=calendarDateKeys('month');
+ const title=scope==='week'?'Weekly timesheet':'Monthly timesheet',dateRange=keys[0]+' — '+keys[keys.length-1];
+ const rows=keys.map(k=>{
+  const r=calendarRecord(k),p=r.punches||[],first=t=>p.find(x=>x.type===t),last=t=>[...p].reverse().find(x=>x.type===t);
+  const types=[['in','Punch in'],['morning-break-start','15 min break start'],['morning-break-end','15 min break end'],['lunch-start','Lunch start'],['lunch-end','Lunch end'],['afternoon-break-start','15 min break start'],['afternoon-break-end','15 min break end'],['out','Punch out']];
+  const punches=types.map(([type,label])=>{const x=type==='out'?last(type):first(type);return label+': '+(x?.ts?fmtTime(x.ts):'—')});
+  const out=last('out'),lastPunch=p[p.length-1],end=out?.ts||(k===todayKey()?Date.now():lastPunch?.ts||Date.now());
+  const paid=p.length?fmtMin(paidMs(r,end)/60000):'—';
+  return '<tr><td>'+esc(new Date(k+'T12:00:00').toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric',year:'numeric'}))+'</td><td>'+punches.map(esc).join('<span class="print-sep"> | </span>')+'</td><td>'+esc(paid)+'</td></tr>';
+ }).join('');
+ const report=document.getElementById('calendarPrintReport');if(!report)return;
+ report.innerHTML='<header class="print-report-head"><div class="print-brand">FOSS North America · myTIME</div><h1>'+title+'</h1><p>'+esc(dateRange)+'</p></header><table class="print-timesheet"><thead><tr><th>Date</th><th>Daily punches (actual recorded times)</th><th>Paid time</th></tr></thead><tbody>'+rows+'</tbody></table><footer class="print-report-foot">Generated from punch records saved in this browser/device. Scheduled lunch times are intentionally excluded.</footer>';
+ report.style.display='block';report.setAttribute('aria-hidden','false');document.body.classList.add('printing-calendar');
+ const cleanup=()=>{report.style.display='none';report.setAttribute('aria-hidden','true');document.body.classList.remove('printing-calendar');window.removeEventListener('afterprint',cleanup)};
+ window.addEventListener('afterprint',cleanup);window.print();setTimeout(cleanup,1500);
+}
+function exportCalendarCsv(keys){
+ const q=v=>{const s=String(v??'');return '"'+s.replace(/"/g,'""')+'"';};
+ const rows=[['Date','Clock in','Lunch out','Lunch in','Clock out','Paid time','Punch count','Lunch status','Morning break status','Afternoon break status','Morning break start','Morning break end','Afternoon break start','Afternoon break end']];
+ keys.forEach(k=>{const r=data[k]||{punches:[]},p=r.punches||[],get=t=>p.find(x=>x.type===t),out=[...p].reverse().find(x=>x.type==='out'),clock=t=>{const item=t==='out'?out:get(t);return item?.ts?fmtTime(item.ts):''};rows.push([k,clock('in'),clock('lunch-start'),clock('lunch-end'),clock('out'),p.length?fmtMin(paidMs(r,out?.ts||Date.now())/60000):'',p.length,(r.breakStatus||{}).lunch||'not-recorded',(r.breakStatus||{}).morning||'not-recorded',(r.breakStatus||{}).afternoon||'not-recorded',r.breakTimes?.morning?.start||'',r.breakTimes?.morning?.end||'',r.breakTimes?.afternoon?.start||'',r.breakTimes?.afternoon?.end||''])});
+ const csv=rows.map(row=>row.map(q).join(',')).join('\r\n'),blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='myTIME-monthly-timesheet-'+keys[0]+'-to-'+keys[keys.length-1]+'.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+/* Direct editing and deletion for any saved date */
+function recordHH(ts){if(!ts)return '';const d=new Date(ts);return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}
+function managerRecordTimes(k){const p=data[k]?.punches||[],first=t=>p.find(x=>x.type===t);return {cin:first('in')?.ts,lo:first('lunch-start')?.ts,li:first('lunch-end')?.ts,cout:[...p].reverse().find(x=>x.type==='out')?.ts}}
+function renderRecordManager(){
+ const body=document.getElementById('recordManagerRows');if(!body)return;
+ const filter=(document.getElementById('recordSearch')?.value||'').trim(),keys=Object.keys(data).filter(k=>!filter||k.includes(filter)).sort().reverse();body.innerHTML='';
+ if(!keys.length){body.innerHTML='<tr><td colspan="7">No matching saved records.</td></tr>';return}
+ keys.forEach(k=>{const p=managerRecordTimes(k),rec=data[k],paid=paidMs(rec,[...(rec.punches||[])].reverse().find(x=>x.type==='out')?.ts||Date.now());const tr=document.createElement('tr');
+  [k, p.cin?fmtTime(p.cin):'—',p.lo?fmtTime(p.lo):'—',p.li?fmtTime(p.li):'—',p.cout?fmtTime(p.cout):'—',fmtMin(paid/60000)].forEach(v=>{const td=document.createElement('td');td.textContent=v;tr.appendChild(td)});
+  const td=document.createElement('td'),actions=document.createElement('div');actions.className='record-row-actions';const edit=document.createElement('button');edit.type='button';edit.className='quiet';edit.textContent='Edit';edit.onclick=()=>openRecordEditor(k);const del=document.createElement('button');del.type='button';del.className='danger';del.textContent='Delete';del.onclick=()=>deleteRecordDate(k);actions.append(edit,del);td.appendChild(actions);tr.appendChild(td);body.appendChild(tr);
+ });
+}
+function openRecordEditor(k){
+ const input=document.getElementById('recordDate');input.value=k;const exists=!!data[k];const p=managerRecordTimes(k);
+ document.getElementById('editClockIn').value=recordHH(p.cin);document.getElementById('editLunchOut').value=recordHH(p.lo);document.getElementById('editLunchIn').value=recordHH(p.li);document.getElementById('editClockOut').value=recordHH(p.cout);
+ document.getElementById('editReason').value='';document.getElementById('recordEditorTitle').textContent=(exists?'Edit punches for ':'Add punches for ')+k;document.getElementById('deleteRecordDay').hidden=!exists;document.getElementById('recordEditor').hidden=false;
+}
+function deleteRecordDate(k){
+ if(!data[k])return;if(!confirm('Permanently delete all punch records for '+k+' from this browser? Download a backup first if you may need them.'))return;
+ delete data[k];save();render();renderRecordManager();document.getElementById('recordEditor').hidden=true;
+}
+document.getElementById('recordSearch')?.addEventListener('input',renderRecordManager);
+document.getElementById('recordDate')?.addEventListener('change',e=>{if(e.target.value)openRecordEditor(e.target.value)});
+document.getElementById('newRecordBtn')?.addEventListener('click',()=>{const d=document.getElementById('recordDate');if(!d.value)d.value=todayKey();openRecordEditor(d.value)});
+document.getElementById('cancelRecordEdit')?.addEventListener('click',()=>document.getElementById('recordEditor').hidden=true);
+document.getElementById('deleteRecordDay')?.addEventListener('click',()=>deleteRecordDate(document.getElementById('recordDate').value));
+document.getElementById('saveRecordEdit')?.addEventListener('click',()=>{
+ const k=document.getElementById('recordDate').value;if(!/^\d{4}-\d{2}-\d{2}$/.test(k)){alert('Choose a valid work date first.');return}
+ const values=[['in',document.getElementById('editClockIn').value],['lunch-start',document.getElementById('editLunchOut').value],['lunch-end',document.getElementById('editLunchIn').value],['out',document.getElementById('editClockOut').value]],seq=values.filter(x=>x[1]).map(x=>x[1]);
+ if(!seq.length){alert('Enter at least one punch time, or use Delete to remove the date.');return}
+ for(let i=1;i<seq.length;i++)if(seq[i]<seq[i-1]){alert('Punch times must be chronological: clock in, lunch out, lunch in, clock out.');return}
+ if(values[1][1]&&!values[0][1]||values[2][1]&&!values[1][1]||values[3][1]&&!values[0][1]){alert('Add the preceding punch first (clock in before lunch, lunch out before lunch in, and clock in before clock out).');return}
+ const punches=values.filter(x=>x[1]).map(([type,t])=>({type,ts:new Date(k+'T'+t+':00').getTime()}));
+ const reason=document.getElementById('editReason').value.trim()||'Manually edited in Manage records';
+ const audit=[...(data[k]?.audit||[]),{at:Date.now(),reason}];data[k]={...(data[k]||{}),punches,audit};save();render();renderRecordManager();document.getElementById('recordEditor').hidden=true;
+ const status=document.getElementById('importStatus');if(status)status.textContent='Saved corrections for '+k+'.';
+});
+document.getElementById('downloadRecordsCsv')?.addEventListener('click',()=>{
+ const escapeCsv=v=>'"'+String(v??'').replace(/"/g,'""')+'"',lines=[['Date','Clock In','Lunch Out','Lunch In','Clock Out','Paid Minutes','Notes']];
+ Object.keys(data).sort().forEach(k=>{const p=managerRecordTimes(k),rec=data[k],out=[...(rec.punches||[])].reverse().find(x=>x.type==='out'),mins=Math.round(paidMs(rec,out?.ts||Date.now())/60000);lines.push([k,recordHH(p.cin),recordHH(p.lo),recordHH(p.li),recordHH(p.cout),mins,(rec.audit||[]).map(a=>a.reason).filter(Boolean).join(' | ')])});
+ const blob=new Blob([lines.map(r=>r.map(escapeCsv).join(',')).join('\r\n')],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='myTIME-editable-records-'+todayKey()+'.csv';a.click();URL.revokeObjectURL(url);
+});
+const beforeManagerRender=render;render=function(){beforeManagerRender();renderRecordManager()};
+renderRecordManager();
 
 </script>
 <script>
