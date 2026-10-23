@@ -609,6 +609,11 @@ body.dark-mode .schedule-item small{color:#b7c5df}
 #profileSaveStatus{min-width:180px}
 body.dark-mode #profilePanel{background:#172438;color:#e7edff;border-color:#354968}
 @media(max-width:760px){#profilePanel:not([hidden]){grid-template-columns:1fr}}
+
+/* Profile controls must remain clickable above the overlay. */
+#profileBackdrop{pointer-events:auto}
+#profilePanel{pointer-events:auto}
+#profileTrigger{pointer-events:auto;touch-action:manipulation}
 </style>
 </head>
 <body><div id="updateNotice" role="status" aria-live="polite"><div><strong>myTIME update available</strong><br><small>Save any changes, then reload to use the latest version.</small></div><button type="button" id="applyUpdateBtn">Update myTIME</button></div><main class="shell">
@@ -897,20 +902,20 @@ function updateLiveClock(){
  date.textContent=fmtDate(now);
  if(tz)tz.textContent='Local time · '+(settings.timezone==='UTC'?'UTC':Intl.DateTimeFormat().resolvedOptions().timeZone);
 }
-render();
-/* Continuous live clock: repaint every animation frame using wall-clock time,
-   so seconds never depend on dashboard rendering or timer drift. */
+/* Start the clock and profile setup even if a dashboard renderer fails.
+   A rendering exception must not abort the rest of this main script. */
+try{render()}catch(error){console.error('myTIME initial dashboard render failed:',error)}
+/* Continuous live clock: repaint every animation frame using wall-clock time. */
 let liveClockFrame=0;
 function runContinuousClock(){
- updateLiveClock();
+ try{updateLiveClock()}catch(error){console.error('myTIME clock update failed:',error)}
  liveClockFrame=requestAnimationFrame(runContinuousClock);
 }
-if(liveClockFrame)cancelAnimationFrame(liveClockFrame);
 runContinuousClock();
 setInterval(()=>{try{render()}catch(error){console.error('myTIME live refresh failed:',error)}},15000);
 function refreshMyTimeOnReturn(){
- updateLiveClock();
- try{render();updateLiveClock()}catch(error){console.error('myTIME refresh after returning to tab failed:',error)}
+ try{updateLiveClock()}catch(error){console.error('myTIME clock refresh failed:',error)}
+ try{render()}catch(error){console.error('myTIME refresh after returning to tab failed:',error)}
 }
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')refreshMyTimeOnReturn()});
 window.addEventListener('focus',refreshMyTimeOnReturn);
@@ -1079,8 +1084,8 @@ function setProfileOpen(open){
   panel.hidden=false;backdrop.hidden=false;
   panel.setAttribute('aria-modal','true');
   trigger.setAttribute('aria-expanded','true');
-  renderProfile();
-  requestAnimationFrame(()=>{$('profileName')?.focus();panel.scrollIntoView({block:'nearest',behavior:document.body.classList.contains('dark-mode')?'auto':'smooth'})});
+  try{renderProfile()}catch(error){console.error('myTIME profile render failed:',error)}
+  requestAnimationFrame(()=>{try{$('profileName')?.focus();panel.scrollIntoView({block:'nearest',behavior:'auto'})}catch(error){console.error('myTIME profile focus failed:',error)}});
  }else{
   panel.hidden=true;backdrop.hidden=true;
   panel.removeAttribute('aria-modal');
