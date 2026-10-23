@@ -1000,6 +1000,20 @@ else{payload={source:'myTIME',event:'full_backup',sentAt:new Date().toISOString(
   pages[key]=page;
  });
  const move=(el,key)=>{if(el)pages[key].appendChild(el)};
+ // Add convenient cross-links so integrations are reachable from both Settings and Import & Export.
+ function addPageShortcuts(key,title,description,links){
+  const host=pages[key];if(!host||host.querySelector('[data-page-shortcuts="'+key+'"]'))return;
+  const card=document.createElement('section');card.className='card';card.dataset.pageShortcuts=key;
+  card.style.cssText='margin:0 0 16px;padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap';
+  const copy=document.createElement('div');copy.style.cssText='min-width:220px;flex:1';
+  const heading=document.createElement('h2');heading.style.cssText='margin:0 0 4px;font-size:17px';heading.textContent=title;
+  const note=document.createElement('p');note.className='sub';note.style.margin='0';note.textContent=description;
+  copy.append(heading,note);card.appendChild(copy);
+  const actions=document.createElement('div');actions.style.cssText='display:flex;gap:8px;flex-wrap:wrap';
+  links.forEach(link=>{const button=document.createElement('button');button.type='button';button.className='secondary';button.textContent=link.label;button.addEventListener('click',()=>showPage(link.page));actions.appendChild(button)});
+  card.appendChild(actions);host.insertBefore(card,host.firstChild);
+ }
+
  const oldLayout=document.querySelector('.layout');
  if(oldLayout){
   const timelineCard=oldLayout.querySelector('#timeline')?.closest('article');
@@ -1045,6 +1059,8 @@ else{payload={source:'myTIME',event:'full_backup',sentAt:new Date().toISOString(
  nav.querySelectorAll('.app-tab').forEach(btn=>btn.addEventListener('click',()=>showPage(btn.dataset.tab)));
  const updateNavBrand=()=>document.body.classList.toggle('nav-compact',window.scrollY>120);
  window.addEventListener('scroll',updateNavBrand,{passive:true});updateNavBrand();
+ addPageShortcuts('settings','Settings shortcuts','Manage your work preferences and quickly open connected services.',[{label:'Open integrations',page:'integrations'},{label:'Import & export',page:'import'}]);
+ addPageShortcuts('import','Data tools & integrations','Import or export your records, or manage your connected services.',[{label:'Open integrations',page:'integrations'},{label:'Open settings',page:'settings'}]);
  showPage('dashboard');window.myTimeShowPage=showPage;
 })();
 
