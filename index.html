@@ -1384,7 +1384,9 @@ renderRecordManager();
  async function upload(silent=false){
   if(!session||busy)return;busy=true;setButtons();
   try{
-   const payload=await encryptPayload(localBackup(),session.key);
+   const currentBackup=localBackup();
+   if(!Object.keys(currentBackup.data||{}).length&&!(Array.isArray(currentBackup.bankEntries)&&currentBackup.bankEntries.length))throw Error('This browser has no time records or time-bank entries to back up. To protect existing records, empty data will not be uploaded. Restore a cloud/JSON backup first, or create records on this device.');
+   const payload=await encryptPayload(currentBackup,session.key);
    const result=await request(API,{method:'PUT',body:JSON.stringify({account:session.account,verifier:session.verifier,ciphertext:payload})});
    remoteMeta={exists:true,updatedAt:result.updatedAt,revision:result.revision,verifier:session.verifier};
    updated.textContent='Last cloud backup: '+new Date(result.updatedAt).toLocaleString()+' · revision '+result.revision;
