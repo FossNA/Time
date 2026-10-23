@@ -297,7 +297,7 @@ body[data-tab]:not([data-tab="dashboard"]) .schedule-reminders,
 .recovery-stats strong{font-size:17px}
 .recovery-break-note{margin-top:14px}
 @media(max-width:600px){.recovery-stats{grid-template-columns:1fr 1fr}.recovery-stats strong{font-size:15px}}
-.calendar-month-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:8px 0 12px}
+.calendar-analysis{margin-top:16px;padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--card)}.calendar-analysis-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px}.calendar-analysis-item{border:1px solid var(--line);border-radius:10px;padding:12px;min-width:0;background:var(--bg)}.calendar-analysis-item strong{display:block;font-size:15px;margin:5px 0;overflow-wrap:anywhere}.calendar-analysis-item small{display:block;color:var(--muted);line-height:1.45}.calendar-analysis-status{display:inline-block;border-radius:99px;padding:3px 8px;font-size:11px;font-weight:800;background:#e6f5eb;color:#176b3a}.calendar-analysis-status.warn{background:#fff0d5;color:#875500}.calendar-analysis-status.bad{background:#ffe6e6;color:#a51f2b}.calendar-analysis-status.neutral{background:#e9eef6;color:#465773}body.dark-mode .calendar-analysis-item{background:#101b2d;border-color:#30415d}body.dark-mode .calendar-analysis{border-color:#30415d}@media(max-width:650px){.calendar-analysis-grid{grid-template-columns:1fr}}.calendar-month-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:8px 0 12px}
 .mytime-calendar-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--card)}
 .mytime-calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(105px,1fr));grid-auto-rows:minmax(124px,auto);gap:0;min-width:735px;background:var(--line);border-top:1px solid var(--line);border-left:1px solid var(--line)}
 #myTimeCalendarGrid>.mytime-calendar-day{display:flex!important;visibility:visible!important;opacity:1!important;min-height:124px;height:auto;align-self:stretch}
@@ -1338,6 +1338,7 @@ function renderMyTimeCalendar(){
    <section class="card" id="calendarDayDetail" style="margin-top:18px;background:var(--bg)">
     <div class="section-head"><div><div class="metric-label">SELECTED DAY</div><h3 id="calendarSelectedTitle" style="margin:4px 0"></h3></div><span class="tag" id="calendarSavedBadge">No saved record</span></div>
     <div class="mytime-detail-grid" id="calendarPunchDetails"></div><p class="sub" id="calendarDaySummary" style="margin-top:12px"></p>
+    <section class="calendar-analysis" aria-live="polite"><h3 style="margin:0">Hours, lunch &amp; break analysis</h3><p class="sub" style="margin:5px 0 0">Select a day to compare recorded time with your schedule. Green means within allowance, amber means short or missing, and red means over the allowance.</p><div class="calendar-analysis-grid" id="calendarIntervalAnalysis"></div></section>
     <h3 style="margin-top:18px">Late start &amp; make-up record</h3><p class="sub">Late start is calculated from your planned start and actual clock-in. Add a note about approved adjustments and how you made up time; notes do not change paid hours.</p><div id="calendarRecoverySummary" class="notice" style="margin:10px 0"></div><div class="field"><label for="calendarMakeUpNote">How time was made up (or plan agreed)</label><textarea id="calendarMakeUpNote" rows="3" maxlength="600" placeholder="e.g. Started 20 minutes late; stayed until 5:20 PM with approval."></textarea></div><button type="button" class="quiet" id="saveCalendarMakeUpNote">Save make-up note</button><h3 style="margin-top:18px">Lunch and rest-break record</h3><p class="sub">Choose Taken, Skipped, or Not recorded. These labels document what happened; they do not alter payroll or automatically grant make-up credit.</p>
     <div class="mytime-break-grid" id="calendarBreakControls"></div>
    </section>
@@ -1394,6 +1395,7 @@ function renderMyTimeCalendar(){
  const details=document.getElementById('calendarPunchDetails');details.innerHTML='';
  [['Clock in','in'],['Lunch out','lunch-start'],['Lunch in','lunch-end'],['Clock out','out']].forEach(([label,type])=>{const box=document.createElement('div');box.className='mytime-detail-item';const l=document.createElement('span'),v=document.createElement('strong');l.textContent=label;v.textContent=calendarPunchTime(selected,type);box.append(l,v);details.appendChild(box)});
  document.getElementById('calendarDaySummary').textContent=p.length?p.length+' punch event(s) saved · paid time '+calendarPaid(myTimeSelectedDate):'No punches saved for this date in this browser. Records from another browser/device are not automatically synced.';
+ renderCalendarIntervalAnalysis(myTimeSelectedDate,selected);
  const selectedSchedule=scheduleForDate(myTimeSelectedDate),selectedLate=lateStartMinutes(myTimeSelectedDate),recoverySummary=document.getElementById('calendarRecoverySummary');if(recoverySummary)recoverySummary.textContent=selectedLate>0?'Late start: '+fmtMin(selectedLate)+' (planned '+selectedSchedule.startTime+', actual '+calendarPunchTime(selected,'in')+'). Record the actual approved make-up action below.':(calendarPunchTime(selected,'in')!=='—'?'No late start detected against the planned '+selectedSchedule.startTime+'.':'No clock-in recorded; late start will be calculated once you clock in.');const noteInput=document.getElementById('calendarMakeUpNote');if(noteInput)noteInput.value=recoveryNote(myTimeSelectedDate);
  const breakRoot=has?ensureBreakFields(myTimeSelectedDate):{breakStatus:{lunch:'not-recorded',morning:'not-recorded',afternoon:'not-recorded'},breakTimes:{morning:{start:'',end:''},afternoon:{start:'',end:''}}};
  const controls=document.getElementById('calendarBreakControls');controls.innerHTML='';
@@ -1405,6 +1407,47 @@ function renderMyTimeCalendar(){
   if(name!=='lunch'){const times=document.createElement('div');times.className='mytime-break-times';['start','end'].forEach(part=>{const lab=document.createElement('label');lab.textContent=part==='start'?'Start time':'End time';const inp=document.createElement('input');inp.type='time';inp.value=breakRoot.breakTimes[name][part]||'';inp.onchange=()=>{const rec=ensureBreakFields(myTimeSelectedDate);rec.breakTimes[name][part]=inp.value;save();renderMyTimeCalendar()};lab.appendChild(inp);times.appendChild(lab)});box.appendChild(times)}
   controls.appendChild(box);
  });
+}
+function calendarIntervalMinutes(rec,startType,endType,fallback){
+ const p=rec?.punches||[],start=[...p].reverse().find(x=>x.type===startType),end=[...p].reverse().find(x=>x.type===endType);
+ if(start?.ts&&end?.ts&&end.ts>=start.ts)return (end.ts-start.ts)/60000;
+ const parseClock=v=>{if(!v||!/^\d{2}:\d{2}$/.test(v))return null;const [h,m]=v.split(':').map(Number);return h*60+m};
+ const a=parseClock(fallback?.start),b=parseClock(fallback?.end);
+ if(a!==null&&b!==null)return (b-a+1440)%1440;
+ if(start?.ts&&!end?.ts)return (Date.now()-start.ts)/60000;
+ return null;
+}
+function renderCalendarIntervalAnalysis(k,rec){
+ const root=document.getElementById('calendarIntervalAnalysis');if(!root)return;root.innerHTML='';
+ const schedule=scheduleForDate(k),p=rec?.punches||[],status=rec?.breakStatus||{},times=rec?.breakTimes||{};
+ const lunchActual=calendarIntervalMinutes(rec,'lunch-start','lunch-end',times.lunch);
+ const lunchAllowed=Math.max(0,parseTime(settings.lunchEnd)-parseTime(settings.lunchStart));
+ const lunchStarted=p.some(x=>x.type==='lunch-start'),lunchEnded=p.some(x=>x.type==='lunch-end');
+ const minsText=v=>v===null?'Not recorded':fmtMin(v);
+ function add(label,actual,allowed,detail,missing=false){
+  const box=document.createElement('article');box.className='calendar-analysis-item';
+  const h=document.createElement('small');h.textContent=label;
+  const value=document.createElement('strong');value.textContent=minsText(actual);
+  const delta=actual===null?null:Math.round(actual-allowed);
+  const badge=document.createElement('span');badge.className='calendar-analysis-status';
+  if(missing||actual===null){badge.classList.add('neutral');badge.textContent='Missing / incomplete'}
+  else if(delta>0){badge.classList.add('bad');badge.textContent=fmtMin(delta)+' over'}
+  else if(delta<0){badge.classList.add('warn');badge.textContent=fmtMin(-delta)+' short'}
+  else badge.textContent='On target';
+  const note=document.createElement('small');note.textContent='Allowance: '+fmtMin(allowed)+(detail?' · '+detail:'');
+  box.append(h,value,badge,note);root.appendChild(box);
+ }
+ add('Lunch duration',lunchActual,lunchAllowed,lunchStarted&&!lunchEnded?'Lunch is still open':(lunchActual!==null&&lunchActual<lunchAllowed?'Shorter than scheduled':lunchActual!==null&&lunchActual>lunchAllowed?'Longer than scheduled':'Scheduled lunch allowance'),lunchActual===null||!lunchEnded);
+ [['Morning break','morning','morning-break-start','morning-break-end'],['Afternoon break','afternoon','afternoon-break-start','afternoon-break-end']].forEach(([label,key,st,et])=>{
+  const actual=calendarIntervalMinutes(rec,st,et,times[key]);
+  const ended=p.some(x=>x.type===et),fallbackRecorded=!!(times[key]?.start&&times[key]?.end);
+  const missing=actual===null||(!ended&&!fallbackRecorded);
+  const detail=status[key]==='skipped'?'Marked skipped':status[key]==='taken'?'Marked taken':'Status not recorded';
+  add(label,actual,15,detail,missing);
+ });
+ const planned=Math.max(0,plannedMinutes(schedule)),out=[...p].reverse().find(x=>x.type==='out'),last=p[p.length-1];
+ const paid=p.length?paidMs(rec,out?.ts||(k===todayKey()?Date.now():last?.ts||Date.now()))/60000:null;
+ add('Paid work time',paid,planned,'Actual paid time compared with planned daily hours',paid===null);
 }
 function calendarDateKeys(scope){
  const first=new Date(myTimeCalendarMonth.getFullYear(),myTimeCalendarMonth.getMonth(),1,12),count=new Date(first.getFullYear(),first.getMonth()+1,0).getDate();
