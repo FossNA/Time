@@ -1601,7 +1601,19 @@ renderRecordManager();
  const email=el('cloudAccountEmail'),pass=el('cloudPassphrase'),unlock=el('cloudUnlockBtn'),backup=el('cloudBackupBtn'),restore=el('cloudRestoreBtn'),lock=el('cloudLockBtn'),status=el('cloudSyncStatusText'),updated=el('cloudSyncUpdated');
  if(!email||!pass||!unlock)return;
  let session=null, busy=false, timer=null, remoteMeta=null;
- function setStatus(message,kind='info'){status.textContent=message;const root=el('cloudSyncStatus');root.classList.toggle('save-status-error',kind==='error');root.classList.toggle('save-status-ok',kind==='success')}
+ function setStorageBadge(label,description,kind='info'){
+  const badge=el('saveStatus'),text=el('saveStatusText');
+  if(text)text.textContent=label;
+  if(badge){badge.title=description;badge.classList.toggle('save-status-error',kind==='error');badge.classList.toggle('save-status-ok',kind==='success')}
+ }
+ function setStatus(message,kind='info'){
+  status.textContent=message;
+  const root=el('cloudSyncStatus');
+  root.classList.toggle('save-status-error',kind==='error');
+  root.classList.toggle('save-status-ok',kind==='success');
+  if(session&&kind==='success')setStorageBadge('Encrypted cloud backup ready','Local records plus encrypted cloud backup; automatic backups are scheduled after changes.','success');
+  else if(!session)setStorageBadge('Local-only storage','Time records are stored in this browser until you unlock and create an encrypted cloud backup.','info');
+ }
  function setButtons(){unlock.disabled=busy;backup.disabled=busy||!session;restore.disabled=busy||!session||!remoteMeta?.exists;lock.disabled=busy||!session}
  const enc=new TextEncoder(), dec=new TextDecoder();
  function b64(bytes){let s='';for(const b of bytes)s+=String.fromCharCode(b);return btoa(s)}
@@ -1700,7 +1712,7 @@ renderRecordManager();
  unlock.addEventListener('click',connect);
  backup.addEventListener('click',()=>{if(remoteMeta?.exists&&!confirm('Replace the current cloud backup with this browser’s current records?'))return;upload(false)});
  restore.addEventListener('click',restoreRemote);
- lock.addEventListener('click',()=>{session=null;remoteMeta=null;pass.value='';clearTimeout(timer);setButtons();setStatus('Cloud profile locked. Records on this device are unchanged.')});
+ lock.addEventListener('click',()=>{session=null;remoteMeta=null;pass.value='';clearTimeout(timer);setButtons();setStorageBadge('Local-only storage','Cloud profile is locked. Records remain on this device.','info');setStatus('Cloud profile locked. Records on this device are unchanged.')});
  email.value=(typeof profile!=='undefined'&&profile.email)||'';
  // While unlocked, changes made through the app are backed up after a short idle period.
  const priorSave=save;save=function(){const result=priorSave();if(session){clearTimeout(timer);timer=setTimeout(()=>upload(true),1800)}return result};
