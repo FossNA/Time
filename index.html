@@ -1009,7 +1009,7 @@ else{payload={source:'myTIME',event:'full_backup',sentAt:new Date().toISOString(
   const note=document.createElement('p');note.className='sub';note.style.margin='0';note.textContent=description;
   copy.append(heading,note);card.appendChild(copy);
   const actions=document.createElement('div');actions.style.cssText='display:flex;gap:8px;flex-wrap:wrap';
-  links.forEach(link=>{const button=document.createElement('button');button.type='button';button.className='secondary';button.textContent=link.label;button.addEventListener('click',()=>showPage(link.page));actions.appendChild(button)});
+  links.forEach(link=>{const button=document.createElement('button');button.type='button';button.className='secondary';button.textContent=link.label;button.addEventListener('click',()=>{if(link.section)showSettingsSection(link.section);showPage(link.page)});actions.appendChild(button)});
   card.appendChild(actions);host.insertBefore(card,host.firstChild);
  }
 
@@ -1072,7 +1072,7 @@ else{payload={source:'myTIME',event:'full_backup',sentAt:new Date().toISOString(
  const updateNavBrand=()=>document.body.classList.toggle('nav-compact',window.scrollY>120);
  window.addEventListener('scroll',updateNavBrand,{passive:true});updateNavBrand();
  addPageShortcuts('settings','Settings overview','Choose a section above to manage your schedule, backups, or integrations.',[{label:'Import & export',page:'import'}]);
- addPageShortcuts('import','Data tools & integrations','Import or export your records, or manage your connected services.',[{label:'Open integrations',page:'integrations'},{label:'Open settings',page:'settings'}]);
+ addPageShortcuts('import','Data tools & integrations','Import or export your records, or manage your connected services.',[{label:'Open integration settings',page:'settings',section:'integrations'},{label:'Open settings',page:'settings'}]);
  showPage('dashboard');window.myTimeShowPage=showPage;
 })();
 
