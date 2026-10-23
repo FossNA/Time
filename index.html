@@ -387,6 +387,7 @@ body[data-tab]:not([data-tab="dashboard"]) #webhookPanel{display:none!important;
 
 
 /* Integrations redesign — clear states, visible webhook controls, responsive FOSS styling */
+.settings-subnav{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 18px;padding:8px;background:#eaf0fc;border:1px solid #dce5f5;border-radius:14px}.settings-subtab{appearance:none;border:1px solid transparent;border-radius:9px;padding:10px 14px;background:transparent;color:#24406f;font-weight:750;cursor:pointer}.settings-subtab:hover{background:#fff;border-color:#cbd8f0}.settings-subtab.active{background:#09266f;color:#fff;box-shadow:0 3px 10px #09266f20}.settings-subpage[hidden]{display:none!important}#page-settings>#settingsBackupGroup,#page-settings>#settingsIntegrationsGroup{margin-top:6px}@media(max-width:560px){.settings-subnav{display:grid;grid-template-columns:1fr}.settings-subtab{text-align:left}}
 .integration-page{margin-top:18px;color:var(--ink)}
 .integration-hero{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:clamp(22px,4vw,38px);border-radius:22px;background:linear-gradient(125deg,#09266f 0%,#153c92 66%,#2458c6 100%);color:#fff;box-shadow:var(--shadow)}
 .integration-eyebrow{font-size:11px;font-weight:800;letter-spacing:.17em;color:#dce7ff;text-transform:uppercase}
@@ -489,12 +490,10 @@ body.dark-mode .analytics-warning{background:#3a301c;color:#ffe4a1;border-color:
 <nav class="app-tabs" aria-label="myTIME pages" id="appTabs">
   <button type="button" class="app-tab active" data-tab="dashboard">Dashboard</button>
   <button type="button" class="app-tab" data-tab="calendar">Calendar</button>
-  <button type="button" class="app-tab" data-tab="timesheets">Timesheet &amp; backup</button>
   <button type="button" class="app-tab" data-tab="weekly">Weekly schedule &amp; punches</button>
   <button type="button" class="app-tab" data-tab="records">Manage records</button>
   <button type="button" class="app-tab" data-tab="import">Import &amp; export</button>
   <button type="button" class="app-tab" data-tab="settings">Settings</button>
-  <button type="button" class="app-tab" data-tab="integrations">Integrations</button>
   <span class="app-tabs-spacer" aria-hidden="true"></span>
   <a class="app-tabs-brand" href="https://www.fossanalytics.com/" target="_blank" rel="noopener noreferrer" aria-label="FOSS North America website"><img src="https://www.fossanalytics.com/Design/static/foss-logo.png" alt="FOSS"></a>
 </nav><div class="profile-backdrop" id="profileBackdrop" hidden></div><section class="card profile-card" id="profilePanel" aria-labelledby="profileHeading" hidden><div class="profile-avatar-wrap"><img id="profileAvatar" class="profile-avatar" alt="Your profile photo" hidden><div id="profileInitials" class="profile-initials">YOU</div></div><div class="profile-main"><div class="section-head"><h2 id="profileHeading">Your myTIME profile</h2><button type="button" class="quiet" id="closeProfile">Close</button></div><div class="profile-fields"><div class="field"><label for="profileName">Display name</label><input id="profileName" type="text" maxlength="70" placeholder="Your name"></div><div class="field"><label for="profileEmail">FOSSNA work email</label><input id="profileEmail" type="email" maxlength="160" placeholder="you@fossna.com" autocomplete="email"></div><div class="field"><label for="profilePhoto">Profile image</label><input id="profilePhoto" type="file" accept="image/*"></div></div><div class="profile-actions"><button class="primary" id="saveProfile" type="button">Save profile</button><button class="quiet" id="clearProfilePhoto" type="button">Remove photo</button><small id="profileSaveStatus" class="sub" role="status" aria-live="polite">Profile saves automatically on this device.</small></div><p class="sub profile-note">Profile details and photo are saved only in this browser. Entering a FOSSNA email personalizes this local profile; it does not authenticate your work account or sync records between devices.</p></div></section>
@@ -1042,13 +1041,26 @@ else{payload={source:'myTIME',event:'full_backup',sentAt:new Date().toISOString(
  move(document.getElementById('dataHub'),'import');
  move(document.getElementById('integrationDirectory'),'integrations');
  move(document.querySelector('.schedule-reminders'),'dashboard');
+ // Put the existing backup/timesheet and integration views inside Settings; keep their functionality intact.
+ const settingsWorkday=document.createElement('div');settingsWorkday.id='settingsWorkdayGroup';settingsWorkday.className='settings-subpage';
+ [...pages.settings.children].forEach(el=>settingsWorkday.appendChild(el));
+ const settingsNav=document.createElement('div');settingsNav.className='settings-subnav';settingsNav.setAttribute('role','tablist');settingsNav.setAttribute('aria-label','Settings sections');
+ settingsNav.innerHTML='<button type="button" class="settings-subtab active" data-settings-section="workday" role="tab" aria-selected="true">Workday settings</button><button type="button" class="settings-subtab" data-settings-section="backup" role="tab" aria-selected="false">Timesheet &amp; backup</button><button type="button" class="settings-subtab" data-settings-section="integrations" role="tab" aria-selected="false">Integration settings</button>';
+ pages.settings.append(settingsNav,settingsWorkday);
+ pages.settings.appendChild(pages.timesheets);pages.settings.appendChild(pages.integrations);
+ pages.timesheets.classList.add('settings-subpage');pages.integrations.classList.add('settings-subpage');
+ pages.timesheets.id='settingsBackupGroup';pages.integrations.id='settingsIntegrationsGroup';
+ let settingsSection='workday';
+ function showSettingsSection(section){settingsSection=section;settingsWorkday.hidden=section!=='workday';pages.timesheets.hidden=section!=='backup';pages.integrations.hidden=section!=='integrations';settingsNav.querySelectorAll('[data-settings-section]').forEach(btn=>{const active=btn.dataset.settingsSection===section;btn.classList.toggle('active',active);btn.setAttribute('aria-selected',active?'true':'false')});}
+ settingsNav.querySelectorAll('[data-settings-section]').forEach(btn=>btn.addEventListener('click',()=>showSettingsSection(btn.dataset.settingsSection)));
+ showSettingsSection('workday');
  // Webhook controls are already nested in #integrationDirectory in the source markup.
  [...main.children].filter(el=>el.tagName==='DIV'&&el.getAttribute('style')?.includes('height:1px')).forEach(el=>el.remove());
  document.querySelectorAll('[data-page]').forEach(el=>el.removeAttribute('data-page'));
  function showPage(key){
   if(!pages[key])key='dashboard';
   document.body.dataset.tab=key;
-  Object.entries(pages).forEach(([name,el])=>{el.hidden=name!==key;el.setAttribute('aria-hidden',name===key?'false':'true')});
+  Object.entries(pages).forEach(([name,el])=>{const nested=name==='timesheets'||name==='integrations';if(nested){el.hidden=key!=='settings'||(name==='timesheets'?settingsSection!=='backup':settingsSection!=='integrations');el.setAttribute('aria-hidden',el.hidden?'true':'false')}else if(name==='settings'){el.hidden=key!=='settings';el.setAttribute('aria-hidden',key==='settings'?'false':'true')}else{el.hidden=name!==key;el.setAttribute('aria-hidden',name===key?'false':'true')}});
   nav.querySelectorAll('.app-tab').forEach(btn=>{
    const active=btn.dataset.tab===key;btn.classList.toggle('active',active);btn.setAttribute('aria-current',active?'page':'false');
   });
@@ -1059,7 +1071,7 @@ else{payload={source:'myTIME',event:'full_backup',sentAt:new Date().toISOString(
  nav.querySelectorAll('.app-tab').forEach(btn=>btn.addEventListener('click',()=>showPage(btn.dataset.tab)));
  const updateNavBrand=()=>document.body.classList.toggle('nav-compact',window.scrollY>120);
  window.addEventListener('scroll',updateNavBrand,{passive:true});updateNavBrand();
- addPageShortcuts('settings','Settings shortcuts','Manage your work preferences and quickly open connected services.',[{label:'Open integrations',page:'integrations'},{label:'Import & export',page:'import'}]);
+ addPageShortcuts('settings','Settings overview','Choose a section above to manage your schedule, backups, or integrations.',[{label:'Import & export',page:'import'}]);
  addPageShortcuts('import','Data tools & integrations','Import or export your records, or manage your connected services.',[{label:'Open integrations',page:'integrations'},{label:'Open settings',page:'settings'}]);
  showPage('dashboard');window.myTimeShowPage=showPage;
 })();
