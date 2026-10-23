@@ -516,7 +516,7 @@ body.dark-mode .analytics-warning{background:#3a301c;color:#ffe4a1;border-color:
 <section class="card" style="margin-top:18px" aria-labelledby="weekHeading">
  <div class="section-head"><h2 id="weekHeading">Weekly schedule & punches</h2><span class="tag">MON–SUN</span></div>
  <div class="week-tools"><button class="quiet" id="prevWeek">← Previous week</button><label for="weekOf" class="sub">Week starting</label><input type="date" id="weekOf" style="padding:9px;border:1px solid var(--line);border-radius:9px"><button class="quiet" id="nextWeek">Next week →</button><button class="quiet" id="weeklyExportCsv" type="button">Export this week CSV</button><button class="quiet" id="weeklyPrintBtn" type="button">Print this week</button></div>
- <div class="tablewrap" style="margin-top:14px"><table class="week-table"><thead><tr><th>Day</th><th>Planned in</th><th>Lunch out</th><th>Lunch in</th><th>Planned out</th><th>Actual in</th><th>Actual out</th><th>Lunch</th><th>Paid</th><th>Day balance</th></tr></thead><tbody id="weekRows"></tbody><tfoot><tr><th colspan="8">Weekly totals</th><th id="weekPaid">0h 00m</th><th id="weekBalance">0h 00m</th></tr></tfoot></table></div>
+ <div class="tablewrap" style="margin-top:14px"><table class="week-table"><thead><tr><th>Day</th><th>Planned in</th><th>Lunch out</th><th>Lunch in</th><th>Planned out</th><th>Actual in</th><th>Actual out</th><th>Lunch</th><th>Paid</th><th>Day balance</th><th>Late / make-up</th></tr></thead><tbody id="weekRows"></tbody><tfoot><tr><th colspan="8">Weekly totals</th><th id="weekPaid">0h 00m</th><th id="weekBalance">0h 00m</th></tr></tfoot></table></div>
  <div class="notice">This weekly view is read-only. Planned times come from your saved workday settings; actual punches come from your time clock. Day balance compares paid time with that day’s planned paid-hours goal.</div>
 </section>
 <section class="card" style="margin-top:18px" aria-labelledby="bankHeading">
@@ -752,6 +752,8 @@ function getPunch(rec,type){return (rec?.punches||[]).find(x=>x.type===type)}
 function getOut(rec){return [...(rec?.punches||[])].reverse().find(x=>x.type==='out')}
 function actualPaidMinutes(rec){let out=getOut(rec);return Math.round(paidMs(rec,out?.ts||Date.now())/60000)}
 function plannedMinutes(s){return Math.max(0,Number(s.goalHours||0)*60)}
+function lateStartMinutes(k){const rec=data[k],first=getPunch(rec,'in');if(!first)return 0;const s=scheduleForDate(k);return Math.max(0,(new Date(first.ts).getHours()*60+new Date(first.ts).getMinutes())-parseTime(s.startTime||settings.startTime))}
+function recoveryNote(k){return String(data[k]?.makeUpNote||'').trim()}
 function bankMinutesForWeek(keys){let set=new Set(keys);return bankEntries.filter(e=>set.has(e.date)).reduce((n,e)=>n+Number(e.minutes||0),0)}
 function weekBalanceFor(keys){return keys.reduce((n,k)=>{let rec=data[k],s=scheduleForDate(k);if(!rec?.punches?.length)return n;return n+actualPaidMinutes(rec)-plannedMinutes(s)},0)+bankMinutesForWeek(keys)}
 function renderRecovery(){
@@ -759,33 +761,32 @@ function renderRecovery(){
  const k=todayKey(),s=scheduleForDate(k),rec=data[k],first=rec?getPunch(rec,'in'):null,out=rec?getOut(rec):null;
  const goal=Number(s.goalHours||settings.goalHours||8),startM=parseTime(s.startTime||settings.startTime),actualStart=first?new Date(first.ts).getHours()*60+new Date(first.ts).getMinutes():null;
  const paidToday=rec?.punches?.length?actualPaidMinutes(rec):0,week=weekKeys();
- const paidBreakCreditFor=key=>{const bs=data[key]?.breakStatus||{};return ['morning','afternoon'].reduce((sum,name)=>sum+(bs[name]==='skipped'?15:0),0)};
- const todayBreakCredit=paidBreakCreditFor(k),deficit=Math.max(0,Math.round(goal*60)-paidToday-todayBreakCredit);
- let projected=0,actualWeek=0,remaining=[],weekBreakCredit=0;
+ const deficit=Math.max(0,Math.round(goal*60)-paidToday);
+ let projected=0,actualWeek=0,remaining=[];
  week.forEach(dk=>{
   const ds=scheduleForDate(dk),g=plannedMinutes(ds),rr=data[dk],has=!!rr?.punches?.length,done=!!(rr&&getOut(rr)),date=new Date(dk+'T12:00:00');
   if(date.getDay()===0||date.getDay()===6||g<=0)return;
-  weekBreakCredit+=paidBreakCreditFor(dk);
   if(has)actualWeek+=actualPaidMinutes(rr);
   if(dk<k){if(has)projected+=actualPaidMinutes(rr);return}
   if(dk===k){projected+=done?actualPaidMinutes(rr):Math.max(g,has?actualPaidMinutes(rr):0);if(!done)remaining.push(dk);return}
   projected+=done?actualPaidMinutes(rr):(has?Math.max(g,actualPaidMinutes(rr)):g);
   if(!done)remaining.push(dk);
  });
- const rawGap=Math.max(0,2400-projected),gap=Math.max(0,rawGap-weekBreakCredit),perDay=remaining.length?Math.ceil(gap/remaining.length):gap,opts=[];
+ const gap=Math.max(0,2400-projected),perDay=remaining.length?Math.ceil(gap/remaining.length):gap,opts=[];
  if(gap&&remaining.length){
   opts.push({title:'Spread the gap across remaining workdays',detail:'To project 40 paid hours, plan about '+fmtMin(perDay)+' additional paid time on each of '+remaining.length+' remaining workday(s), on top of the planned shift.'});
   const half=Math.ceil(gap/remaining.length/15)*15;
-  opts.push({title:'Choose a small schedule adjustment',detail:'For example, add '+fmtMin(half)+' to each remaining shift, or divide the total gap between fewer days if approved. Update your planned hours only after confirming the change.'});
+  opts.push({title:'Choose an exact schedule adjustment',detail:'Add '+fmtMin(half)+' to each remaining shift (rounded up to 15-minute increments), or divide '+fmtMin(gap)+' across fewer days if approved. This is a plan, not recorded work time.'});
+  opts.push({title:'Breaks are not automatic make-up credit',detail:'A skipped break only helps if policy allows it and you actually work during that time. Do not skip required breaks or count a skipped paid break as extra hours automatically.'});
   opts.push({title:'Start earlier or finish later—with approval',detail:'An earlier start or later finish can make up the gap without relying on missed meals or rest breaks. Check with your manager before changing your schedule.'});
  }else if(gap)opts.push({title:'Review the week with your manager',detail:'The forecast is '+fmtMin(gap)+' short of 40 paid hours and there are no remaining planned workdays. Ask about an approved schedule adjustment or overtime, if applicable.'});
  if(deficit&&first)opts.unshift({title:'Today’s paid-time estimate',detail:'Recorded punches show '+fmtMin(paidToday)+' paid minutes so far, '+fmtMin(deficit)+' below the '+goal+'-hour daily goal. This updates as actual punches are saved.'});
  const actualLabel=(actualWeek/60).toFixed(2);
  const forecastLabel=(Math.max(0,projected)/60).toFixed(2);
  const bank=bankMinutesForWeek(week);
- const status='<div class="recovery-progress"><div class="recovery-progress-head"><span>Weekly paid-hours target</span><strong>40.00 h</strong></div><div class="recovery-progress-track"><span style="width:'+Math.min(100,Math.max(0,projected/2400*100))+'%"></span></div><div class="recovery-stats"><div><small>Actual recorded</small><strong>'+actualLabel+' h</strong></div><div><small>Projected by week end</small><strong>'+forecastLabel+' h</strong></div><div><small>Projected gap</small><strong>'+(gap?(gap/60).toFixed(2)+' h':'On track')+'</strong></div></div><p class="sub">Actual paid hours stay based on recorded punches. Skipped paid-break credits ('+fmtMin(weekBreakCredit)+') reduce the recovery gap estimate only; they do not change punch totals or payroll. '+(bank?'Time-bank entries ('+fmtMin(bank)+') are shown separately and are not counted as paid hours here. ':'')+'Future shifts are estimates, not completed time.</p></div>';
+ const status='<div class="recovery-progress"><div class="recovery-progress-head"><span>Weekly paid-hours target</span><strong>40.00 h</strong></div><div class="recovery-progress-track"><span style="width:'+Math.min(100,Math.max(0,projected/2400*100))+'%"></span></div><div class="recovery-stats"><div><small>Actual recorded</small><strong>'+actualLabel+' h</strong></div><div><small>Projected by week end</small><strong>'+forecastLabel+' h</strong></div><div><small>Projected gap</small><strong>'+(gap?(gap/60).toFixed(2)+' h':'On track')+'</strong></div></div><p class="sub">Actual paid hours stay based on recorded punches. Skipped breaks never automatically count as extra worked time. '+(bank?'Time-bank entries ('+fmtMin(bank)+') are shown separately and are not counted as paid hours here. ':'')+'Future shifts are estimates, not completed time.</p></div>';
  const list=opts.length?'<div class="suggestion-list">'+opts.map(o=>'<div class="suggestion"><strong>'+o.title+'</strong><span>'+o.detail+'</span></div>').join('')+'</div>':'<p>You are projected to reach the 40 paid-hour target if the remaining planned shifts are completed.</p>';
- const breakNotice='<p class="notice recovery-break-note"><strong>Paid 15-minute break credits.</strong> Mark a morning or afternoon 15-minute break as “Skipped” in the Calendar to apply a 15-minute recovery credit for each one (up to 30 minutes per workday). This changes the planning estimate only, not recorded hours or payroll. Lunch is separate; follow workplace policy and applicable law for required breaks.</p>';
+ const breakNotice='<p class="notice recovery-break-note"><strong>Breaks and make-up time.</strong> The 40-hour forecast counts actual punches and planned future shifts only. A skipped 15-minute break is not automatically 15 minutes of extra work. Only count time actually worked, and follow company policy and applicable break rules.</p>';
  if(!first){panel.innerHTML='<div class="recovery-number">Weekly goal: 40 paid hours</div>'+status+list+breakNotice;return}
  const late=Math.max(0,actualStart-startM);
  panel.innerHTML='<div class="recovery-number">'+(out?'Shift complete':deficit===0?'You’ve reached today’s paid-hours goal':late>0?'You started '+fmtMin(late)+' late':'Your recovery plan')+'</div>'+status+(late>0?'<p>You clocked in at '+fmtTime(first.ts)+'; your planned start is '+s.startTime+'.</p>':'')+list+breakNotice;
@@ -795,7 +796,7 @@ function renderWeek(){
  keys.forEach(k=>{const d=new Date(k+'T12:00:00'),s=scheduleForDate(k),rec=data[k],p=rec?.punches||[],first=getPunch(rec,'in'),out=getOut(rec),ls=getPunch(rec,'lunch-start'),le=getPunch(rec,'lunch-end'),paid=rec?.punches?.length?actualPaidMinutes(rec):0,goal=plannedMinutes(s),balance=rec?.punches?.length?paid-goal:0;paidTotal+=paid;
  const tr=document.createElement('tr');if(k===todayKey())tr.className='today-row';
  const timeCell=(field,val,label)=>'<td>'+((goal===0)?'—':(val||'—'))+'</td>';
- tr.innerHTML='<td>'+weekdays[d.getDay()]+'<small style="display:block;color:var(--muted)">'+k+'</small></td>'+timeCell('startTime',s.startTime,'Planned in')+timeCell('lunchStart',s.lunchStart,'Lunch out')+timeCell('lunchEnd',s.lunchEnd,'Lunch in')+timeCell('endTime',s.endTime,'Planned out')+'<td>'+(first?fmtTime(first.ts):'—')+'</td><td>'+(out?fmtTime(out.ts):'—')+'</td><td>'+(ls&&le?fmtMin((le.ts-ls.ts)/60000):ls?'Open':'—')+'</td><td>'+(rec?.punches?.length?fmtMin(paid):'—')+'</td><td class="'+(balance<0?'negative':'positive')+'">'+(rec?.punches?.length?(balance<0?'−':'+')+fmtMin(Math.abs(balance)):'—')+'</td>';
+ tr.innerHTML='<td>'+weekdays[d.getDay()]+'<small style="display:block;color:var(--muted)">'+k+'</small></td>'+timeCell('startTime',s.startTime,'Planned in')+timeCell('lunchStart',s.lunchStart,'Lunch out')+timeCell('lunchEnd',s.lunchEnd,'Lunch in')+timeCell('endTime',s.endTime,'Planned out')+'<td>'+(first?fmtTime(first.ts):'—')+'</td><td>'+(out?fmtTime(out.ts):'—')+'</td><td>'+(ls&&le?fmtMin((le.ts-ls.ts)/60000):ls?'Open':'—')+'</td><td>'+(rec?.punches?.length?fmtMin(paid):'—')+'</td><td class="'+(balance<0?'negative':'positive')+'">'+(rec?.punches?.length?(balance<0?'−':'+')+fmtMin(Math.abs(balance)) :'—')+'</td><td>'+(lateStartMinutes(k)>0?'Late '+fmtMin(lateStartMinutes(k)):'On time')+(recoveryNote(k)?'<small style="display:block;max-width:220px;white-space:normal">Make-up: '+recoveryNote(k).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</small>':'')+'</td>';
  body.appendChild(tr);
  });
  $('weekPaid').textContent=fmtMin(paidTotal);
@@ -1028,7 +1029,7 @@ function renderMyTimeCalendar(){
    <section class="card" id="calendarDayDetail" style="margin-top:18px;background:var(--bg)">
     <div class="section-head"><div><div class="metric-label">SELECTED DAY</div><h3 id="calendarSelectedTitle" style="margin:4px 0"></h3></div><span class="tag" id="calendarSavedBadge">No saved record</span></div>
     <div class="mytime-detail-grid" id="calendarPunchDetails"></div><p class="sub" id="calendarDaySummary" style="margin-top:12px"></p>
-    <h3 style="margin-top:18px">Lunch and rest-break record</h3><p class="sub">Choose Taken, Skipped, or Not recorded. These labels document what happened; they do not alter payroll or automatically grant make-up credit.</p>
+    <h3 style="margin-top:18px">Late start &amp; make-up record</h3><p class="sub">Late start is calculated from your planned start and actual clock-in. Add a note about approved adjustments and how you made up time; notes do not change paid hours.</p><div id="calendarRecoverySummary" class="notice" style="margin:10px 0"></div><div class="field"><label for="calendarMakeUpNote">How time was made up (or plan agreed)</label><textarea id="calendarMakeUpNote" rows="3" maxlength="600" placeholder="e.g. Started 20 minutes late; stayed until 5:20 PM with approval."></textarea></div><button type="button" class="quiet" id="saveCalendarMakeUpNote">Save make-up note</button><h3 style="margin-top:18px">Lunch and rest-break record</h3><p class="sub">Choose Taken, Skipped, or Not recorded. These labels document what happened; they do not alter payroll or automatically grant make-up credit.</p>
     <div class="mytime-break-grid" id="calendarBreakControls"></div>
    </section>
    <section id="calendarPrintReport" aria-hidden="true"></section>
@@ -1038,6 +1039,7 @@ function renderMyTimeCalendar(){
   document.getElementById('calendarToday').onclick=()=>{myTimeSelectedDate=todayKey();myTimeCalendarMonth=new Date(new Date().getFullYear(),new Date().getMonth(),1);renderMyTimeCalendar()};
   document.getElementById('calendarDatePicker').onchange=e=>{if(!e.target.value)return;myTimeSelectedDate=e.target.value;const d=new Date(myTimeSelectedDate+'T12:00:00');myTimeCalendarMonth=new Date(d.getFullYear(),d.getMonth(),1);renderMyTimeCalendar()};
   document.getElementById('calendarExportMonth').onclick=()=>exportCalendarCsv(calendarDateKeys('month'));
+  document.getElementById('saveCalendarMakeUpNote').onclick=()=>{const k=myTimeSelectedDate,rec=data[k]||(data[k]={punches:[],audit:[]});rec.makeUpNote=document.getElementById('calendarMakeUpNote').value.trim();save();renderMyTimeCalendar();renderPlanning()};
   document.getElementById('calendarPrintMonth').onclick=()=>printCalendarReport('month');
   document.getElementById('calendarPrintWeek').onclick=()=>printCalendarReport('week');
  }
@@ -1053,12 +1055,14 @@ function renderMyTimeCalendar(){
  keys.forEach(k=>{
   const rec=calendarRecord(k),p=rec.punches||[],has=p.length>0;
   if(has){days++;punchTotal+=p.length;const out=[...p].reverse().find(x=>x.type==='out'),last=p[p.length-1];const end=out?.ts||(k===todayKey()?Date.now():last?.ts||Date.now());totalMs+=paidMs(rec,end)}
-  const status=rec.breakStatus||{},statusText=['morning','afternoon'].map(n=>({taken:'Taken',skipped:'Skipped','not-recorded':'Not recorded'}[status[n]||'not-recorded'])).join(' / ');
+  const late=lateStartMinutes(k),note=recoveryNote(k);const status=rec.breakStatus||{},statusText=['morning','afternoon'].map(n=>({taken:'Taken',skipped:'Skipped','not-recorded':'Not recorded'}[status[n]||'not-recorded'])).join(' / ');
   const d=new Date(k+'T12:00:00'),cell=document.createElement('button');cell.type='button';cell.className='mytime-calendar-day'+(has?' has-record':'')+(k===myTimeSelectedDate?' selected':'')+(k===todayKey()?' today':'');cell.setAttribute('role','gridcell');cell.setAttribute('aria-label',d.toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric',year:'numeric'})+(has?', '+p.length+' saved punch events':' , no saved punches'));cell.setAttribute('aria-pressed',k===myTimeSelectedDate?'true':'false');
   const dateNum=document.createElement('strong');dateNum.textContent=String(d.getDate());cell.appendChild(dateNum);
   if(has){const badge=document.createElement('span');badge.className='calendar-record-badge';badge.textContent=p.length+' punch'+(p.length===1?'':'es');cell.appendChild(badge);
    const inTime=calendarPunchTime(rec,'in'),outTime=calendarPunchTime(rec,'out'),lunchOut=calendarPunchTime(rec,'lunch-start'),lunchIn=calendarPunchTime(rec,'lunch-end');
    if(inTime!=='—'){const line=document.createElement('small');line.className='calendar-day-punches';line.textContent='In '+inTime;cell.appendChild(line)}
+   if(late>0){const line=document.createElement('small');line.className='calendar-day-late';line.textContent='Late start +'+fmtMin(late);cell.appendChild(line)}
+   if(note){const line=document.createElement('small');line.className='calendar-day-recovery';line.textContent='Make-up logged';cell.appendChild(line)}
    if(outTime!=='—'){const line=document.createElement('small');line.className='calendar-day-punches';line.textContent='Out '+outTime;cell.appendChild(line)}
    if(lunchOut!=='—'||lunchIn!=='—'){const line=document.createElement('small');line.className='calendar-day-lunch';line.textContent='Lunch '+(lunchOut==='—'?'—':lunchOut)+' / '+(lunchIn==='—'?'—':lunchIn);cell.appendChild(line)}
    const paid=document.createElement('small');paid.className='calendar-day-paid';paid.textContent=calendarPaid(k)+' paid';cell.appendChild(paid);
@@ -1075,6 +1079,7 @@ function renderMyTimeCalendar(){
  const details=document.getElementById('calendarPunchDetails');details.innerHTML='';
  [['Clock in','in'],['Lunch out','lunch-start'],['Lunch in','lunch-end'],['Clock out','out']].forEach(([label,type])=>{const box=document.createElement('div');box.className='mytime-detail-item';const l=document.createElement('span'),v=document.createElement('strong');l.textContent=label;v.textContent=calendarPunchTime(selected,type);box.append(l,v);details.appendChild(box)});
  document.getElementById('calendarDaySummary').textContent=p.length?p.length+' punch event(s) saved · paid time '+calendarPaid(myTimeSelectedDate):'No punches saved for this date in this browser. Records from another browser/device are not automatically synced.';
+ const selectedSchedule=scheduleForDate(myTimeSelectedDate),selectedLate=lateStartMinutes(myTimeSelectedDate),recoverySummary=document.getElementById('calendarRecoverySummary');if(recoverySummary)recoverySummary.textContent=selectedLate>0?'Late start: '+fmtMin(selectedLate)+' (planned '+selectedSchedule.startTime+', actual '+calendarPunchTime(selected,'in')+'). Record the actual approved make-up action below.':(calendarPunchTime(selected,'in')!=='—'?'No late start detected against the planned '+selectedSchedule.startTime+'.':'No clock-in recorded; late start will be calculated once you clock in.');const noteInput=document.getElementById('calendarMakeUpNote');if(noteInput)noteInput.value=recoveryNote(myTimeSelectedDate);
  const breakRoot=has?ensureBreakFields(myTimeSelectedDate):{breakStatus:{lunch:'not-recorded',morning:'not-recorded',afternoon:'not-recorded'},breakTimes:{morning:{start:'',end:''},afternoon:{start:'',end:''}}};
  const controls=document.getElementById('calendarBreakControls');controls.innerHTML='';
  [['lunch','Lunch status'],['morning','Morning 15-minute break'],['afternoon','Afternoon 15-minute break']].forEach(([name,label])=>{
@@ -1106,8 +1111,8 @@ function printCalendarReport(scope){
 }
 function exportCalendarCsv(keys){
  const q=v=>{const s=String(v??'');return '"'+s.replace(/"/g,'""')+'"';};
- const rows=[['Date','Clock in','Lunch out','Lunch in','Clock out','Paid time','Punch count','Lunch status','Morning break status','Afternoon break status','Morning break start','Morning break end','Afternoon break start','Afternoon break end']];
- keys.forEach(k=>{const r=data[k]||{punches:[]},p=r.punches||[],get=t=>p.find(x=>x.type===t),out=[...p].reverse().find(x=>x.type==='out'),clock=t=>{const item=t==='out'?out:get(t);return item?.ts?fmtTime(item.ts):''};rows.push([k,clock('in'),clock('lunch-start'),clock('lunch-end'),clock('out'),p.length?fmtMin(paidMs(r,out?.ts||Date.now())/60000):'',p.length,(r.breakStatus||{}).lunch||'not-recorded',(r.breakStatus||{}).morning||'not-recorded',(r.breakStatus||{}).afternoon||'not-recorded',r.breakTimes?.morning?.start||'',r.breakTimes?.morning?.end||'',r.breakTimes?.afternoon?.start||'',r.breakTimes?.afternoon?.end||''])});
+ const rows=[['Date','Clock in','Lunch out','Lunch in','Clock out','Paid time','Punch count','Late start minutes','Make-up note','Lunch status','Morning break status','Afternoon break status','Morning break start','Morning break end','Afternoon break start','Afternoon break end']];
+ keys.forEach(k=>{const r=data[k]||{punches:[]},p=r.punches||[],get=t=>p.find(x=>x.type===t),out=[...p].reverse().find(x=>x.type==='out'),clock=t=>{const item=t==='out'?out:get(t);return item?.ts?fmtTime(item.ts):''};rows.push([k,clock('in'),clock('lunch-start'),clock('lunch-end'),clock('out'),p.length?fmtMin(paidMs(r,out?.ts||Date.now())/60000):'',p.length,lateStartMinutes(k),recoveryNote(k),(r.breakStatus||{}).lunch||'not-recorded',(r.breakStatus||{}).morning||'not-recorded',(r.breakStatus||{}).afternoon||'not-recorded',r.breakTimes?.morning?.start||'',r.breakTimes?.morning?.end||'',r.breakTimes?.afternoon?.start||'',r.breakTimes?.afternoon?.end||''])});
  const csv=rows.map(row=>row.map(q).join(',')).join('\r\n'),blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='myTIME-monthly-timesheet-'+keys[0]+'-to-'+keys[keys.length-1]+'.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 /* Direct editing and deletion for any saved date */
