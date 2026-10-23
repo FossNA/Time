@@ -569,6 +569,36 @@ body.dark-mode .progress{background:#30415d!important}
 body.dark-mode .notice{color:#dce8ff!important}
 body.dark-mode .calendar-month-bar{color:#f3f6ff!important}
 body.dark-mode .legend-dot{border-color:#7da7ff!important}
+
+/* Dark-mode dashboard contrast repair: keep the hero dark when theme tokens change. */
+body.dark-mode .hero{background:linear-gradient(135deg,#172438 0%,#111d30 100%);color:#f4f7ff;border:1px solid #2b3d5b;box-shadow:0 16px 40px #0004}
+body.dark-mode .hero .eyebrow{color:#a9c4ff}
+body.dark-mode .hero .clock{color:#fff}
+body.dark-mode .hero .date{color:#c0cce2}
+body.dark-mode .hero .status{color:#e7edff;border-color:#405474;background:#1b2a40}
+body.dark-mode .hero .punchpanel{background:#0e192a;border-color:#354968}
+body.dark-mode .hero .punchpanel h2{color:#f4f7ff}
+body.dark-mode .hero .punchpanel p,body.dark-mode .hero .break-punch-hint{color:#b7c5df}
+body.dark-mode .hero button.secondary{background:#243651;color:#f1f5ff;border:1px solid #405779}
+body.dark-mode .hero button.secondary:hover{background:#304969}
+body.dark-mode .hero .break-countdown{background:#172438;border-color:#536b90;color:#eef3ff}
+body.dark-mode .hero .break-countdown-head,body.dark-mode .hero .break-countdown-help{color:#e7edff}
+body.dark-mode .hero .break-countdown-track{background:#354968}
+body.dark-mode .hero .break-countdown-bar,body.dark-mode .hero #breakCountdownBar{background:#7ea5ff}
+body.dark-mode .schedule-item{background:#172438;color:#e7edff;border-color:#354968}
+body.dark-mode .schedule-icon{background:#263752}
+body.dark-mode .schedule-popup{background:#302b20;color:#ffe7ae;border-color:#806a3d}
+body.dark-mode .mytime-calendar-wrap{background:#111d30;border-color:#354968}
+body.dark-mode .mytime-calendar-grid{background:#2b3a55}
+body.dark-mode .mytime-calendar-empty{background:#152238}
+body.dark-mode .mytime-calendar-day,body.dark-mode .mytime-calendar-day.has-record{background:#172438;color:#e7edff}
+body.dark-mode .mytime-calendar-day:hover{background:#243651}
+body.dark-mode .mytime-calendar-day.has-record>strong{background:#304969;color:#fff}
+body.dark-mode .tag{background:#263752;color:#dce7ff}
+body.dark-mode .rail{box-shadow:0 0 0 4px #263752}
+body.dark-mode .progress{background:#354968}
+body.dark-mode .schedule-item small{color:#b7c5df}
+
 </style>
 </head>
 <body><div id="updateNotice" role="status" aria-live="polite"><div><strong>myTIME update available</strong><br><small>Save any changes, then reload to use the latest version.</small></div><button type="button" id="applyUpdateBtn">Update myTIME</button></div><main class="shell">
