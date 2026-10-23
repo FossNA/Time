@@ -951,7 +951,7 @@ try{render()}catch(error){console.error('myTIME initial dashboard render failed:
 /* Continuous live clock: repaint every animation frame using wall-clock time. */
 let liveClockFrame=0;
 function runContinuousClock(){
- try{updateLiveClock();updateWeeklyOvertimeAlert()}catch(error){console.error('myTIME clock/overtime update failed:',error)}
+ try{updateLiveClock();updateWeeklyOvertimeAlert();updateBreakOveragePanel()}catch(error){console.error('myTIME clock/overtime update failed:',error)}
  liveClockFrame=requestAnimationFrame(runContinuousClock);
 }
 runContinuousClock();
