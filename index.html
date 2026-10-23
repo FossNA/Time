@@ -888,10 +888,27 @@ function updateLiveClock(){
  if(tz)tz.textContent='Local time · '+(settings.timezone==='UTC'?'UTC':Intl.DateTimeFormat().resolvedOptions().timeZone);
 }
 render();
-updateLiveClock();
-setInterval(updateLiveClock,1000);
-setInterval(()=>{try{render()}catch(error){console.error('myTIME live refresh failed:',error)}},15000);
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){updateLiveClock();try{render()}catch(error){console.error('myTIME refresh after returning to tab failed:',error)}}});
+/* Keep the displayed clock independent from dashboard renders. Schedule each
+   tick against the next second boundary and refresh on browser focus/restore. */
+let liveClockTimer=null;
+function scheduleLiveClockTick(){
+ if(liveClockTimer!==null)clearTimeout(liveClockTimer);
+ updateLiveClock();
+ const delay=1000-(Date.now()%1000)+20;
+ liveClockTimer=setTimeout(scheduleLiveClockTick,delay);
+}
+scheduleLiveClockTick();
+setInterval(()=>{try{render();updateLiveClock()}catch(error){console.error('myTIME live refresh failed:',error)}},15000);
+function refreshMyTimeOnReturn(){
+ updateLiveClock();
+ try{render();updateLiveClock()}catch(error){console.error('myTIME refresh after returning to tab failed:',error)}
+ if(liveClockTimer!==null)clearTimeout(liveClockTimer);
+ liveClockTimer=null;
+ scheduleLiveClockTick();
+}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')refreshMyTimeOnReturn()});
+window.addEventListener('focus',refreshMyTimeOnReturn);
+window.addEventListener('pageshow',refreshMyTimeOnReturn);
 
 
 /* Weekly planning and recovery tools */
