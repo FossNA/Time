@@ -428,6 +428,52 @@ body[data-tab]:not([data-tab="dashboard"]) #webhookPanel{display:none!important;
 
 /* myTIME enhancements: analytics, theme, and install controls */
 :root{color-scheme:light}
+body.dark-mode{color-scheme:dark;background:#0b1220}
+body.dark-mode .shell{color:var(--ink)}
+body.dark-mode .top{background:linear-gradient(135deg,#111d32 0%,#172844 100%);border-color:#2b3d5b;box-shadow:0 14px 36px #0005}
+body.dark-mode .app-tabs{background:#121e31;border-color:#2b3d55;box-shadow:0 8px 22px #0003}
+body.dark-mode .app-tab:hover{background:#223653;border-color:#3c5276}
+body.dark-mode .card,body.dark-mode .profile-card{background:linear-gradient(145deg,#172438 0%,#142033 100%);box-shadow:0 12px 32px #0003}
+body.dark-mode .profile-trigger{background:#1b2a42;color:#eaf0ff;border-color:#354968;box-shadow:0 4px 16px #0003}
+body.dark-mode .profile-trigger:hover{background:#263b5b;border-color:#6f91c9}
+body.dark-mode .mini-avatar{background:#2c4264;color:#f4f7ff}
+body.dark-mode .profile-avatar-wrap{background:#233754;border-color:#405b82}
+body.dark-mode .profile-backdrop{background:#020817b8;backdrop-filter:blur(3px)}
+body.dark-mode .profile-card{border:1px solid #354a6c}
+body.dark-mode .enhance-btn{background:#1b2a42;border-color:#354968;color:#eaf0ff}
+body.dark-mode .enhance-btn:hover{background:#263b5b;border-color:#6f91c9}
+body.dark-mode button.primary{background:linear-gradient(135deg,#4779df,#2858b8);border-color:#628ce4;color:#fff}
+body.dark-mode button.primary:hover{filter:brightness(1.12)}
+body.dark-mode input,body.dark-mode select,body.dark-mode textarea{background:#0f1a2b;color:#eef3ff;border-color:#354968}
+body.dark-mode input::placeholder,body.dark-mode textarea::placeholder{color:#8192b0}
+body.dark-mode input:focus,body.dark-mode select:focus,body.dark-mode textarea:focus{outline:2px solid #7ea5ff;outline-offset:1px;border-color:#7ea5ff}
+body.dark-mode .quiet{background:#243651;color:#eaf0ff;border-color:#3a5072}
+body.dark-mode .quiet:hover{background:#304969}
+body.dark-mode .recovery{background:#1c2b43;border-color:#334b70;color:#e7edff}
+body.dark-mode .progress{background:#2b3a55}
+body.dark-mode .tablewrap{border-color:#2b3a55}
+body.dark-mode table{background:#152238}
+body.dark-mode td{border-color:#2b3a55}
+body.dark-mode tr:nth-child(even) td{background:#182740}
+body.dark-mode th{background:#223653;color:#eef3ff;border-color:#354968}
+body.dark-mode .notice{background:#1c2b43;color:#d9e4fa;border-color:#334b70}
+body.dark-mode .custom-webhooks{border-color:#354968;box-shadow:0 16px 42px #0003}
+body.dark-mode .custom-webhooks-head{background:linear-gradient(100deg,#1d2d46,#172438);border-color:#354968}
+body.dark-mode .custom-webhook-status{background:#1b2a40;border-color:#354968;color:#d5e1f6}
+body.dark-mode .custom-webhook-status[data-kind="success"]{background:#173629;border-color:#2d6848;color:#b9f1ce}
+body.dark-mode .custom-webhook-status[data-kind="error"]{background:#3a2228;border-color:#75414a;color:#ffd1d5}
+body.dark-mode .custom-webhook-preview summary{background:#20334e;color:#edf3ff}
+body.dark-mode .custom-webhook-preview pre{background:#101b2d;color:#dce8ff}
+body.dark-mode .analytics-warning{background:#3a301c;color:#ffe4a1;border-color:#d79a25}
+body.dark-mode .app-tab.active{background:#35558a;color:#fff;border-color:#5277b5}
+body.dark-mode .profile-note,body.dark-mode .sub{color:var(--muted)}
+body.dark-mode .save-status{background:#1a2b40;border-color:#354968;color:#dce8ff}
+body.dark-mode .event,body.dark-mode .calendar-day{border-color:#2b3a55}
+body.dark-mode .calendar-day:hover{background:#20334e}
+body.dark-mode .modal,body.dark-mode dialog{background:#172438;color:var(--ink);border-color:#354968}
+body.dark-mode a{color:#9dbaff}
+body.dark-mode :focus-visible{outline-color:#91b0ff}
+@media(prefers-color-scheme:dark){body:not(.dark-mode){color-scheme:light}}
 body.dark-mode{--ink:#e7edff;--brand-blue:#7ea5ff;--muted:#a7b4d0;--bg:#101827;--card:#172236;--line:#2b3a55;--green:#7ea5ff;--lime:#dce7ff;--red:#ff8f86;--shadow:0 12px 34px #00000026;color:var(--ink)}
 body.dark-mode .card,body.dark-mode .profile-card{background:var(--card);color:var(--ink);border-color:var(--line)}
 body.dark-mode input,body.dark-mode select,body.dark-mode textarea{background:#101827;color:var(--ink);border-color:var(--line)}
@@ -861,16 +907,28 @@ function renderProfile(){
 }
 function saveProfileChanges(showConfirmation=false){
  const email=$('profileEmail').value.trim();
- if(email&&!/^[^\s@]+@fossna\.com$/i.test(email)){const status=$('profileSaveStatus');if(status)status.textContent='Use your @fossna.com work email';if(showConfirmation)alert('Please use your FOSS North America work email ending in @fossna.com.');return false}
- const previous={...profile};profile.name=$('profileName').value.trim();profile.email=email;
+ const name=$('profileName').value.trim();
+ const status=$('profileSaveStatus');
+ if(email&&!/^[^\s@]+@fossna\.com$/i.test(email)){
+  if(status)status.textContent='Enter a valid @fossna.com work email, or leave it blank';
+  $('profileEmail').setAttribute('aria-invalid','true');
+  if(showConfirmation)alert('Enter a valid FOSS North America work email ending in @fossna.com, or leave the email blank.');
+  return false
+ }
+ $('profileEmail').removeAttribute('aria-invalid');
+ const previous={...profile};
+ const next={...profile,name,email};
  try{
-  localStorage.setItem(PROFILEKEY,JSON.stringify(profile));
-  const status=$('profileSaveStatus');if(status)status.textContent='Saved on this device';
+  const serialized=JSON.stringify(next);
+  localStorage.setItem(PROFILEKEY,serialized);
+  profile=next;
+  if(status)status.textContent='✓ Profile saved on this device';
   if(typeof updateProfileButton==='function')updateProfileButton();
   return true
- }catch{
-  profile=previous;const status=$('profileSaveStatus');if(status)status.textContent='Could not save — browser storage is full';
-  if(showConfirmation)alert('Your profile could not be saved because browser storage may be full. Remove the photo and try again.');
+ }catch(error){
+  profile=previous;
+  if(status)status.textContent='Could not save. Remove the photo or export a backup, then retry.';
+  if(showConfirmation)alert('The profile could not be saved in this browser. Try removing the photo and saving again.');
   return false
  }
 }
@@ -905,14 +963,23 @@ if(scheduleNote){const note=document.createElement('p');note.className='sub';not
 function updateProfileButton(){
  const label=profile.name||'My profile';$('profileButtonName').textContent=label;
  const initials=initialsFor(profile.name,profile.email),mini=$('miniAvatar');
- if(profile.photo){mini.innerHTML='<img alt="" src="'+profile.photo+'">'}else{mini.textContent=initials}
+ if(profile.photo){mini.replaceChildren();const avatar=document.createElement('img');avatar.alt='';avatar.src=profile.photo;mini.appendChild(avatar)}else{mini.textContent=initials}
 }
 function setProfileOpen(open){
  const panel=$('profilePanel'),backdrop=$('profileBackdrop'),trigger=$('profileTrigger');
  if(!panel||!backdrop||!trigger)return;
- panel.hidden=!open;backdrop.hidden=!open;
- trigger.setAttribute('aria-expanded',String(open));
- if(open){renderProfile();requestAnimationFrame(()=> $('profileName')?.focus())}
+ if(open){
+  panel.hidden=false;backdrop.hidden=false;
+  panel.setAttribute('aria-modal','true');
+  trigger.setAttribute('aria-expanded','true');
+  renderProfile();
+  requestAnimationFrame(()=>{$('profileName')?.focus();panel.scrollIntoView({block:'nearest',behavior:document.body.classList.contains('dark-mode')?'auto':'smooth'})});
+ }else{
+  panel.hidden=true;backdrop.hidden=true;
+  panel.removeAttribute('aria-modal');
+  trigger.setAttribute('aria-expanded','false');
+  trigger.focus({preventScroll:true});
+ }
 }
 $('profileTrigger').setAttribute('aria-controls','profilePanel');$('profileTrigger').setAttribute('aria-expanded','false');
 $('profileTrigger').addEventListener('click',()=>setProfileOpen($('profilePanel').hidden));
@@ -1252,8 +1319,9 @@ renderRecordManager();
  function setTheme(mode){
   const dark=mode==='dark';
   document.body.classList.toggle('dark-mode',dark);
+  document.documentElement.style.colorScheme=dark?'dark':'light';
   if(themeBtn){themeBtn.textContent=dark?'☀ Light mode':'☾ Dark mode';themeBtn.setAttribute('aria-pressed',String(dark));themeBtn.title=dark?'Switch to light theme':'Switch to dark theme'}
-  const meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.content=dark?'#101827':'#09266f';
+  const meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.content=dark?'#0b1220':'#09266f';
  }
  let savedTheme='light';try{savedTheme=localStorage.getItem(THEME_KEY)||'light'}catch{}
  setTheme(savedTheme);
