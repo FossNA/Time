@@ -1458,10 +1458,24 @@ renderRecordManager();
    session={email:mail,...derived};remoteMeta=previous;
    if(previous.exists){
     updated.textContent='Cloud backup found · last saved '+new Date(previous.updatedAt).toLocaleString();
-    setStatus('Cloud profile unlocked. Choose Restore from cloud to load it, or Back up now to replace it with this device’s records.','success');
+    const localHasRecords=Object.values(data||{}).some(r=>r&&Array.isArray(r.punches)&&r.punches.length)||Array.isArray(bankEntries)&&bankEntries.length>0;
+    if(!localHasRecords){
+     setStatus('Cloud backup found. Restoring it to this device…');
+     const cloudData=await decryptPayload(previous.ciphertext,session.key);
+     if(!cloudData.data||typeof cloudData.data!=='object')throw Error('Cloud backup has no valid time records.');
+     data=cloudData.data;if(cloudData.settings)settings=cloudData.settings;
+     localStorage.setItem(KEY,JSON.stringify(data));localStorage.setItem(SETKEY,JSON.stringify(settings));
+     if(Array.isArray(cloudData.bankEntries)){bankEntries=cloudData.bankEntries;localStorage.setItem(BANKKEY,JSON.stringify(bankEntries))}
+     if(cloudData.profile&&typeof cloudData.profile==='object'){profile={name:String(cloudData.profile.name||''),email:String(cloudData.profile.email||''),photo:String(cloudData.profile.photo||'')};localStorage.setItem('foss-time-profile-v1',JSON.stringify(profile));if(typeof renderProfile==='function')renderProfile()}
+     if(cloudData.theme==='dark'||cloudData.theme==='light')localStorage.setItem('foss-time-theme-v1',cloudData.theme);
+     applySettings();render();
+     setStatus('Cloud records restored automatically on this device. Verify your timesheet.','success');
+    }else{
+     setStatus('Cloud profile unlocked. This device already has records, so nothing was overwritten. Choose Restore from cloud to replace them, or Back up now only if you intend to replace the cloud copy.','success');
+    }
    }else{
     updated.textContent='No cloud backup exists yet for this profile.';
-    setStatus('Cloud profile is ready. Choose Back up now to create your first encrypted cloud backup.','success');
+    setStatus('Cloud profile is ready. Back up now creates the first encrypted cloud copy; this device remains the source until then.','success');
    }
    pass.value='';
   }catch(e){setStatus('Could not connect: '+e.message,'error')}finally{busy=false;setButtons()}
